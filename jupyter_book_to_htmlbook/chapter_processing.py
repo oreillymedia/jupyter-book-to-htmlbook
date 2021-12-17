@@ -230,15 +230,39 @@ def process_chapter(toc_element):
     """
     Takes a list of chapter files and chapter lists and then writes the chapter to the root directory in which the script is run. Note that this is predicated on the files being in some /html/ directory or some such
     """
+
+    # list of front and back matter guessed-at filenames
+    front_matter = ['preface', 'notation', 'prereqs', 'titlepage', 'foreword', 'introduction']
+    back_matter = ['colophon', 'author_bio', 'references', "acknowledgments", "conclusion", "afterword"]
+    # data-types
+    allowed_data_types = ["colophon", "halftitlepage", "titlepage", "copyright-page", "dedication", "acknowledgments", "afterword", "conclusion", 'foreword', 'introduction', 'preface']
+
     if isinstance(toc_element, str): # single-file chapter
         # this should really be a function, but for now
+        ch_name = toc_element.split('.')[0].split('/')[-1]
         with open(toc_element, 'r') as f:
             base_soup = BeautifulSoup(f, 'html.parser')
+
+        # perform initial swapping and namespace designation
         chapter = base_soup.find(class_='section') 
         chapter.name = 'section'
-        chapter['data-type'] = 'chapter'
         chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
+        
+        # apply appropriate data-type (best guess)
+        if ch_name.lower() in front_matter:
+            if ch_name.lower() in allowed_data_types:
+                chapter['data-type'] = ch_name.lower()
+            else:
+                chapter['data-type'] = "preface"
+        elif ch_name.lower() in back_matter:
+            if ch_name.lower() in allowed_data_types:
+                chapter['data-type'] = ch_name.lower()
+            else:
+                chapter['data-type'] = "afterword"
+        else:
+            chapter['data-type'] = 'chapter'
         del chapter['class']
+        
         # update chapter id to what is actually referred to (as far as I can tell)
         try:
             id_span = chapter.find('span')
@@ -248,7 +272,6 @@ def process_chapter(toc_element):
             print(f'Unable to move span id in {toc_element}. This may not be a problem.\n{e}')
         except TypeError as e:
             print(f'Unable to move span id in {toc_element}. This may not be a problem.\n{e}')
-        ch_name = toc_element.split('.')[0].split('/')[-1]
     else: # i.e., an ordered list of chapter parts
         chapter = compile_chapter_parts(toc_element)
         ch_name = 'ch' + toc_element[0].split('/')[-2]
