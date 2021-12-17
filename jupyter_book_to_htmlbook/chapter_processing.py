@@ -15,6 +15,9 @@ def compile_chapter_parts(ordered_chapter_files_list):
     chapter['data-type'] = 'chapter'
     chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
     del chapter['class']
+    # add class="pagenumrestart" if it's the first chapter (will need to be changed for parts, but -- will handle that later)
+    if base_chapter_file.find('/01/') > -1 or base_chapter_file.find('/1/') > -1:
+        chapter['class'] = "pagenumrestart"
     # update chapter id to what is actually referred to (as far as I can tell)
     try:
         id_span = chapter.find('span')

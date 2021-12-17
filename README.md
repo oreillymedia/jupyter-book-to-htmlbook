@@ -8,6 +8,7 @@ is in a _./html_ directory. You can change this default in
 
 ## Notes
 
+* The `"pagenumrestart"` class is currently applied to the first chapter with parts (assuming that the chapters are numbered); this is a limitation to be overcome later (if there is a single-file chapter 1, a part, etc.)
 * Currently, bibliography references are "opinionated," and are meant to follow CMS 
 author-date in terms of in-text citations (no work has been done on the actual 
 *references.html* yet).
