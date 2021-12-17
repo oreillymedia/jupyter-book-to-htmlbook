@@ -6,13 +6,10 @@ import os
 html_dir = 'html/'
 
 def main():
-    os.system(f'cp {html_dir}/_images/* images/')
+    os.system(f'cp {html_dir}/_images/* images/') # note: no windows support
     toc = get_book_index(html_dir)
     for element in toc:
-        # print(element)
         process_chapter(element)
-
-    # move the images
 
 
 if __name__ == '__main__':

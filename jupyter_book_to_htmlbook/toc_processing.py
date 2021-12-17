@@ -1,6 +1,11 @@
 from bs4 import BeautifulSoup # type: ignore
 
 def get_book_index(basedir: str) -> list:
+    """
+    Takes the 'genindex' file from a Jupyter Book HTML site and returns a 
+    list of chapter URIs and lists of chapter URIs where there is more than one 
+    file per chapter. 
+    """
     indexfile = basedir + 'genindex.html'
     bookfile_uris = []
 

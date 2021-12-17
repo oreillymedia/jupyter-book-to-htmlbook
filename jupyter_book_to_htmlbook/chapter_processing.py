@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup # type: ignore
 
 def compile_chapter_parts(ordered_chapter_files_list):
     """
-    takes a list of chapter file URIs and returns a basic, sectioned 
+    Takes a list of chapter file URIs and returns a basic, sectioned 
     chapter soup (i.e., with no other htmlbook optimizations)
     """
     # work with main file
@@ -62,7 +62,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
 def clean_chapter(chapter, rm_numbering=True):
     """
     "Cleans" the chapter from any script or style tags, removes table borders, 
-    removes any style attrs, and by default removes any section numbering
+    removes any style attrs, and by default removes any section numbering.
     """
     remove_tags = ['style', 'script']
     all_tags = chapter.find_all()
@@ -82,8 +82,6 @@ def clean_chapter(chapter, rm_numbering=True):
     for link in chapter.find_all(class_="headerlink"):
         link.decompose()
     return chapter
-
-
 
 
 def process_figures(chapter):
@@ -128,9 +126,7 @@ def process_interal_refs(chapter):
     Processes internal a tags with "reference internal" classes.
     Converts bib references into spans (to deal with later), and other
     refernces to valid htmlbook xrefs. Currently opinionated towards CMS 
-    author-date
-
-    TO DO: change references to footnotes if that's the jam.
+    author-date.
     """
     xrefs = chapter.find_all(class_='internal')
     for ref in xrefs:
@@ -157,6 +153,10 @@ def process_interal_refs(chapter):
     return chapter
 
 def process_footnotes(chapter):
+    """
+    Takes footnote anchors and footnote lists and turns them into 
+    <span data-type='footnote'> tags.
+    """
     footnote_refs = chapter.find_all(class_='footnote-reference')
     # move the contents of the ref to the anchor point
     for ref in footnote_refs:
@@ -216,6 +216,16 @@ def process_admonitions(chapter):
             
     return chapter
 
+def process_math(chapter):
+    """
+    Takes latex math notation and applies HTMLBook-compliant metadata such that
+    it can be displayed when converted.
+    """
+    maths = chapter.find_all(class_="math")
+    for eq in maths: # assume latex
+        eq['data-type'] = "tex"
+    return chapter
+
 def process_chapter(toc_element):
     """
     Takes a list of chapter files and chapter lists and then writes the chapter to the root directory in which the script is run. Note that this is predicated on the files being in some /html/ directory or some such
@@ -242,15 +252,16 @@ def process_chapter(toc_element):
     else: # i.e., an ordered list of chapter parts
         chapter = compile_chapter_parts(toc_element)
         ch_name = 'ch' + toc_element[0].split('/')[-2]
+        
+    # perform cleans and processing
     chapter = clean_chapter(chapter)
     chapter = process_interal_refs(chapter)
     chapter = process_figures(chapter)
     chapter = process_informal_figs(chapter)
     chapter = process_footnotes(chapter)
     chapter = process_admonitions(chapter)
-    # get chapter number
-    # live/ch/06/pandas_intro.html
+    chapter = process_math(chapter)
     
-    # print(ch_name)
+    # write the file
     with open(f'{ch_name}.html', 'w') as f:
         f.write(str(chapter))
