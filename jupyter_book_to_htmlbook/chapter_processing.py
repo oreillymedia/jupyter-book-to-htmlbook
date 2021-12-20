@@ -1,17 +1,18 @@
+from pathlib import Path
 from typing import Type
 from bs4 import BeautifulSoup # type: ignore
 import re
 
 def compile_chapter_parts(ordered_chapter_files_list):
     """
-    Takes a list of chapter file URIs and returns a basic, sectioned 
+    Takes a list of chapter file URIs and returns a basic, sectioned
     chapter soup (i.e., with no other htmlbook optimizations)
     """
     # work with main file
     base_chapter_file = ordered_chapter_files_list[0]
     with open(base_chapter_file, 'r') as f:
         base_soup = BeautifulSoup(f, 'html.parser')
-    chapter = base_soup.find(class_='section') 
+    chapter = base_soup.find(class_='section')
     chapter.name = 'section'
     chapter['data-type'] = 'chapter'
     chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
@@ -32,7 +33,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
     except ValueError as e:
         print(f'Error: {e} in {base_chapter_file}')
 
- 
+
     # work with subfiles
     for subfile in ordered_chapter_files_list[1:]:
         with open(subfile, 'r') as f:
@@ -60,11 +61,11 @@ def compile_chapter_parts(ordered_chapter_files_list):
                 elif sub.select('div > h5'):
                     sub.name = 'section'
                     sub['data-type'] = 'sect5'
-            # if the subfile has a "summary" section, add subfile name to 
+            # if the subfile has a "summary" section, add subfile name to
             # summary id
-            # NOTE: xrefs to summaries will not work! will handle this when 
+            # NOTE: xrefs to summaries will not work! will handle this when
             # it comes up...
-            
+
 
 
             # add section to chapter
@@ -75,7 +76,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
 
 def clean_chapter(chapter, rm_numbering=True):
     """
-    "Cleans" the chapter from any script or style tags, removes table borders, 
+    "Cleans" the chapter from any script or style tags, removes table borders,
     removes any style attrs, and by default removes any section numbering.
     """
     remove_tags = ['style', 'script']
@@ -111,7 +112,7 @@ def process_figures(chapter):
         # update uri
         img_tag = figure.find('img')
         uri = img_tag['src']
-        img_fn = uri.split('/')[-1] 
+        img_fn = uri.split('/')[-1]
         img_tag['src'] = f'images/{img_fn}'
 
         # update caption
@@ -128,16 +129,16 @@ def process_figures(chapter):
             # clear contents of the img tag (self closes it)
             img_tag.clear()
     return chapter
-        
+
 
 def process_informal_figs(chapter):
     """
-    This should be run *AFTER* process figs, but basically just repoints the 
+    This should be run *AFTER* process figs, but basically just repoints the
     img tags.
     """
     for img in chapter.find_all('img'):
         uri = img['src']
-        img_fn = uri.split('/')[-1] 
+        img_fn = uri.split('/')[-1]
         img['src'] = f'images/{img_fn}'
     return chapter
 
@@ -146,7 +147,7 @@ def process_interal_refs(chapter):
     """
     Processes internal a tags with "reference internal" classes.
     Converts bib references into spans (to deal with later), and other
-    refernces to valid htmlbook xrefs. Currently opinionated towards CMS 
+    refernces to valid htmlbook xrefs. Currently opinionated towards CMS
     author-date.
     """
     xrefs = chapter.find_all(class_='internal')
@@ -175,7 +176,7 @@ def process_interal_refs(chapter):
 
 def process_footnotes(chapter):
     """
-    Takes footnote anchors and footnote lists and turns them into 
+    Takes footnote anchors and footnote lists and turns them into
     <span data-type='footnote'> tags.
     """
     footnote_refs = chapter.find_all(class_='footnote-reference')
@@ -191,7 +192,7 @@ def process_footnotes(chapter):
             ref['data-type'] = 'footnote'
             del(ref['href'])
             del(ref['class'])
-            del(ref['id']) 
+            del(ref['id'])
             ref.string = ''
             for child in footnote_contents:
                 ref.append(child)
@@ -215,9 +216,9 @@ def process_admonitions(chapter):
     """
     admonitions = chapter.find_all(class_="admonition")
     htmlbook_admonition_types = [
-        "note", 
-        "warning", 
-        "tip", 
+        "note",
+        "warning",
+        "tip",
         "caution",
         "important"
     ]
@@ -238,7 +239,7 @@ def process_admonitions(chapter):
                     title.decompose()
             except AttributeError: # i.e., there is markup inside the thing
                 title.name = 'h1'
-            
+
     return chapter
 
 def process_math(chapter):
@@ -253,7 +254,7 @@ def process_math(chapter):
 
 def move_span_ids_to_sections(chapter):
     """
-    Takes span tags with "sec-" ids and moves the id to the next heading tag 
+    Takes span tags with "sec-" ids and moves the id to the next heading tag
     so Atlas can find the cross reference.
     """
     sec_spans = chapter.find_all("span", id=re.compile('sec-*'))
@@ -268,7 +269,7 @@ def move_span_ids_to_sections(chapter):
         span.decompose()
     return chapter
 
-def process_chapter(toc_element):
+def process_chapter(toc_element, build_dir=Path('.')):
     """
     Takes a list of chapter files and chapter lists and then writes the chapter to the root directory in which the script is run. Note that this is predicated on the files being in some /html/ directory or some such
     """
@@ -286,10 +287,10 @@ def process_chapter(toc_element):
             base_soup = BeautifulSoup(f, 'html.parser')
 
         # perform initial swapping and namespace designation
-        chapter = base_soup.find(class_='section') 
+        chapter = base_soup.find(class_='section')
         chapter.name = 'section'
         chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
-        
+
         # apply appropriate data-type (best guess)
         if ch_name.lower() in front_matter:
             if ch_name.lower() in allowed_data_types:
@@ -304,7 +305,7 @@ def process_chapter(toc_element):
         else:
             chapter['data-type'] = 'chapter'
         del chapter['class']
-        
+
         # update chapter id to what is actually referred to (as far as I can tell)
         try:
             id_span = chapter.find('span')
@@ -317,7 +318,7 @@ def process_chapter(toc_element):
     else: # i.e., an ordered list of chapter parts
         chapter = compile_chapter_parts(toc_element)
         ch_name = 'ch' + toc_element[0].split('/')[-2]
-        
+
     # perform cleans and processing
     chapter = clean_chapter(chapter)
     chapter = process_interal_refs(chapter)
@@ -327,7 +328,7 @@ def process_chapter(toc_element):
     chapter = process_admonitions(chapter)
     chapter = process_math(chapter)
     chapter = move_span_ids_to_sections(chapter)
-    
+
     # write the file
-    with open(f'{ch_name}.html', 'w') as f:
-        f.write(str(chapter))
+    out = build_dir / (ch_name + '.html')
+    out.write_text(str(chapter))
