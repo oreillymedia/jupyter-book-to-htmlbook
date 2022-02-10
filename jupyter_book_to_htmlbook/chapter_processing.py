@@ -44,6 +44,8 @@ def compile_chapter_parts(ordered_chapter_files_list):
             # deal with subsections
             subsections = section.find_all(class_="section")
             for sub in subsections:
+                if sub['id'] == "summary":
+                    sub['id'] = f"{subfile.split('/')[-1].split('.')[0]}_summary"
                 if sub.select('div > h2'):
                     sub.name = 'section'
                     sub['data-type'] = 'sect2'
@@ -57,6 +59,13 @@ def compile_chapter_parts(ordered_chapter_files_list):
                 elif sub.select('div > h5'):
                     sub.name = 'section'
                     sub['data-type'] = 'sect5'
+            # if the subfile has a "summary" section, add subfile name to 
+            # summary id
+            # NOTE: xrefs to summaries will not work! will handle this when 
+            # it comes up...
+            
+
+
             # add section to chapter
             chapter.append(section)
 
