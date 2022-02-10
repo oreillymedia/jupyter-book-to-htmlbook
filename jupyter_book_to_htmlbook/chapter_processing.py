@@ -109,6 +109,13 @@ def process_figures(chapter):
         # remove numbering
         numbering = caption.find(class_='caption-number')
         numbering.decompose()
+        # handle apparently common edge case!
+        if img_tag.find('figcaption'):
+            # extract the caption and move it to the figure tag
+            caption.extract()
+            figure.append(caption)
+            # clear contents of the img tag (self closes it)
+            img_tag.clear()
     return chapter
         
 
