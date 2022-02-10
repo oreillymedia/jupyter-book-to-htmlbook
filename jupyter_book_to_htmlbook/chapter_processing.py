@@ -44,6 +44,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
             # deal with subsections
             subsections = section.find_all(class_="section")
             for sub in subsections:
+                # remove duplicate sub-section summary ids (do chapter-level stuff with post-processing scripts b/c those handle in-chapter xrefs better)
                 if sub['id'] == "summary":
                     sub['id'] = f"{subfile.split('/')[-1].split('.')[0]}_summary"
                 if sub.select('div > h2'):
