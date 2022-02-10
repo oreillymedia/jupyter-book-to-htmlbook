@@ -176,13 +176,15 @@ def process_footnotes(chapter):
             ref_id = ref['href'].split('#')[-1]
             # double next_sibling b/c next sigling is a space
             ref_location = chapter.find("dt", {"id": ref_id}).next_sibling.next_sibling
-            contents = ref_location.find('p')
+            footnote_contents = ref_location.find('p').children
             ref.name = 'span'
             ref['data-type'] = 'footnote'
             del(ref['href'])
-            del(ref['class']) # these two lines can probably be combined?
+            del(ref['class'])
+            del(ref['id']) 
             ref.string = ''
-            ref.append(contents)
+            for child in footnote_contents:
+                ref.append(child)
         except ValueError as e:
             print(f'{e}')
     # remove the list of footnote contents
