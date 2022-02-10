@@ -1,5 +1,6 @@
 from typing import Type
 from bs4 import BeautifulSoup # type: ignore
+import re
 
 def compile_chapter_parts(ordered_chapter_files_list):
     """
@@ -186,10 +187,12 @@ def process_footnotes(chapter):
             print(f'{e}')
     # remove the list of footnote contents
     try:
-        hr = chapter.find('hr', {'class': 'footnotes'})
-        hr.decompose()
-        dl = chapter.find('dl', {'class': 'footnote'})
-        dl.decompose()
+        hrs = chapter.find_all('hr', {'class': 'footnotes'})
+        for hr in hrs:
+            hr.decompose()
+        dls = chapter.find_all('dl', {'class': 'footnote'})
+        for dl in dls:
+            dl.decompose()
     except AttributeError:
         pass # no index in this chapter
     return chapter
@@ -234,6 +237,23 @@ def process_math(chapter):
     maths = chapter.find_all(class_="math")
     for eq in maths: # assume latex
         eq['data-type'] = "tex"
+    return chapter
+
+def move_span_ids_to_sections(chapter):
+    """
+    Takes span tags with "sec-" ids and moves the id to the next heading tag 
+    so Atlas can find the cross reference.
+    """
+    sec_spans = chapter.find_all("span", id=re.compile('sec-*'))
+    for span in sec_spans:
+        # get id
+        span_id = span['id']
+        # get next heading
+        section = span.find_parent('section')
+        # add span id to section
+        section['id'] = span_id
+        # remove span so no dup ids
+        span.decompose()
     return chapter
 
 def process_chapter(toc_element):
@@ -294,6 +314,7 @@ def process_chapter(toc_element):
     chapter = process_footnotes(chapter)
     chapter = process_admonitions(chapter)
     chapter = process_math(chapter)
+    chapter = move_span_ids_to_sections(chapter)
     
     # write the file
     with open(f'{ch_name}.html', 'w') as f:
