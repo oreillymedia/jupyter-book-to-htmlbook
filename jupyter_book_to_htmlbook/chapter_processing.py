@@ -93,9 +93,21 @@ def clean_chapter(chapter, rm_numbering=True):
         for span in chapter.find_all(class_="section-number"):
             span.decompose()
 
-    # remove any heading links
-    for link in chapter.find_all(class_="headerlink"):
-        link.decompose()
+    tags_to_remove = [
+        # remove hidden cells. in the web version, these cells are hidden by
+        # default and users can toggle them on/off. but they take up too much
+        # space if rendered into the pdf.
+        ".tag_hide-input > .cell_input",
+        ".tag_hide-output > .cell_output",
+        ".tag_hide-cell",
+        ".toggle-details",
+
+        # remove any heading links
+        ".headerlink",
+    ]
+
+    for el in chapter.select(','.join(tags_to_remove)):
+        el.decompose()
     return chapter
 
 
