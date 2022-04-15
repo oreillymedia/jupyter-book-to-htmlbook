@@ -3,6 +3,7 @@ from typing import Type
 from bs4 import BeautifulSoup # type: ignore
 import re
 
+
 def compile_chapter_parts(ordered_chapter_files_list):
     """
     Takes a list of chapter file URIs and returns a basic, sectioned
@@ -13,7 +14,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
     with open(base_chapter_file, 'r') as f:
         base_soup = BeautifulSoup(f, 'html.parser')
     chapter = base_soup.find(class_='section')
-    chapter.name = 'section'
+    chapter.name = 'section'  # type: ignore
     chapter['data-type'] = 'chapter'
     chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
     del chapter['class']
@@ -26,13 +27,12 @@ def compile_chapter_parts(ordered_chapter_files_list):
         chapter['id'] = id_span['id']
         id_span.decompose()
     except KeyError:
-        pass # this isn't an issue
+        pass  # this isn't an issue
         # print(f'Unable to move span id in {base_chapter_file}. This may not be a problem.')
     except TypeError as e:
         print(f'Error: {e} in {base_chapter_file}')
     except ValueError as e:
         print(f'Error: {e} in {base_chapter_file}')
-
 
     # work with subfiles
     for subfile in ordered_chapter_files_list[1:]:
@@ -42,6 +42,15 @@ def compile_chapter_parts(ordered_chapter_files_list):
             section.name = 'section'
             section['data-type'] = 'sect1'
             del section['class']
+            # move id from empty span to section
+            try:
+                first_span = section.select_one('span')
+                section['id'] = section.select_one('span')['id']
+                # leave spans for now in case they're not empty; 
+                # TO DO: clean up empty spans...
+                del section.select_one('span')['id']
+            except KeyError:
+                pass  # like before, if it's not there that's OK.
             # deal with subsections
             subsections = section.find_all(class_="section")
             for sub in subsections:
@@ -65,9 +74,6 @@ def compile_chapter_parts(ordered_chapter_files_list):
             # summary id
             # NOTE: xrefs to summaries will not work! will handle this when
             # it comes up...
-
-
-
             # add section to chapter
             chapter.append(section)
 
