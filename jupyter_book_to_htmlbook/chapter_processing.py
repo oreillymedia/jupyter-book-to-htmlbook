@@ -1,6 +1,5 @@
 from pathlib import Path
-from typing import Type
-from bs4 import BeautifulSoup # type: ignore
+from bs4 import BeautifulSoup  # type: ignore
 import re
 
 
@@ -15,52 +14,58 @@ def compile_chapter_parts(ordered_chapter_files_list):
         base_soup = BeautifulSoup(f, 'html.parser')
     chapter = base_soup.find(class_='section')
     chapter.name = 'section'  # type: ignore
-    chapter['data-type'] = 'chapter'
-    chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
-    del chapter['class']
-    # add class="pagenumrestart" if it's the first chapter (will need to be changed for parts, but -- will handle that later)
-    if base_chapter_file.find('/01/') > -1 or base_chapter_file.find('/1/') > -1:
-        chapter['class'] = "pagenumrestart"
+    chapter['data-type'] = 'chapter'  # type: ignore
+    chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
+    del chapter['class']  # type: ignore
+    # add class="pagenumrestart" if it's the first chapter
+    # (will need to be changed for parts, but -- will handle that later)
+    if base_chapter_file.find('/01/') > -1 or \
+       base_chapter_file.find('/1/') > -1:
+        chapter['class'] = "pagenumrestart"  # type: ignore
     # update chapter id to what is actually referred to (as far as I can tell)
+    err_feel_better_msg = "  It's possible there is no empty span here" + \
+                          " and likely is not a problem."
+
     try:
-        id_span = chapter.find('span')
-        chapter['id'] = id_span['id']
-        id_span.decompose()
-    except KeyError:
+        id_span = chapter.find('span')  # type: ignore
+        chapter['id'] = id_span['id']  # type: ignore
+        id_span.decompose()  # type: ignore
+
+    except KeyError as e:
         pass  # this isn't an issue
-        # print(f'Unable to move span id in {base_chapter_file}. This may not be a problem.')
     except TypeError as e:
-        print(f'Error: {e} in {base_chapter_file}')
+        print(f'Error: {e} in {base_chapter_file}\n{err_feel_better_msg}')
     except ValueError as e:
-        print(f'Error: {e} in {base_chapter_file}')
+        print(f'Error: {e} in {base_chapter_file}\n{err_feel_better_msg}')
 
     # work with subfiles
     for subfile in ordered_chapter_files_list[1:]:
         with open(subfile, 'r') as f:
             soup = BeautifulSoup(f, 'html.parser')
             section = soup.find(class_='section')
-            section.name = 'section'
-            section['data-type'] = 'sect1'
-            del section['class']
+            section.name = 'section'  # type: ignore
+            section['data-type'] = 'sect1'  # type: ignore
+            del section['class']  # type: ignore
             # move id from empty span to section
             try:
-                first_span = section.select_one('span')
-                section['id'] = section.select_one('span')['id']
+                section['id'] = section.select_one('span')['id']  # type: ignore
                 # leave spans for now in case they're not empty; 
                 # TO DO: clean up empty spans...
-                del section.select_one('span')['id']
+                del section.select_one('span')['id']  # type: ignore
             except KeyError:
                 pass  # like before, if it's not there that's OK.
             # deal with subsections
-            subsections = section.find_all(class_="section")
+            subsections = section.find_all(class_="section")  # type: ignore
             for sub in subsections:
-                # remove duplicate sub-section summary ids (do chapter-level stuff with post-processing scripts b/c those handle in-chapter xrefs better)
+                # remove duplicate sub-section summary ids
+                # (do chapter-level stuff with post-processing scripts
+                # b/c those handle in-chapter xrefs better)
                 if sub['id'] == "summary":
                     sub['id'] = f"{subfile.split('/')[-1].split('.')[0]}_summary"
                 if sub.select('div > h2'):
                     sub.name = 'section'
                     sub['data-type'] = 'sect2'
-                    # parsing subsections within seems like the best stragegy...
+                    # parsing subsections within seems like the best strategy
                 elif sub.select('div > h3'):
                     sub.name = 'section'
                     sub['data-type'] = 'sect3'
@@ -75,7 +80,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
             # NOTE: xrefs to summaries will not work! will handle this when
             # it comes up...
             # add section to chapter
-            chapter.append(section)
+            chapter.append(section)  # type: ignore
 
     return chapter
 
@@ -95,7 +100,8 @@ def clean_chapter(chapter, rm_numbering=True):
     for tag in chapter.find_all(attrs={'style': True}):
         del tag['style']
     # (optinally) remove numbering
-    if rm_numbering == True:
+
+    if rm_numbering:
         for span in chapter.find_all(class_="section-number"):
             span.decompose()
 
@@ -195,8 +201,10 @@ def process_interal_refs(chapter):
             for part in ref.contents:
                 inner_str += part.string
             # remove last comma per CMS
-            inner_str = ','.join(inner_str.split(',')[0:-1]) + inner_str.split(',')[-1]
-            ref.string = f' ({inner_str})'  # need the space because these were footnotes
+            inner_str = ','.join(inner_str.split(',')[0:-1]) + \
+                        inner_str.split(',')[-1]
+            # note the space because of footnotes
+            ref.string = f' ({inner_str})'
             # remove parent brackets
             parent = ref.parent
             parent.contents = ref
@@ -245,8 +253,9 @@ def process_footnotes(chapter):
         for dl in dls:
             dl.decompose()
     except AttributeError:
-        pass # no index in this chapter
+        print("No index in this chapter...")
     return chapter
+
 
 def process_admonitions(chapter):
     """
@@ -275,10 +284,12 @@ def process_admonitions(chapter):
                     title.name = 'h1'
                 else:
                     title.decompose()
-            except AttributeError: # i.e., there is markup inside the thing
+            except AttributeError:
+                # i.e., there is markup inside the thing
                 title.name = 'h1'
 
     return chapter
+
 
 def process_math(chapter):
     """
@@ -286,9 +297,10 @@ def process_math(chapter):
     it can be displayed when converted.
     """
     maths = chapter.find_all(class_="math")
-    for eq in maths: # assume latex
+    for eq in maths:  # assume latex
         eq['data-type'] = "tex"
     return chapter
+
 
 def move_span_ids_to_sections(chapter):
     """
@@ -307,18 +319,26 @@ def move_span_ids_to_sections(chapter):
         span.decompose()
     return chapter
 
+
 def process_chapter(toc_element, build_dir=Path('.')):
     """
-    Takes a list of chapter files and chapter lists and then writes the chapter to the root directory in which the script is run. Note that this is predicated on the files being in some /html/ directory or some such
+    Takes a list of chapter files and chapter lists and then writes the chapter
+    to the root directory in which the script is run. Note that this assumes
+    that the files are in some /html/ directory or some such
     """
 
     # list of front and back matter guessed-at filenames
-    front_matter = ['preface', 'notation', 'prereqs', 'titlepage', 'foreword', 'introduction']
-    back_matter = ['colophon', 'author_bio', 'references', "acknowledgments", "conclusion", "afterword"]
+    front_matter = ['preface', 'notation', 'prereqs',
+                    'titlepage', 'foreword', 'introduction']
+    back_matter = ['colophon', 'author_bio', 'references',
+                   "acknowledgments", "conclusion", "afterword"]
     # data-types
-    allowed_data_types = ["colophon", "halftitlepage", "titlepage", "copyright-page", "dedication", "acknowledgments", "afterword", "conclusion", 'foreword', 'introduction', 'preface']
+    allowed_data_types = ["colophon", "halftitlepage", "titlepage",
+                          "copyright-page", "dedication", "acknowledgments",
+                          "afterword", "conclusion", 'foreword',
+                          'introduction', 'preface']
 
-    if isinstance(toc_element, str): # single-file chapter
+    if isinstance(toc_element, str):  # single-file chapter
         # this should really be a function, but for now
         ch_name = toc_element.split('.')[0].split('/')[-1]
         with open(toc_element, 'r') as f:
@@ -326,36 +346,41 @@ def process_chapter(toc_element, build_dir=Path('.')):
 
         # perform initial swapping and namespace designation
         chapter = base_soup.find(class_='section')
-        chapter.name = 'section'
-        chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
+        chapter.name = 'section'  # type: ignore
+        chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
 
         # apply appropriate data-type (best guess)
         if ch_name.lower() in front_matter:
             if ch_name.lower() in allowed_data_types:
-                chapter['data-type'] = ch_name.lower()
+                chapter['data-type'] = ch_name.lower()  # type: ignore
             else:
-                chapter['data-type'] = "preface"
+                chapter['data-type'] = "preface"  # type: ignore
         elif ch_name.lower() in back_matter:
             if ch_name.lower() in allowed_data_types:
-                chapter['data-type'] = ch_name.lower()
+                chapter['data-type'] = ch_name.lower()  # type: ignore
             else:
-                chapter['data-type'] = "afterword"
+                chapter['data-type'] = "afterword"  # type: ignore
         else:
-            chapter['data-type'] = 'chapter'
-        del chapter['class']
+            chapter['data-type'] = 'chapter'  # type: ignore
+        del chapter['class']  # type: ignore
 
-        # update chapter id to what is actually referred to (as far as I can tell)
+        # update chapter id to what is actually referred to
         try:
-            id_span = chapter.find('span')
-            chapter['id'] = id_span['id']
-            id_span.decompose()
+            id_span = chapter.find('span')  # type: ignore
+            chapter['id'] = id_span['id']  # type: ignore
+            id_span.decompose()  # type: ignore
         except KeyError as e:
-            print(f'Unable to move span id in {toc_element}. This may not be a problem.\n{e}')
+            print(f'Unable to move span id in {toc_element}.' +
+                  f'This may not be a problem.\n{e}')
         except TypeError as e:
-            print(f'Unable to move span id in {toc_element}. This may not be a problem.\n{e}')
-    else: # i.e., an ordered list of chapter parts
+            print(f'Unable to move span id in {toc_element}.' +
+                  f'This may not be a problem.\n{e}')
+    else:  # i.e., an ordered list of chapter parts
         chapter = compile_chapter_parts(toc_element)
         ch_name = 'ch' + toc_element[0].split('/')[-2]
+
+    # see where we're at
+    print(f"Processing {ch_name}...")
 
     # perform cleans and processing
     chapter = clean_chapter(chapter)
