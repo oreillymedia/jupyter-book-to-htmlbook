@@ -211,6 +211,8 @@ def process_interal_refs(chapter):
         # handle images inside ref tags (these appear to be informal figs)
         elif ref['href'].find('_images') > -1:
             process_image_reference_figures(ref)
+        elif ref['href'].find('htt') > -1:
+            print(f"\nAlert! External image reference: {ref['href']}\n")
         else:  # i.e., non reference xrefs
             ref['data-type'] = 'xref'
             uri = ref['href']  # get current uri and fix it if needed
