@@ -117,6 +117,22 @@ def clean_chapter(chapter, rm_numbering=True):
     return chapter
 
 
+def process_image_reference_figures(anchor):
+    """
+    Sometimes images show up inside anchor tags. Deal with those!
+    """
+    anchor.name = "figure"
+    anchor['class'] = "informal"
+    del anchor['href']
+    # update uri
+    img_tag = anchor.find('img')
+    uri = img_tag['src']
+    img_fn = uri.split('/')[-1]
+    img_tag['src'] = f'images/{img_fn}'
+    if img_tag.has_attr('style'):
+        del img_tag['style']
+
+
 def process_figures(chapter):
     """
     Takes a chapter soup and handles changing the references to figures
@@ -180,17 +196,21 @@ def process_interal_refs(chapter):
                 inner_str += part.string
             # remove last comma per CMS
             inner_str = ','.join(inner_str.split(',')[0:-1]) + inner_str.split(',')[-1]
-            ref.string = f' ({inner_str})' # need the space because these were footnotes
+            ref.string = f' ({inner_str})'  # need the space because these were footnotes
             # remove parent brackets
             parent = ref.parent
             parent.contents = ref
-        else: # i.e., non reference xrefs
+        # handle images inside ref tags (these appear to be informal figs)
+        elif ref['href'].find('_images') > -1:
+            process_image_reference_figures(ref)
+        else:  # i.e., non reference xrefs
             ref['data-type'] = 'xref'
-            uri = ref['href'] # get current uri and fix it if needed
+            uri = ref['href']  # get current uri and fix it if needed
             uri = uri.split('#')[-1]
             ref.string = f'#{uri}'
             ref['href'] = f'#{uri}'
     return chapter
+
 
 def process_footnotes(chapter):
     """
