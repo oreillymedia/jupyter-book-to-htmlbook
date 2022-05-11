@@ -187,7 +187,7 @@ def process_interal_refs(chapter):
     """
     Processes internal a tags with "reference internal" classes.
     Converts bib references into spans (to deal with later), and other
-    refernces to valid htmlbook xrefs. Currently opinionated towards CMS
+    references to valid htmlbook xrefs. Currently opinionated towards CMS
     author-date.
     """
     xrefs = chapter.find_all(class_='internal')
@@ -196,18 +196,19 @@ def process_interal_refs(chapter):
         if ref['href'].find('references.html') > -1:
             ref.name = 'span'
             del(ref['href'])
-            # remove any interal tags
+            # remove any internal tags
             inner_str = ''
             for part in ref.contents:
                 inner_str += part.string
             # remove last comma per CMS
             inner_str = ','.join(inner_str.split(',')[0:-1]) + \
                         inner_str.split(',')[-1]
-            # note the space because of footnotes
-            ref.string = f' ({inner_str})'
+            ref.string = f'({inner_str})'
             # remove parent brackets
             parent = ref.parent
             parent.contents = ref
+            # remove any id tags on the parent to avoid duplicates
+            del(parent['id'])
         # handle images inside ref tags (these appear to be informal figs)
         elif ref['href'].find('_images') > -1:
             process_image_reference_figures(ref)
