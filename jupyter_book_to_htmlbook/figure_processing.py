@@ -8,6 +8,20 @@ def process_figures(chapter):
         # change div to figure tag
         figure.name = 'figure'
 
+        # clean anything extraneous, if extant
+        if figure.find_all('a', class_="headerlink") != []:
+            for anchor in figure.find_all('a', class_="headerlink"):
+                anchor.decompose()
+
+        # get img tag out of any surrounding a tags
+        try:
+            figure.a.unwrap()
+        except AttributeError:
+            pass
+
+        # remove any styles on the img tag
+        del figure.img['style']
+
         # update uri
         img_tag = figure.find('img')
         uri = img_tag['src']
@@ -17,16 +31,10 @@ def process_figures(chapter):
         # update caption
         caption = figure.find(class_='caption')
         caption.name = 'figcaption'
-        # remove numbering
-        numbering = caption.find(class_='caption-number')
-        numbering.decompose()
-        # handle apparently common edge case!
-        if img_tag.find('figcaption'):
-            # extract the caption and move it to the figure tag
-            caption.extract()
-            figure.append(caption)
-            # clear contents of the img tag (self closes it)
-            img_tag.clear()
+        # remove numbering if extant
+        if caption.find(class_="caption-number"):
+            numbering = caption.find(class_='caption-number')
+            numbering.decompose()
     return chapter
 
 

@@ -1,7 +1,11 @@
 def process_image_reference_figures(anchor):
     """
     Sometimes images show up inside anchor tags. Deal with those!
+    BUT! Don't process anchors inside of figures.
     """
+    for parent in anchor.parents:
+        if parent.name == "div" and "figure" in parent["class"]:
+            return
     anchor.name = "figure"
     anchor['class'] = "informal"
     del anchor['href']
