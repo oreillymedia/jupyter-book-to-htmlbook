@@ -49,7 +49,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
             # move id from empty span to section
             try:
                 section['id'] = section.select_one('span')['id']  # type: ignore
-                # leave spans for now in case they're not empty; 
+                # leave spans for now in case they're not empty;
                 # TO DO: clean up empty spans...
                 del section.select_one('span')['id']  # type: ignore
             except KeyError:
@@ -232,7 +232,7 @@ def process_footnotes(chapter):
     # move the contents of the ref to the anchor point
     for ref in footnote_refs:
         try:
-            #<a class="footnote-reference brackets" href="#psql" id="id3">1</a>
+            # <a class="footnote-reference brackets" href="#psql" id="id3">1</a>
             ref_id = ref['href'].split('#')[-1]
             # double next_sibling b/c next sigling is a space
             ref_location = chapter.find("dt", {"id": ref_id}).next_sibling.next_sibling
@@ -348,9 +348,17 @@ def process_chapter(toc_element, build_dir=Path('.')):
             base_soup = BeautifulSoup(f, 'html.parser')
 
         # perform initial swapping and namespace designation
-        chapter = base_soup.find(class_='section')
-        chapter.name = 'section'  # type: ignore
-        chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
+        try:
+            chapter = base_soup.find(class_='section')
+            chapter.name = 'section'  # type: ignore
+            chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
+
+        except AttributeError:  # does not have a section class for top-level
+            if base_soup.main:
+                chapter = base_soup.main.section
+                chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
+            else:  # this is an edge case, and I'm going to leave it for now
+                return
 
         # apply appropriate data-type (best guess)
         if ch_name.lower() in front_matter:
@@ -373,10 +381,10 @@ def process_chapter(toc_element, build_dir=Path('.')):
             chapter['id'] = id_span['id']  # type: ignore
             id_span.decompose()  # type: ignore
         except KeyError as e:
-            print(f'Unable to move span id in {toc_element}.' +
+            print(f'Unable to move span id in {toc_element}. ' +
                   f'This may not be a problem.\n{e}')
         except TypeError as e:
-            print(f'Unable to move span id in {toc_element}.' +
+            print(f'Unable to move span id in {toc_element}. ' +
                   f'This may not be a problem.\n{e}')
     else:  # i.e., an ordered list of chapter parts
         chapter = compile_chapter_parts(toc_element)
