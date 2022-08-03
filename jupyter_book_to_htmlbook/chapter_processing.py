@@ -16,7 +16,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
     # work with main file
     base_chapter_file = ordered_chapter_files_list[0]
     with open(base_chapter_file, 'r') as f:
-        base_soup = BeautifulSoup(f, 'html.parser')
+        base_soup = BeautifulSoup(f, 'lxml')
     chapter = base_soup.find(class_='section')
     chapter.name = 'section'  # type: ignore
     chapter['data-type'] = 'chapter'  # type: ignore
@@ -44,7 +44,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
     # work with subfiles
     for subfile in ordered_chapter_files_list[1:]:
         with open(subfile, 'r') as f:
-            soup = BeautifulSoup(f, 'html.parser')
+            soup = BeautifulSoup(f, 'lxml')
             section = soup.find(class_='section')
             section.name = 'section'  # type: ignore
             section['data-type'] = 'sect1'  # type: ignore
@@ -166,7 +166,7 @@ def process_chapter(toc_element, build_dir=Path('.')):
         # this should really be a function, but for now
         ch_name = toc_element.split('.')[0].split('/')[-1]
         with open(toc_element, 'r') as f:
-            base_soup = BeautifulSoup(f, 'html.parser')
+            base_soup = BeautifulSoup(f, 'lxml')
 
         # perform initial swapping and namespace designation
         try:
