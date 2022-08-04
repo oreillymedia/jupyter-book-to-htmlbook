@@ -24,8 +24,8 @@ def compile_chapter_parts(ordered_chapter_files_list):
     del chapter['class']  # type: ignore
     # add class="pagenumrestart" if it's the first chapter
     # (will need to be changed for parts, but -- will handle that later)
-    if base_chapter_file.name.find('/01/') > -1 or \
-       base_chapter_file.name.find('/1/') > -1:
+    if base_chapter_file.as_posix().find('01') > -1 or \
+       base_chapter_file.as_posix().find('/1/') > -1:
         chapter['class'] = "pagenumrestart"  # type: ignore
     # update chapter id to what is actually referred to (as far as I can tell)
     err_feel_better_msg = "It's possible there is no empty span here " + \
@@ -57,7 +57,11 @@ def compile_chapter_parts(ordered_chapter_files_list):
                 # leave spans for now in case they're not empty;
                 # TO DO: clean up empty spans...
                 del section.select_one('span')['id']  # type: ignore
+            except TypeError:
+                # fun fact, this happens when there's not numbering on the toc
+                pass  # like before, if it's not there that's OK.
             except KeyError:
+                # fun fact, this happens when there's numbering on the toc
                 pass  # like before, if it's not there that's OK.
             # deal with subsections
             subsections = section.find_all(class_="section")  # type: ignore
@@ -66,7 +70,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
                 # (do chapter-level stuff with post-processing scripts
                 # b/c those handle in-chapter xrefs better)
                 if sub['id'] == "summary":
-                    sub['id'] = f"{subfile.as_posix().split('/')[-1].split('.')[0]}_summary"
+                    sub['id'] = f"{subfile.stem}_summary"
                 if sub.select('div > h2'):
                     sub.name = 'section'
                     sub['data-type'] = 'sect2'
