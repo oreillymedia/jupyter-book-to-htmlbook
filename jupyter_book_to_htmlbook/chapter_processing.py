@@ -42,9 +42,6 @@ def compile_chapter_parts(ordered_chapter_files_list):
     except TypeError as e:
         print(f'Error: {e} in {base_chapter_file.name}\n{err_feel_better_msg}')
         pass
-    except ValueError as e:
-        print(f'Error: {e} in {base_chapter_file.name}\n{err_feel_better_msg}')
-        pass
 
     # work with subfiles
     for subfile in ordered_chapter_files_list[1:]:
@@ -206,17 +203,6 @@ def process_chapter(toc_element, build_dir=Path('.')):
             chapter['data-type'] = 'chapter'  # type: ignore
         del chapter['class']  # type: ignore
 
-        # update chapter id to what is actually referred to
-        try:
-            id_span = chapter.find('span')  # type: ignore
-            chapter['id'] = id_span['id']  # type: ignore
-            id_span.decompose()  # type: ignore
-        except KeyError as e:
-            print(f'Unable to move span id in {toc_element}. ' +
-                  f'This may not be a problem.\n{e}')
-        except TypeError as e:
-            print(f'Unable to move span id in {toc_element}. ' +
-                  f'This may not be a problem.\n{e}')
     else:  # i.e., an ordered list of chapter parts
         chapter = compile_chapter_parts(toc_element)
         ch_name = 'ch' + toc_element[0].as_posix().split('/')[-2]
