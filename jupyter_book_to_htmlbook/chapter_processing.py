@@ -130,7 +130,7 @@ def clean_chapter(chapter, rm_numbering=True):
 
 def move_span_ids_to_sections(chapter):
     """
-    Takes span tags with "sec-" ids and moves the id to the next heading tag
+    Takes span tags with "sec-" ids and moves the id to the parent section tag
     so Atlas can find the cross reference.
     """
     sec_spans = chapter.find_all("span", id=re.compile('sec-*'))

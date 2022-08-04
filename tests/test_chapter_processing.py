@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
-
-from jupyter_book_to_htmlbook.chapter_processing import clean_chapter
+from jupyter_book_to_htmlbook.chapter_processing import clean_chapter, move_span_ids_to_sections
 
 
 def test_chapter_cleans():
@@ -35,3 +34,22 @@ div class="cell_input docutils container"&gt;
 <pre> some thing </pre>
 </div>
 </h2>"""
+
+
+def test_move_span_ids_to_sections():
+    """
+    Atlas requires that cross reference targets sections so that
+    the text will appear as expected. This test is to confirm that
+    the ids we added ("sec-") to the invisible spans earlier for cross
+    referencing are then applied to the parent section.
+    """
+    chapter_text = """
+<section class="section" data-type="sect2" id="types-of-bias">
+<span id="sec-biastypes"></span><h2>Types of Bias</h2>
+<p>Bias comes in many forms!</p>"""
+    chapter = BeautifulSoup(chapter_text, 'html.parser')
+    result = move_span_ids_to_sections(chapter)
+    assert str(result) == """
+<section class="section" data-type="sect2" id="sec-biastypes">
+<h2>Types of Bias</h2>
+<p>Bias comes in many forms!</p></section>"""
