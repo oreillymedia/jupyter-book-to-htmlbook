@@ -110,7 +110,7 @@ def clean_chapter(chapter, rm_numbering=True):
         for span in chapter.find_all(class_="section-number"):
             span.decompose()
 
-    tags_to_remove = [
+    classes_to_remove = [
         # remove hidden cells. in the web version, these cells are hidden by
         # default and users can toggle them on/off. but they take up too much
         # space if rendered into the pdf.
@@ -123,7 +123,7 @@ def clean_chapter(chapter, rm_numbering=True):
         ".headerlink",
     ]
 
-    for el in chapter.select(','.join(tags_to_remove)):
+    for el in chapter.select(','.join(classes_to_remove)):
         el.decompose()
     return chapter
 
@@ -177,9 +177,9 @@ def process_chapter(toc_element, build_dir=Path('.')):
             chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
 
         except AttributeError:  # does not have a section class for top-level
-            if base_soup.main:
+            if base_soup.main and base_soup.main.section:
                 chapter = base_soup.main.section
-                chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
+                chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
             else:  # this is an edge case, and I'm going to leave it for now
                 return
 
