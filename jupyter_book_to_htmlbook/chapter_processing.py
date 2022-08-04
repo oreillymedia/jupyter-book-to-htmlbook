@@ -24,8 +24,8 @@ def compile_chapter_parts(ordered_chapter_files_list):
     del chapter['class']  # type: ignore
     # add class="pagenumrestart" if it's the first chapter
     # (will need to be changed for parts, but -- will handle that later)
-    if base_chapter_file.find('/01/') > -1 or \
-       base_chapter_file.find('/1/') > -1:
+    if base_chapter_file.name.find('/01/') > -1 or \
+       base_chapter_file.name.find('/1/') > -1:
         chapter['class'] = "pagenumrestart"  # type: ignore
     # update chapter id to what is actually referred to (as far as I can tell)
     err_feel_better_msg = "It's possible there is no empty span here " + \
@@ -36,10 +36,12 @@ def compile_chapter_parts(ordered_chapter_files_list):
         chapter['id'] = id_span['id']  # type: ignore
         id_span.decompose()  # type: ignore
 
+    except KeyError as e:
+        print(f'Error: {e} in {base_chapter_file.name}\n{err_feel_better_msg}')
     except TypeError as e:
-        print(f'Error: {e} in {base_chapter_file}\n{err_feel_better_msg}')
+        print(f'Error: {e} in {base_chapter_file.name}\n{err_feel_better_msg}')
     except ValueError as e:
-        print(f'Error: {e} in {base_chapter_file}\n{err_feel_better_msg}')
+        print(f'Error: {e} in {base_chapter_file.name}\n{err_feel_better_msg}')
 
     # work with subfiles
     for subfile in ordered_chapter_files_list[1:]:
@@ -64,7 +66,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
                 # (do chapter-level stuff with post-processing scripts
                 # b/c those handle in-chapter xrefs better)
                 if sub['id'] == "summary":
-                    sub['id'] = f"{subfile.split('/')[-1].split('.')[0]}_summary"
+                    sub['id'] = f"{subfile.as_posix().split('/')[-1].split('.')[0]}_summary"
                 if sub.select('div > h2'):
                     sub.name = 'section'
                     sub['data-type'] = 'sect2'
@@ -162,9 +164,9 @@ def process_chapter(toc_element, build_dir=Path('.')):
                           "afterword", "conclusion", 'foreword',
                           'introduction', 'preface']
 
-    if isinstance(toc_element, str):  # single-file chapter
+    if isinstance(toc_element, Path):  # single-file chapter
         # this should really be a function, but for now
-        ch_name = toc_element.split('.')[0].split('/')[-1]
+        ch_name = toc_element.name.split('.')[0].split('/')[-1]
         with open(toc_element, 'r') as f:
             base_soup = BeautifulSoup(f, 'lxml')
 
@@ -209,7 +211,7 @@ def process_chapter(toc_element, build_dir=Path('.')):
                   f'This may not be a problem.\n{e}')
     else:  # i.e., an ordered list of chapter parts
         chapter = compile_chapter_parts(toc_element)
-        ch_name = 'ch' + toc_element[0].split('/')[-2]
+        ch_name = 'ch' + toc_element[0].as_posix().split('/')[-2]
 
     # see where we're at
     print(f"Processing {ch_name}...")

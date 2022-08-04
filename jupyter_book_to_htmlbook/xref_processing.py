@@ -4,7 +4,7 @@ def process_image_reference_figures(anchor):
     BUT! Don't process anchors inside of figures.
     """
     for parent in anchor.parents:
-        if parent.name == "div" and "figure" in parent["class"]:
+        if parent.name == "div" and ("class", "figure") in parent.attrs:
             return
     anchor.name = "figure"
     anchor['class'] = "informal"
