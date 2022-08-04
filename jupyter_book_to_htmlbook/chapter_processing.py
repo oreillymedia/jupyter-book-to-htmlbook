@@ -38,10 +38,13 @@ def compile_chapter_parts(ordered_chapter_files_list):
 
     except KeyError as e:
         print(f'Error: {e} in {base_chapter_file.name}\n{err_feel_better_msg}')
+        pass
     except TypeError as e:
         print(f'Error: {e} in {base_chapter_file.name}\n{err_feel_better_msg}')
+        pass
     except ValueError as e:
         print(f'Error: {e} in {base_chapter_file.name}\n{err_feel_better_msg}')
+        pass
 
     # work with subfiles
     for subfile in ordered_chapter_files_list[1:]:
@@ -170,7 +173,7 @@ def process_chapter(toc_element, build_dir=Path('.')):
 
     if isinstance(toc_element, Path):  # single-file chapter
         # this should really be a function, but for now
-        ch_name = toc_element.name.split('.')[0].split('/')[-1]
+        ch_name = toc_element.stem
         with open(toc_element, 'r') as f:
             base_soup = BeautifulSoup(f, 'lxml')
 
@@ -185,6 +188,7 @@ def process_chapter(toc_element, build_dir=Path('.')):
                 chapter = base_soup.main.section
                 chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
             else:  # this is an edge case, and I'm going to leave it for now
+                print("Error! Looks like {toc_element.name} is malformed.")
                 return
 
         # apply appropriate data-type (best guess)
