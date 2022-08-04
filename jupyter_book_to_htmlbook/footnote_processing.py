@@ -7,9 +7,8 @@ def process_footnotes(chapter):
     # move the contents of the ref to the anchor point
     for ref in footnote_refs:
         try:
-            # <a class="footnote-reference brackets" href="#psql" id="id3">1</a>
             ref_id = ref['href'].split('#')[-1]
-            # double next_sibling b/c next sigling is a space
+            # double next_sibling b/c next sibling is a space
             ref_location = chapter.find(
                                         "dt", {"id": ref_id}
                                         ).next_sibling.next_sibling
@@ -22,16 +21,16 @@ def process_footnotes(chapter):
             ref.string = ''
             for child in footnote_contents:
                 ref.append(child)
-        except ValueError as e:
-            print(f'{e}')
+        except KeyError:
+            print(f'Error converting footnote "{ref}".')
+        except AttributeError:
+            print(f'Error converting footnote "{ref}".')
     # remove the list of footnote contents
-    try:
-        hrs = chapter.find_all('hr', {'class': 'footnotes'})
-        for hr in hrs:
-            hr.decompose()
-        dls = chapter.find_all('dl', {'class': 'footnote'})
-        for dl in dls:
-            dl.decompose()
-    except AttributeError:
-        print("No index in this chapter...")
+    hrs = chapter.find_all('hr', {'class': 'footnotes'})
+    for hr in hrs:
+        hr.decompose()
+    dls = chapter.find_all('dl', {'class': 'footnote'})
+    for dl in dls:
+        dl.decompose()
+
     return chapter
