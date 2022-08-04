@@ -9,7 +9,9 @@ def test_get_book_index_simple(tmp_path):
     """
     test_env = tmp_path / 'tmp'
     test_env.mkdir()
-    shutil.copytree('tests/example-1', test_env, dirs_exist_ok=True)
+    shutil.copytree('tests/example_tocs', test_env, dirs_exist_ok=True)
+    shutil.move(test_env / 'genindex01.html',
+                test_env / 'genindex.html')
     toc = get_book_index(test_env)
     assert type(toc) == list
     assert toc == [
@@ -28,7 +30,9 @@ def test_get_book_index_with_sub_chapter_files(tmp_path):
     """
     test_env = tmp_path / 'tmp'
     test_env.mkdir()
-    shutil.copytree('tests/example-2', test_env, dirs_exist_ok=True)
+    shutil.copytree('tests/example_tocs', test_env, dirs_exist_ok=True)
+    shutil.move(test_env / 'genindex02.html',
+                test_env / 'genindex.html')
     toc = get_book_index(test_env)
     assert type(toc) == list
     assert toc == [
