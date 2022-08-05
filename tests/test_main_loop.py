@@ -8,7 +8,7 @@ def test_main_loop_happy_path(tmp_path):
     test_env = tmp_path / 'tmp'
     test_env.mkdir()
     shutil.copytree('tests/example_html', test_env, dirs_exist_ok=True)
-    main(test_env / 'html', test_env / 'build')
+    main(test_env, test_env / 'build')
     assert os.path.exists(test_env / 'build')
     assert os.path.isfile(test_env / 'build/ch01.html')
     with open(test_env / 'build/ch01.html') as f:
