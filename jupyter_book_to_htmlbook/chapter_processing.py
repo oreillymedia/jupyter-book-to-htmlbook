@@ -108,8 +108,8 @@ def clean_chapter(chapter, rm_numbering=True):
             del(tag['border'])
     for tag in chapter.find_all(attrs={'style': True}):
         del tag['style']
-    # (optinally) remove numbering
 
+    # (optionally) remove numbering
     if rm_numbering:
         for span in chapter.find_all(class_="section-number"):
             span.decompose()

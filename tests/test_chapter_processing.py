@@ -265,4 +265,3 @@ def test_chapter_process_confirm_remove_span(tmp_path):
     process_chapter(toc[1], test_out)
     # the resulting section should have a data-type of "chapter"
     assert os.path.exists(test_out / 'ch01.html')
-
