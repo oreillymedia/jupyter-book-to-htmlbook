@@ -1,6 +1,6 @@
 import shutil
 import os
-from jupyter_book_to_htmlbook.jb2html import main
+from jupyter_book_to_htmlbook.jupter_book_to_htmlbook import main
 
 
 def test_main_loop_happy_path(tmp_path):
