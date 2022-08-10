@@ -132,3 +132,5 @@ dmypy.json
 scratch*
 test.sh
 .vscode
+borrowed-example-*
+playground

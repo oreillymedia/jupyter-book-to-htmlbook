@@ -1,21 +1,22 @@
-from toc_processing import *
-from chapter_processing import *
-import os
+from toc_processing import get_book_index
+from chapter_processing import process_chapter
 from pathlib import Path
+import shutil
 
-# default html directory
-html_dir = 'html/'
 
-# default build directory
-build_dir = Path('build/')
-image_dir = build_dir / 'images'
-
-def main():
+def main(source_dir=Path('html/'), output_dir=Path('build/')):
+    # setup
+    image_dir = output_dir / 'images'
     image_dir.mkdir(parents=True, exist_ok=True)
-    os.system(f'cp {html_dir}/_images/* {image_dir}') # note: no windows support
-    toc = get_book_index(html_dir)
+    shutil.copytree(f'{source_dir}/_images/', image_dir,
+                    dirs_exist_ok=True)
+
+    # get table of contents
+    toc = get_book_index(source_dir)
+
+    # process book files
     for element in toc:
-        process_chapter(element, build_dir)
+        process_chapter(element, output_dir)
 
 
 if __name__ == '__main__':
