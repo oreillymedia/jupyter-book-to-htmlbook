@@ -1,5 +1,5 @@
-from toc_processing import get_book_index
-from chapter_processing import process_chapter
+from .toc_processing import get_book_index
+from .chapter_processing import process_chapter
 from pathlib import Path
 import shutil
 
