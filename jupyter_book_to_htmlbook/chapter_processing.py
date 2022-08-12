@@ -1,10 +1,10 @@
 from pathlib import Path
 from bs4 import BeautifulSoup  # type: ignore
-from admonition_processing import process_admonitions
-from figure_processing import process_figures, process_informal_figs
-from footnote_processing import process_footnotes
-from math_processing import process_math
-from xref_processing import process_interal_refs
+from .admonition_processing import process_admonitions
+from .figure_processing import process_figures, process_informal_figs
+from .footnote_processing import process_footnotes
+from .math_processing import process_math
+from .xref_processing import process_interal_refs
 import re
 
 
