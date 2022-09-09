@@ -15,7 +15,7 @@ pytest = "^7.1.2"
 pytest-cov = "^3.0.0"
 
 [tool.poetry.scripts]
-jb2atlas = "jupyter_book_to_htmlbook.jupyter_book_to_htmlbook:main"
+jupbook2htmlbook = "jupyter_book_to_htmlbook.jupyter_book_to_htmlbook:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
