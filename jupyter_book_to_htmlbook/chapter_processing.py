@@ -224,3 +224,6 @@ def process_chapter(toc_element, build_dir=Path('.')):
     # write the file
     out = build_dir / (ch_name + '.html')
     out.write_text(str(chapter))
+
+    # return relative path of file as string for later use
+    return str(out.relative_to(build_dir))
