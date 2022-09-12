@@ -5,9 +5,10 @@ description = "A script to convert jupyter book html files to htmlbook for consu
 authors = ["delfanbaum"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.10"
 beautifulsoup4 = "^4.11.1"
 lxml = "^4.9.1"
+typer = "^0.6.1"
 
 [tool.poetry.dev-dependencies]
 coverage = "^6.4.3"
@@ -15,7 +16,7 @@ pytest = "^7.1.2"
 pytest-cov = "^3.0.0"
 
 [tool.poetry.scripts]
-jupbook2htmlbook = "jupyter_book_to_htmlbook.jupyter_book_to_htmlbook:main"
+jb2htmlbook = "jupyter_book_to_htmlbook.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
