@@ -1,6 +1,7 @@
-import shutil
+import logging
 import os
 import pytest
+import shutil
 from pathlib import Path
 from bs4 import BeautifulSoup
 from jupyter_book_to_htmlbook.chapter_processing import (
@@ -110,28 +111,28 @@ def test_compile_chapter_parts_happy_path_numbered(tmp_path):
     assert number_of_sections == number_of_sections_expected
 
 
-def test_compile_chapter_parts_keyerror(capsys):
+def test_compile_chapter_parts_keyerror(caplog):
     """
     It's too much of a pain to mock the circumstances in which this
     might happen, so we'll force it and prove it works.
     """
+    caplog.set_level(logging.DEBUG)
     ordered_list = [Path('tests/example_html/error_forcers/keyerror.html')]
     compile_chapter_parts(ordered_list)
-    output = capsys.readouterr().out.rstrip()
-    assert output.rstrip() == """Error: 'id' in keyerror.html
-It's possible there is no empty span here and likely is not a problem."""
+    assert """'id' in keyerror.html""" in caplog.text
 
 
-def test_compile_chapter_parts_typeerror(capsys):
+def test_compile_chapter_parts_typeerror(caplog):
     """
     It's too much of a pain to mock the circumstances in which this
     might happen, so we'll force it and prove it works.
     """
+    caplog.set_level(logging.DEBUG)
     ordered_list = [Path('tests/example_html/error_forcers/typeerror.html')]
     compile_chapter_parts(ordered_list)
-    output = capsys.readouterr().out.rstrip()
-    assert output.rstrip() == """Error: 'NoneType' object is not subscriptable in typeerror.html
-It's possible there is no empty span here and likely is not a problem."""
+    assert (
+            "'NoneType' object is not subscriptable in typeerror.html"
+            ) in caplog.text
 
 
 def test_process_chapter_single_chapter_file(tmp_path):
@@ -184,7 +185,7 @@ def test_process_chapter_no_section(tmp_path):
         assert text.find('xmlns="http://www.w3.org/1999/xhtml"') > -1
 
 
-def test_process_chapter_totally_invalid_file(tmp_path, capsys):
+def test_process_chapter_totally_invalid_file(tmp_path, caplog):
     """
     if we ever try to process something that's super malformed, don't,
     and alert the user
@@ -197,8 +198,8 @@ def test_process_chapter_totally_invalid_file(tmp_path, capsys):
     # first item is the intro file, so let's check on the first "chapter"
     process_chapter(test_env / 'error_forcers/malformed.html', test_out)
     # the resulting section should have a data-type of "chapter"
-    output = capsys.readouterr().out.rstrip()
-    assert "is malformed" in output
+    caplog.set_level(logging.DEBUG)
+    assert "is malformed" in caplog.text
 
 
 @pytest.mark.parametrize(

@@ -1,3 +1,6 @@
+import logging
+
+
 def process_image_reference_figures(anchor):
     """
     Sometimes images show up inside anchor tags. Deal with those!
@@ -52,7 +55,7 @@ def process_interal_refs(chapter):
         elif ref['href'].find('_images') > -1:
             process_image_reference_figures(ref)
         elif ref['href'].find('htt') > -1:
-            print(f"\nAlert! External image reference: {ref['href']}\n")
+            logging.warning(f"External image reference: {ref['href']}")
         else:  # i.e., non reference xrefs
             ref['data-type'] = 'xref'
             uri = ref['href']  # get current uri and fix it if needed

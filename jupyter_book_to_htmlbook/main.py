@@ -1,5 +1,6 @@
-import typer
+import logging
 import shutil
+import typer
 from pathlib import Path
 from importlib import metadata
 from typing import Optional
@@ -34,8 +35,17 @@ def jupter_book_to_htmlbook(
     HTMLBook, and places those files in the TARGET directory.
 
     Returns a json list of converted "files" as output for consumption by
-    Atlas, O'Reilly's in-house publishing tool.
+    Atlas, O'Reilly's in-house publishing tool. Saves run information to
+    jupyter_book_to_htmlbook_run.log
     """
+    # setup logging
+    logging.basicConfig(filename='jb2htmlbook.log',
+                        format='%(levelname)s: %(message)s',
+                        level=logging.DEBUG)
+    logging.info(f'App version: {__version__}')
+    logging.info(f'Source: {source}, Target: {target}')
+
+    # use paths
     source_dir = Path(source)
     output_dir = Path(target)
 
