@@ -1,3 +1,5 @@
+import logging
+import re
 from pathlib import Path
 from bs4 import BeautifulSoup  # type: ignore
 from .admonition_processing import process_admonitions
@@ -5,7 +7,49 @@ from .figure_processing import process_figures, process_informal_figs
 from .footnote_processing import process_footnotes
 from .math_processing import process_math
 from .xref_processing import process_interal_refs
-import re
+
+
+def process_chapter_subparts(subfile):
+    with open(subfile, 'r') as f:
+        soup = BeautifulSoup(f, 'lxml')
+        section = soup.find(class_='section')
+        section.name = 'section'  # type: ignore
+        section['data-type'] = 'sect1'  # type: ignore
+        del section['class']  # type: ignore
+        # move id from empty span to section
+        try:
+            section['id'] = section.select_one('span')['id']  # type: ignore
+            # leave spans for now in case they're not empty;
+            # TO DO: clean up empty spans...
+            del section.select_one('span')['id']  # type: ignore
+        except TypeError:
+            # fun fact, this happens when there's not numbering on the toc
+            pass  # like before, if it's not there that's OK.
+        except KeyError:
+            # fun fact, this happens when there's numbering on the toc
+            pass  # like before, if it's not there that's OK.
+        # deal with subsections
+        subsections = section.find_all(class_="section")  # type: ignore
+        for sub in subsections:
+            # remove duplicate sub-section summary ids
+            # (do chapter-level stuff with post-processing scripts
+            # b/c those handle in-chapter xrefs better)
+            if sub['id'] == "summary":
+                sub['id'] = f"{subfile.stem}_summary"
+            if sub.select('div > h2'):
+                sub.name = 'section'
+                sub['data-type'] = 'sect2'
+                # parsing subsections within seems like the best strategy
+            elif sub.select('div > h3'):
+                sub.name = 'section'
+                sub['data-type'] = 'sect3'
+            elif sub.select('div > h4'):
+                sub.name = 'section'
+                sub['data-type'] = 'sect4'
+            elif sub.select('div > h5'):
+                sub.name = 'section'
+                sub['data-type'] = 'sect5'
+    return section
 
 
 def compile_chapter_parts(ordered_chapter_files_list):
@@ -28,8 +72,8 @@ def compile_chapter_parts(ordered_chapter_files_list):
        base_chapter_file.as_posix().find('/1/') > -1:
         chapter['class'] = "pagenumrestart"  # type: ignore
     # update chapter id to what is actually referred to (as far as I can tell)
-    err_feel_better_msg = "It's possible there is no empty span here " + \
-                          "and likely is not a problem."
+    feel_better_msg = "It's possible there is no empty span here " + \
+                      "and likely is not a problem."
 
     try:
         id_span = chapter.find('span')  # type: ignore
@@ -37,59 +81,16 @@ def compile_chapter_parts(ordered_chapter_files_list):
         id_span.decompose()  # type: ignore
 
     except KeyError as e:
-        print(f'Error: {e} in {base_chapter_file.name}\n{err_feel_better_msg}')
+        logging.debug(f'{e} in {base_chapter_file.name}\n{feel_better_msg}')
         pass
     except TypeError as e:
-        print(f'Error: {e} in {base_chapter_file.name}\n{err_feel_better_msg}')
+        logging.debug(f'{e} in {base_chapter_file.name}\n{feel_better_msg}')
         pass
 
     # work with subfiles
     for subfile in ordered_chapter_files_list[1:]:
-        with open(subfile, 'r') as f:
-            soup = BeautifulSoup(f, 'lxml')
-            section = soup.find(class_='section')
-            section.name = 'section'  # type: ignore
-            section['data-type'] = 'sect1'  # type: ignore
-            del section['class']  # type: ignore
-            # move id from empty span to section
-            try:
-                section['id'] = section.select_one('span')['id']  # type: ignore
-                # leave spans for now in case they're not empty;
-                # TO DO: clean up empty spans...
-                del section.select_one('span')['id']  # type: ignore
-            except TypeError:
-                # fun fact, this happens when there's not numbering on the toc
-                pass  # like before, if it's not there that's OK.
-            except KeyError:
-                # fun fact, this happens when there's numbering on the toc
-                pass  # like before, if it's not there that's OK.
-            # deal with subsections
-            subsections = section.find_all(class_="section")  # type: ignore
-            for sub in subsections:
-                # remove duplicate sub-section summary ids
-                # (do chapter-level stuff with post-processing scripts
-                # b/c those handle in-chapter xrefs better)
-                if sub['id'] == "summary":
-                    sub['id'] = f"{subfile.stem}_summary"
-                if sub.select('div > h2'):
-                    sub.name = 'section'
-                    sub['data-type'] = 'sect2'
-                    # parsing subsections within seems like the best strategy
-                elif sub.select('div > h3'):
-                    sub.name = 'section'
-                    sub['data-type'] = 'sect3'
-                elif sub.select('div > h4'):
-                    sub.name = 'section'
-                    sub['data-type'] = 'sect4'
-                elif sub.select('div > h5'):
-                    sub.name = 'section'
-                    sub['data-type'] = 'sect5'
-            # if the subfile has a "summary" section, add subfile name to
-            # summary id
-            # NOTE: xrefs to summaries will not work! will handle this when
-            # it comes up...
-            # add section to chapter
-            chapter.append(section)  # type: ignore
+        subsection = process_chapter_subparts(subfile)
+        chapter.append(subsection)  # type: ignore
 
     return chapter
 
@@ -185,7 +186,7 @@ def process_chapter(toc_element, build_dir=Path('.')):
                 chapter = base_soup.main.section
                 chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
             else:  # this is an edge case, and I'm going to leave it for now
-                print("Error! Looks like {toc_element.name} is malformed.")
+                logging.warning("Looks like {toc_element.name} is malformed.")
                 return
 
         # apply appropriate data-type (best guess)
@@ -208,7 +209,7 @@ def process_chapter(toc_element, build_dir=Path('.')):
         ch_name = 'ch' + toc_element[0].as_posix().split('/')[-2]
 
     # see where we're at
-    print(f"Processing {ch_name}...")
+    logging.info(f"Processing {ch_name}...")
 
     # perform cleans and processing
     chapter = clean_chapter(chapter)

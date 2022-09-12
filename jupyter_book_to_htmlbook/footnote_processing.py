@@ -1,3 +1,6 @@
+import logging
+
+
 def process_footnotes(chapter):
     """
     Takes footnote anchors and footnote lists and turns them into
@@ -22,9 +25,9 @@ def process_footnotes(chapter):
             for child in footnote_contents:
                 ref.append(child)
         except KeyError:
-            print(f'Error converting footnote "{ref}".')
+            logging.warning(f'Error converting footnote "{ref}".')
         except AttributeError:
-            print(f'Error converting footnote "{ref}".')
+            logging.warning(f'Error converting footnote "{ref}".')
     # remove the list of footnote contents
     hrs = chapter.find_all('hr', {'class': 'footnotes'})
     for hr in hrs:

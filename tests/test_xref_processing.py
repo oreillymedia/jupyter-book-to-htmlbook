@@ -1,3 +1,4 @@
+import logging
 from bs4 import BeautifulSoup
 from jupyter_book_to_htmlbook.xref_processing import process_interal_refs
 
@@ -67,7 +68,7 @@ Here is another sentence.</span>
     assert result == chapter
 
 
-def test_alert_on_external_images(capsys):
+def test_alert_on_external_images(caplog):
     """
     authors really shouldn't be linking out images, so we'll alert them when
     they do this, and not do any processing
@@ -78,7 +79,5 @@ src="http://example.com/example.png" style="width:100px" /></a>"""
     chapter = BeautifulSoup(chapter_text, 'html.parser')
     result = process_interal_refs(chapter)
     assert result == chapter
-    output = capsys.readouterr().out.rstrip()
-    assert output.rstrip() == """
-Alert! External image reference: http://example.com/example.png"""
-
+    caplog.set_level(logging.DEBUG)
+    assert "External image reference:" in caplog.text
