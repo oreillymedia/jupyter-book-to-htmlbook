@@ -9,6 +9,7 @@ python = "^3.10"
 beautifulsoup4 = "^4.11.1"
 lxml = "^4.9.1"
 typer = "^0.6.1"
+jupyter-book = "^0.13.1"
 
 [tool.poetry.dev-dependencies]
 coverage = "^6.4.3"
