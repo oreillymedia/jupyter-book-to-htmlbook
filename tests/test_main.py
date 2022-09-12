@@ -21,8 +21,9 @@ class TestMain:
         test_env = tmp_path / 'tmp'
         test_env.mkdir()
         shutil.copytree('tests/example_html', test_env, dirs_exist_ok=True)
-        result = runner.invoke(app, [str(test_env), str(test_env / 'build')])
+        result = runner.invoke(app, [str(test_env), 'build'])
         assert result.exit_code == 0
+        assert '"build/ch01.html"' in result.stdout
         assert os.path.exists(test_env / 'build')
         assert os.path.isfile(test_env / 'build/ch01.html')
         with open(test_env / 'build/ch01.html') as f:

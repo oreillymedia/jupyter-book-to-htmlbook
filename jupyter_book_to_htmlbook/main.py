@@ -40,6 +40,7 @@ def jupter_book_to_htmlbook(
     """
     # setup logging
     logging.basicConfig(filename='jb2htmlbook.log',
+                        encoding='utf-8',
                         format='%(levelname)s: %(message)s',
                         level=logging.DEBUG)
     logging.info(f'App version: {__version__}')
@@ -47,7 +48,7 @@ def jupter_book_to_htmlbook(
 
     # use paths
     source_dir = Path(source)
-    output_dir = Path(target)
+    output_dir = source_dir / target
 
     image_dir = output_dir / 'images'
     image_dir.mkdir(parents=True, exist_ok=True)
@@ -57,9 +58,16 @@ def jupter_book_to_htmlbook(
     # get table of contents
     toc = get_book_index(source_dir)
 
+    # create a list to return as output
+    processed_files = []
+
     # process book files
     for element in toc:
-        process_chapter(element, output_dir)
+        file = process_chapter(element, output_dir)
+        # add the extra quotes because we want them in the returned string
+        processed_files.append(f'"{target}/{file}"')
+
+    print(",".join(processed_files))
 
 
 def main():

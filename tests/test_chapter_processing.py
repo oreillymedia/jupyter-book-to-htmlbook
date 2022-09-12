@@ -135,9 +135,11 @@ def test_compile_chapter_parts_typeerror(caplog):
             ) in caplog.text
 
 
-def test_process_chapter_single_chapter_file(tmp_path):
+def test_process_chapter_single_chapter_file(tmp_path, capsys):
     """
     happy path for chapter processing a single chapter file
+
+    also ensures that our function is returning what we expect it to
     """
     test_env = tmp_path / 'tmp'
     test_out = test_env / 'output'
@@ -145,10 +147,11 @@ def test_process_chapter_single_chapter_file(tmp_path):
     test_out.mkdir()
     shutil.copytree('tests/example_html', test_env, dirs_exist_ok=True)
     toc = get_book_index(test_env)
+    result = process_chapter(toc[0], test_out)
     # first item is the intro file, so let's check on the first "chapter"
-    process_chapter(toc[0], test_out)
-    # the resulting section should have a data-type of "chapter"
     assert os.path.exists(test_out / 'intro.html')
+    # check on return
+    assert "intro.html" in result
 
 
 def test_process_chapter_chapter_with_subfiles(tmp_path):
