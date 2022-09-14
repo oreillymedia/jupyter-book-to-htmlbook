@@ -23,6 +23,7 @@ def show_version(value: bool):
 def jupter_book_to_htmlbook(
         source: str,
         target: str,
+        skip_jb_build: Optional[bool] = False,
         version: Optional[bool] = typer.Option(None, "--version",
                                                callback=show_version,
                                                is_eager=True)
@@ -34,13 +35,19 @@ def jupter_book_to_htmlbook(
     files), runs `jupyter-book`, converts and consolidates the output to
     HTMLBook, and places those files in the TARGET directory.
 
+    If you for some reason don't want this script to run `jupyter-book` (`jb`),
+    use the SKIP_JB_BUILD option.
+
     Returns a json list of converted "files" as output for consumption by
     Atlas, O'Reilly's in-house publishing tool. Saves run information to
     jupyter_book_to_htmlbook_run.log
     """
     # use paths
-    source_dir = Path(source)
-    output_dir = source_dir / target
+    source_dir = Path(source) / '_build/html'
+    output_dir = Path(source) / target
+
+    # create output_dir (and wiping it is OK)
+    output_dir.mkdir(exist_ok=True)
 
     # setup logging
     log_fn = str(output_dir / 'jb2htmlbook.log')
@@ -51,11 +58,28 @@ def jupter_book_to_htmlbook(
     logging.info(f'App version: {__version__}')
     logging.info(f'Source: {source}, Target: {target}')
 
+    # run `jupyter-book` (or log that we didn't)
+    if not skip_jb_build:
+        # NOTE: that we have to run it as a subprocess because it doesn't
+        # seem like they've designed it to be importable.
+        # Bonus is that it keeps the command similar to what an author will be
+        # using locally.
+        import subprocess
+        jb_info = subprocess.run(['jupyter-book', 'build',
+                                 source])
+        logging.info("jupyter-book run stdout: " + str(jb_info.stdout))
+        logging.info("jupyter-book run stderr: " + str(jb_info.stderr))
+    else:
+        logging.info("Skipping jupyter-book run...")
+
     # setup images directory
-    image_dir = output_dir / 'images'
-    image_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(f'{source_dir}/_images/', image_dir,
-                    dirs_exist_ok=True)
+    if Path(f'{source_dir}/_images').exists():
+        image_dir = output_dir / 'images'
+        image_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(f'{source_dir}/_images/', image_dir,
+                        dirs_exist_ok=True)
+    else:
+        logging.info("No images in the source book")
 
     # get table of contents
     toc = get_book_index(source_dir)
