@@ -38,18 +38,20 @@ def jupter_book_to_htmlbook(
     Atlas, O'Reilly's in-house publishing tool. Saves run information to
     jupyter_book_to_htmlbook_run.log
     """
+    # use paths
+    source_dir = Path(source)
+    output_dir = source_dir / target
+
     # setup logging
-    logging.basicConfig(filename='jb2htmlbook.log',
+    log_fn = str(output_dir / 'jb2htmlbook.log')
+    logging.basicConfig(filename=log_fn,
                         encoding='utf-8',
                         format='%(levelname)s: %(message)s',
                         level=logging.DEBUG)
     logging.info(f'App version: {__version__}')
     logging.info(f'Source: {source}, Target: {target}')
 
-    # use paths
-    source_dir = Path(source)
-    output_dir = source_dir / target
-
+    # setup images directory
     image_dir = output_dir / 'images'
     image_dir.mkdir(parents=True, exist_ok=True)
     shutil.copytree(f'{source_dir}/_images/', image_dir,
