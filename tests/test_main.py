@@ -1,6 +1,7 @@
-import shutil
-import os
 import logging
+import os
+import pytest
+import shutil
 from typer.testing import CliRunner
 from jupyter_book_to_htmlbook.main import app, __version__
 
@@ -17,6 +18,8 @@ class TestMain:
         result = runner.invoke(app, ["--version"])
         assert __version__ in result.stdout
 
+    @pytest.mark.jb
+    @pytest.mark.slow
     def test_simple_case(self, tmp_path, caplog):
         """ happy path test case """
         caplog.set_level(logging.DEBUG)
