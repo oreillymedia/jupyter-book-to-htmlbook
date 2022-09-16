@@ -1,5 +1,5 @@
 import logging
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore
 from jupyter_book_to_htmlbook.xref_processing import process_interal_refs
 
 
