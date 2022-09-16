@@ -6,6 +6,7 @@ from importlib import metadata
 from typing import Optional
 from .toc_processing import get_book_index
 from .chapter_processing import process_chapter
+from .atlas import update_atlas
 
 
 app = typer.Typer()
@@ -19,14 +20,26 @@ def show_version(value: bool):
         raise typer.Exit()
 
 
-@app.command()  # note that docstring serves as --help text
+@app.command()  # note that docstring serves as help text
 def jupter_book_to_htmlbook(
         source: str,
         target: str,
-        skip_jb_build: Optional[bool] = False,
-        version: Optional[bool] = typer.Option(None, "--version",
-                                               callback=show_version,
-                                               is_eager=True)
+        atlas_json: Optional[str] = typer.Option(
+            None,
+            "--atlas-json",
+            help="Path to the book's atlas.json file"
+            ),
+        skip_jb_build: Optional[bool] = typer.Option(
+            False,
+            "--skip-jb-build",
+            help="Skip running `jupyter-book` as a part of this conversion"
+            ),
+        version: Optional[bool] = typer.Option(
+            None,
+            "--version",
+            callback=show_version,
+            is_eager=True
+            )
         ):
     """
     Converts a Jupyter Book project into HTMLBook.
@@ -37,6 +50,9 @@ def jupter_book_to_htmlbook(
 
     If you for some reason don't want this script to run `jupyter-book` (`jb`),
     use the SKIP_JB_BUILD option.
+
+    If you want to UPDATE_ATLAS_JSON, provide the relative path to the
+    atlas.json file (will usually be just "atlas.json")
 
     Returns a json list of converted "files" as output for consumption by
     Atlas, O'Reilly's in-house publishing tool. Saves run information to
@@ -93,7 +109,11 @@ def jupter_book_to_htmlbook(
         # add the extra quotes because we want them in the returned string
         processed_files.append(f'"{target}/{file}"')
 
-    print(",".join(processed_files))
+    if atlas_json:
+        atlas_path = Path(atlas_json)
+        update_atlas(atlas_path, processed_files)
+    else:
+        print(",".join(processed_files))
 
 
 def main():
