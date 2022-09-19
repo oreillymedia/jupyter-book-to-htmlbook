@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 
 
-def update_atlas(atlas: Path, processed_files: list):
+def update_atlas(atlas: Path, processed_files: list, modify_file: bool = True):
     """
     If there is an atlas.json file present in the source directory,
     update it with the new files processed by the script.
@@ -49,6 +49,11 @@ def update_atlas(atlas: Path, processed_files: list):
 
             atlas_json["files"] = updated_files_list
 
+        if modify_file:  # write back to atlas.json
+            atlas.write_text(json.dumps(atlas_json, sort_keys=True, indent=4))
+            logging.info('Updated atlas.json')
+            return
+        else:  # or, save a bunch of opens during testing
             return atlas_json
 
     except FileNotFoundError:

@@ -20,7 +20,7 @@ class TestUpdateAtlas:
                         test_env / 'atlas.json')
         result = update_atlas(test_env / 'atlas.json', [
             'inserted_chapter_1.html',
-            'inserted_chapter_2.html'])
+            'inserted_chapter_2.html'], False)
         assert 'inserted_chapter_1.html' in result["files"]
 
     def test_json_preserve_static_files(self, tmp_path):
@@ -52,12 +52,28 @@ class TestUpdateAtlas:
         inserted_files = [
             'inserted_chapter_1.html',
             'inserted_chapter_2.html']
-        result = update_atlas(test_env / 'atlas.json', inserted_files)
+        result = update_atlas(test_env / 'atlas.json', inserted_files, False)
         assert result["files"] == frontmatter + inserted_files + backmatter
+
+    def test_json_writes_back(self, tmp_path):
+        """
+        Ensure the new files are written back into into the "files" element
+        in atlas.json
+        """
+        test_env = tmp_path / 'tmp'
+        test_env.mkdir()
+        shutil.copyfile('tests/example_json/atlas.json',
+                        test_env / 'atlas.json')
+        atlas = test_env / 'atlas.json'
+        update_atlas(atlas, [
+            'inserted_chapter_1.html',
+            'inserted_chapter_2.html'], True)
+        with atlas.open() as f:
+            assert 'inserted_chapter_1.html' in f.read()
 
     def test_bad_path(self, caplog, capsys):
         """ Handle a bad path argument gracefully """
-        result = update_atlas(Path('does/not/exist.json'), ['a', 'b'])
+        result = update_atlas(Path('does/not/exist.json'), ['a', 'b'], False)
         assert result is None
         assert "a, b" in capsys.readouterr().out
         assert "atlas.json" in caplog.text

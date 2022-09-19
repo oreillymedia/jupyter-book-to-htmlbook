@@ -60,7 +60,7 @@ def jupter_book_to_htmlbook(
     """
     # use paths
     source_dir = Path(source) / '_build/html'
-    output_dir = Path(source) / target
+    output_dir = Path.cwd() / target
 
     # create output_dir (and wiping it is OK)
     output_dir.mkdir(exist_ok=True)
@@ -82,9 +82,11 @@ def jupter_book_to_htmlbook(
         # using locally.
         import subprocess
         jb_info = subprocess.run(['jupyter-book', 'build',
-                                 source])
-        logging.info("jupyter-book run stdout: " + str(jb_info.stdout))
-        logging.info("jupyter-book run stderr: " + str(jb_info.stderr))
+                                 source],
+                                 # hide chatty jupyter-book build output
+                                 stdout=subprocess.DEVNULL)
+        # but log any errors
+        logging.info("jupyter-book run errors: " + str(jb_info.stderr))
     else:
         logging.info("Skipping jupyter-book run...")
 
@@ -106,14 +108,13 @@ def jupter_book_to_htmlbook(
     # process book files
     for element in toc:
         file = process_chapter(element, output_dir)
-        # add the extra quotes because we want them in the returned string
-        processed_files.append(f'"{target}/{file}"')
+        processed_files.append(f'{target}/{file}')
 
     if atlas_json:
         atlas_path = Path(atlas_json)
         update_atlas(atlas_path, processed_files)
     else:
-        print(",".join(processed_files))
+        print(", ".join(processed_files))
 
 
 def main():
