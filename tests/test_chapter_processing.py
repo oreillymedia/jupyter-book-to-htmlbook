@@ -2,15 +2,13 @@ import logging
 import os
 import pytest
 import shutil
-from pathlib import Path
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore
 from jupyter_book_to_htmlbook.chapter_processing import (
         clean_chapter,
         compile_chapter_parts,
         move_span_ids_to_sections,
         process_chapter
 )
-from jupyter_book_to_htmlbook.toc_processing import get_book_index
 
 
 def test_chapter_cleans():
@@ -66,69 +64,63 @@ def test_move_span_ids_to_sections():
 <p>Bias comes in many forms!</p></section>"""
 
 
-def test_compile_chapter_parts_happy_path_non_numbered(tmp_path):
+def test_compile_chapter_parts_happy_path(tmp_path):
     """
     happy path for taking an ordered list of chapter paths
     and then returning a <section> delimited chapter
-
-    This one goes with a nonnumbered toc
     """
     test_env = tmp_path / 'tmp'
     test_env.mkdir()
-    shutil.copytree('tests/example_html', test_env, dirs_exist_ok=True)
-    toc = get_book_index(test_env)
-    # first item is the intro file, so let's check on the first "chapter"
-    result = compile_chapter_parts(toc[1])
-    # the resulting section should have a data-type of "chapter"
-    assert result["data-type"] == "chapter"  # type: ignore
-    # number of level-1 subsections should be one less than the group
-    number_of_sections = len(
-            result.find_all(attrs={"data-type": "sect1"}))  # type: ignore
-    number_of_sections_expected = len(toc[1]) - 1  # type: ignore
-    assert number_of_sections == number_of_sections_expected
-
-
-def test_compile_chapter_parts_happy_path_numbered(tmp_path):
-    """
-    happy path for taking an ordered list of chapter paths
-    and then returning a <section> delimited chapter
-
-    This one goes with a nonnumbered toc
-    """
-    test_env = tmp_path / 'tmp'
-    test_env.mkdir()
-    shutil.copytree('tests/example_html_numbered',
+    shutil.copytree('tests/example_book/_build/html/notebooks',
                     test_env, dirs_exist_ok=True)
-    toc = get_book_index(test_env)
-    # first item is the intro file, so let's check on the first "chapter"
-    result = compile_chapter_parts(toc[1])
+
+    result = compile_chapter_parts([
+        test_env / 'ch02.00.html',
+        test_env / 'ch02.01.html',
+        test_env / 'ch02.02.html',
+        ])
     # the resulting section should have a data-type of "chapter"
-    assert result["data-type"] == "chapter"  # type: ignore
+    assert result["data-type"] == "chapter"
     # number of level-1 subsections should be one less than the group
     number_of_sections = len(
-            result.find_all(attrs={"data-type": "sect1"}))  # type: ignore
-    number_of_sections_expected = len(toc[1]) - 1  # type: ignore
+            result.find_all(attrs={"data-type": "sect1"}))
+    number_of_sections_expected = 2  # the first html file doesn't get one
     assert number_of_sections == number_of_sections_expected
 
 
-def test_compile_chapter_parts_keyerror(caplog):
+def test_compile_chapter_parts_keyerror(tmp_path, caplog):
     """
     It's too much of a pain to mock the circumstances in which this
     might happen, so we'll force it and prove it works.
     """
     caplog.set_level(logging.DEBUG)
-    ordered_list = [Path('tests/example_html/error_forcers/keyerror.html')]
+    with open(tmp_path / 'keyerror.html', 'wt') as f:
+        f.write("""
+<section class="tex2jax_ignore mathjax_ignore section" id="example">
+<h1><span class="section-number">19.
+/span>Example<a class="headerlink" href="#example"
+title="Permalink to this headline">¶</a></h1>
+<p>This chapter is under development. When it’s finished, this note will be
+removed.</p>
+</section>""")
+    ordered_list = [tmp_path / 'keyerror.html']
     compile_chapter_parts(ordered_list)
     assert """'id' in keyerror.html""" in caplog.text
 
 
-def test_compile_chapter_parts_typeerror(caplog):
+def test_compile_chapter_parts_typeerror(tmp_path, caplog):
     """
     It's too much of a pain to mock the circumstances in which this
     might happen, so we'll force it and prove it works.
     """
     caplog.set_level(logging.DEBUG)
-    ordered_list = [Path('tests/example_html/error_forcers/typeerror.html')]
+    with open(tmp_path / 'typeerror.html', 'wt') as f:
+        f.write("""
+<section class="tex2jax_ignore mathjax_ignore" id="example">
+<h1>Example<a class="headerlink" href="#example"
+title="Permalink to this headline">¶</a></h1>
+</section>""")
+    ordered_list = [tmp_path / 'typeerror.html']
     compile_chapter_parts(ordered_list)
     assert (
             "'NoneType' object is not subscriptable in typeerror.html"
@@ -145,16 +137,16 @@ def test_process_chapter_single_chapter_file(tmp_path, capsys):
     test_out = test_env / 'output'
     test_env.mkdir()
     test_out.mkdir()
-    shutil.copytree('tests/example_html', test_env, dirs_exist_ok=True)
-    toc = get_book_index(test_env)
-    result = process_chapter(toc[0], test_out)
+    shutil.copy('tests/example_book/_build/html/notebooks/ch01.html',
+                test_env / 'ch01.html')
+    result = process_chapter((test_env / 'ch01.html'), test_out)
     # first item is the intro file, so let's check on the first "chapter"
-    assert os.path.exists(test_out / 'intro.html')
+    assert os.path.exists(test_out / 'ch01.html')
     # check on return
-    assert "intro.html" in result
+    assert "ch01.html" in result
 
 
-def test_process_chapter_chapter_with_subfiles(tmp_path):
+def test_process_chapter_with_subfiles(tmp_path):
     """
     happy path for chapter processing a chapter with subfiles
     """
@@ -162,12 +154,18 @@ def test_process_chapter_chapter_with_subfiles(tmp_path):
     test_out = test_env / 'output'
     test_env.mkdir()
     test_out.mkdir()
-    shutil.copytree('tests/example_html', test_env, dirs_exist_ok=True)
-    toc = get_book_index(test_env)
+    shutil.copytree('tests/example_book/_build/html/notebooks',
+                    test_env, dirs_exist_ok=True)
+
+    result = process_chapter([
+        test_env / 'ch02.00.html',
+        test_env / 'ch02.01.html',
+        test_env / 'ch02.02.html',
+        ], test_out)
     # first item is the intro file, so let's check on the first "chapter"
-    process_chapter(toc[1], test_out)
     # the resulting section should have a data-type of "chapter"
-    assert os.path.exists(test_out / 'ch01.html')
+    assert "ch02" in result
+    assert os.path.exists(test_out / 'ch02.00.html')
 
 
 def test_process_chapter_no_section(tmp_path):
@@ -175,13 +173,15 @@ def test_process_chapter_no_section(tmp_path):
     confirm that the xml namespace gets added even if there aren't any
     <div class="section"> tags
     """
-    test_env = tmp_path / 'tmp'
-    test_out = test_env / 'output'
-    test_env.mkdir()
+    test_out = tmp_path / 'out'
     test_out.mkdir()
-    shutil.copytree('tests/example_html', test_env, dirs_exist_ok=True)
-    # first item is the intro file, so let's check on the first "chapter"
-    process_chapter(test_env / 'error_forcers/nosection.html', test_out)
+    with open(tmp_path / 'nosection.html', 'wt') as f:
+        f.write("""<main>
+<section>
+    <h1>Hello!</h1>
+</section>
+</main>""")
+    process_chapter(tmp_path / 'nosection.html', test_out)
     # the resulting section should have a data-type of "chapter"
     with open(test_out / 'nosection.html') as f:
         text = f.read()
@@ -193,16 +193,16 @@ def test_process_chapter_totally_invalid_file(tmp_path, caplog):
     if we ever try to process something that's super malformed, don't,
     and alert the user
     """
-    test_env = tmp_path / 'tmp'
-    test_out = test_env / 'output'
-    test_env.mkdir()
-    test_out.mkdir()
-    shutil.copytree('tests/example_html', test_env, dirs_exist_ok=True)
+    with open(tmp_path / 'malformed.html', 'wt') as f:
+        f.write("""<div>
+    <h1>Hello!</h1>
+</div>""")
     # first item is the intro file, so let's check on the first "chapter"
-    process_chapter(test_env / 'error_forcers/malformed.html', test_out)
+    result = process_chapter(tmp_path / 'malformed.html')
     # the resulting section should have a data-type of "chapter"
     caplog.set_level(logging.DEBUG)
     assert "is malformed" in caplog.text
+    assert result is None
 
 
 @pytest.mark.parametrize(
@@ -220,8 +220,7 @@ def test_process_chapter_guessing_datatypes(tmp_path, datatype):
     test_env.mkdir()
     test_out.mkdir()
     test_file_path = test_env / f'{datatype}.html'
-    shutil.copytree('tests/example_html', test_env, dirs_exist_ok=True)
-    shutil.move(test_env / 'intro.html', test_file_path)
+    shutil.copy('tests/example_book/_build/html/intro.html', test_file_path)
     process_chapter(test_file_path, test_out)
     # the resulting section should have a data-type of "datatype"
     with open(test_out / f'{datatype}.html') as f:
@@ -235,37 +234,19 @@ def test_process_chapter_guessing_datatypes(tmp_path, datatype):
             ("author_bio", "afterword")
             ]
         )
-def test_process_chapter_guessing_datatypes_non_allowed(tmp_path, datatype):
+def test_process_chapter_guessing_datatypes_inferred(tmp_path, datatype):
     """
     confirm that the default front/backmatter data types are applied
-    in the case that we get a guessed-at front/backmatter chapter title
+    in the case that we get an inferred front/backmatter chapter title
     """
     test_env = tmp_path / 'tmp'
-    test_out = test_env / 'output'
+    test_out = test_env / 'build'
     test_env.mkdir()
     test_out.mkdir()
     test_file_path = test_env / f'{datatype[0]}.html'
-    shutil.copytree('tests/example_html', test_env, dirs_exist_ok=True)
-    shutil.move(test_env / 'intro.html', test_file_path)
+    shutil.copy('tests/example_book/_build/html/intro.html', test_file_path)
     process_chapter(test_file_path, test_out)
     # the resulting section should have a data-type of "datatype"
     with open(test_out / f'{datatype[0]}.html') as f:
         text = f.read()
         assert text.find(f'data-type="{datatype[1]}') > -1
-
-
-def test_chapter_process_confirm_remove_span(tmp_path):
-    """
-    happy path for chapter processing with numbered sections
-    """
-    test_env = tmp_path / 'tmp'
-    test_out = test_env / 'output'
-    test_env.mkdir()
-    test_out.mkdir()
-    shutil.copytree('tests/example_html_numbered',
-                    test_env, dirs_exist_ok=True)
-    toc = get_book_index(test_env)
-    # first item is the intro file, so let's check on the first "chapter"
-    process_chapter(toc[1], test_out)
-    # the resulting section should have a data-type of "chapter"
-    assert os.path.exists(test_out / 'ch01.html')

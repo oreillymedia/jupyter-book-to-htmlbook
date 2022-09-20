@@ -9,18 +9,67 @@ from .math_processing import process_math
 from .xref_processing import process_interal_refs
 
 
+def process_chapter_single_file(toc_element):
+    """ single-file chapter processing """
+    ch_name = toc_element.stem
+
+    # list of front and back matter guessed-at filenames
+    front_matter = ['preface', 'notation', 'prereqs',
+                    'titlepage', 'foreword', 'introduction']
+    back_matter = ['colophon', 'author_bio', 'references',
+                   "acknowledgments", "conclusion", "afterword"]
+    # data-types
+    allowed_data_types = ["colophon", "halftitlepage", "titlepage",
+                          "copyright-page", "dedication", "acknowledgments",
+                          "afterword", "conclusion", 'foreword',
+                          'introduction', 'preface']
+
+    with open(toc_element, 'r') as f:
+        base_soup = BeautifulSoup(f, 'lxml')
+
+    # perform initial swapping and namespace designation
+    try:
+        chapter = base_soup.find(class_='section')
+        chapter.name = 'section'  # type: ignore
+        chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
+
+    except AttributeError:  # does not have a section class for top-level
+        if base_soup.main and base_soup.main.section:
+            chapter = base_soup.main.section
+            chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
+        else:  # this is an edge case, and I'm going to leave it for now
+            logging.warning("Looks like {toc_element.name} is malformed.")
+            return None, None
+
+    # apply appropriate data-type (best guess)
+    if ch_name.lower() in front_matter:
+        if ch_name.lower() in allowed_data_types:
+            chapter['data-type'] = ch_name.lower()  # type: ignore
+        else:
+            chapter['data-type'] = "preface"  # type: ignore
+    elif ch_name.lower() in back_matter:
+        if ch_name.lower() in allowed_data_types:
+            chapter['data-type'] = ch_name.lower()  # type: ignore
+        else:
+            chapter['data-type'] = "afterword"  # type: ignore
+    else:
+        chapter['data-type'] = 'chapter'  # type: ignore
+    del chapter['class']  # type: ignore
+
+    return chapter, ch_name
+
+
 def process_chapter_subparts(subfile):
+    """ processing for chapters with "sections" """
     with open(subfile, 'r') as f:
         soup = BeautifulSoup(f, 'lxml')
-        section = soup.find(class_='section')
-        section.name = 'section'  # type: ignore
+        section = soup.find_all('section')[0]
         section['data-type'] = 'sect1'  # type: ignore
         del section['class']  # type: ignore
         # move id from empty span to section
         try:
             section['id'] = section.select_one('span')['id']  # type: ignore
-            # leave spans for now in case they're not empty;
-            # TO DO: clean up empty spans...
+            # clean up empty spans
             del section.select_one('span')['id']  # type: ignore
         except TypeError:
             # fun fact, this happens when there's not numbering on the toc
@@ -61,8 +110,8 @@ def compile_chapter_parts(ordered_chapter_files_list):
     base_chapter_file = ordered_chapter_files_list[0]
     with open(base_chapter_file, 'r') as f:
         base_soup = BeautifulSoup(f, 'lxml')
-    chapter = base_soup.find(class_='section')
-    chapter.name = 'section'  # type: ignore
+    sections = base_soup.find_all('section')
+    chapter = sections[0]  # first section is the "main" section
     chapter['data-type'] = 'chapter'  # type: ignore
     chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
     del chapter['class']  # type: ignore
@@ -106,7 +155,7 @@ def clean_chapter(chapter, rm_numbering=True):
         if tag.name in remove_tags:
             tag.decompose()
         if tag.name == 'table':
-            del(tag['border'])
+            del tag['border']
     for tag in chapter.find_all(attrs={'style': True}):
         del tag['style']
 
@@ -158,55 +207,16 @@ def process_chapter(toc_element, build_dir=Path('.')):
     that the files are in some /html/ directory or some such
     """
 
-    # list of front and back matter guessed-at filenames
-    front_matter = ['preface', 'notation', 'prereqs',
-                    'titlepage', 'foreword', 'introduction']
-    back_matter = ['colophon', 'author_bio', 'references',
-                   "acknowledgments", "conclusion", "afterword"]
-    # data-types
-    allowed_data_types = ["colophon", "halftitlepage", "titlepage",
-                          "copyright-page", "dedication", "acknowledgments",
-                          "afterword", "conclusion", 'foreword',
-                          'introduction', 'preface']
-
     if isinstance(toc_element, Path):  # single-file chapter
-        # this should really be a function, but for now
-        ch_name = toc_element.stem
-        with open(toc_element, 'r') as f:
-            base_soup = BeautifulSoup(f, 'lxml')
+        chapter, ch_name = process_chapter_single_file(toc_element)
 
-        # perform initial swapping and namespace designation
-        try:
-            chapter = base_soup.find(class_='section')
-            chapter.name = 'section'  # type: ignore
-            chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
-
-        except AttributeError:  # does not have a section class for top-level
-            if base_soup.main and base_soup.main.section:
-                chapter = base_soup.main.section
-                chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
-            else:  # this is an edge case, and I'm going to leave it for now
-                logging.warning("Looks like {toc_element.name} is malformed.")
-                return
-
-        # apply appropriate data-type (best guess)
-        if ch_name.lower() in front_matter:
-            if ch_name.lower() in allowed_data_types:
-                chapter['data-type'] = ch_name.lower()  # type: ignore
-            else:
-                chapter['data-type'] = "preface"  # type: ignore
-        elif ch_name.lower() in back_matter:
-            if ch_name.lower() in allowed_data_types:
-                chapter['data-type'] = ch_name.lower()  # type: ignore
-            else:
-                chapter['data-type'] = "afterword"  # type: ignore
-        else:
-            chapter['data-type'] = 'chapter'  # type: ignore
-        del chapter['class']  # type: ignore
+        # if the file happens to be bad, just return (logged elsewhere)
+        if chapter is None or ch_name is None:
+            return
 
     else:  # i.e., an ordered list of chapter parts
         chapter = compile_chapter_parts(toc_element)
-        ch_name = 'ch' + toc_element[0].as_posix().split('/')[-2]
+        ch_name = toc_element[0].stem
 
     # see where we're at
     logging.info(f"Processing {ch_name}...")

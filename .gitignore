@@ -134,3 +134,13 @@ test.sh
 .vscode
 borrowed-example-*
 playground
+
+# jupyter book output
+tests/example_book/_build/.doctrees
+tests/example_book/_build/jupyter_execute
+tests/example_book/_build/html/_sources
+tests/example_book/_build/html/_sphinx*
+tests/example_book/_build/html/_static
+tests/example_book/_build/html/reports
+tests/example_book/_build/html/.*
+tests/example_book/_build/html/objects.inv
