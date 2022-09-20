@@ -4,7 +4,7 @@ import typer
 from pathlib import Path
 from importlib import metadata
 from typing import Optional
-from .toc_processing import get_book_index
+from .toc_processing import get_book_toc
 from .chapter_processing import process_chapter
 from .atlas import update_atlas
 
@@ -100,7 +100,7 @@ def jupter_book_to_htmlbook(
         logging.info("No images in the source book")
 
     # get table of contents
-    toc = get_book_index(source_dir)
+    toc = get_book_toc(source_dir)
 
     # create a list to return as output
     processed_files = []
