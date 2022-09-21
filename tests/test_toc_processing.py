@@ -28,7 +28,8 @@ chapters:
 - file: notebooks/ch01
 - file: notebooks/ch02""")
         result = get_book_toc(tmp_path)
-        assert result == [tmp_path / "_build/html/notebooks/preface.html",
+        assert result == [tmp_path / '_build/html/intro.html',
+                          tmp_path / "_build/html/notebooks/preface.html",
                           tmp_path / "_build/html/notebooks/ch01.html",
                           tmp_path / "_build/html/notebooks/ch02.html"]
 
@@ -51,7 +52,8 @@ chapters:
 - file: ch02
 """)
         result = get_book_toc(tmp_path)
-        assert result == [tmp_path / "_build/html/notebooks/preface.html",
+        assert result == [tmp_path / '_build/html/intro.html',
+                          tmp_path / "_build/html/notebooks/preface.html",
                           [tmp_path / "_build/html/notebooks/ch01.00.html",
                            tmp_path / "_build/html/notebooks/ch01.01.html",
                            tmp_path / "_build/html/notebooks/ch01.02.html"],

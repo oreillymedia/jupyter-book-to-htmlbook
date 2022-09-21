@@ -139,11 +139,36 @@ def test_process_chapter_single_chapter_file(tmp_path, capsys):
     test_out.mkdir()
     shutil.copy('tests/example_book/_build/html/notebooks/ch01.html',
                 test_env / 'ch01.html')
-    result = process_chapter((test_env / 'ch01.html'), test_out)
+    result = process_chapter((test_env / 'ch01.html'), test_env, test_out)
     # first item is the intro file, so let's check on the first "chapter"
     assert os.path.exists(test_out / 'ch01.html')
     # check on return
     assert "ch01.html" in result
+
+
+def test_process_chapter_filepaths(tmp_path):
+    """
+    ensure the returned/written filepath is correct
+    also includes testing nested directories
+    """
+    test_env = tmp_path / 'tmp'
+    test_out = test_env / 'output'
+    test_env.mkdir()
+    test_out.mkdir()
+    shutil.copytree('tests/example_book/_build/html',
+                    test_env, dirs_exist_ok=True)
+    shutil.copytree(test_env / 'notebooks',
+                    test_env / 'chapters/notebooks')
+    result = process_chapter((test_env / 'notebooks/ch01.html'),
+                             test_env, test_out)
+    result += process_chapter((test_env / 'chapters/notebooks/ch01.html'),
+                              test_env, test_out)
+    # first item is the intro file, so let's check on the first "chapter"
+    assert os.path.exists(test_out / 'notebooks/ch01.html')
+    assert os.path.exists(test_out / 'chapters/notebooks/ch01.html')
+    # check on return
+    assert "notebooks/ch01.html" in result
+    assert "chapters/" in result
 
 
 def test_process_chapter_with_subfiles(tmp_path):
@@ -161,7 +186,7 @@ def test_process_chapter_with_subfiles(tmp_path):
         test_env / 'ch02.00.html',
         test_env / 'ch02.01.html',
         test_env / 'ch02.02.html',
-        ], test_out)
+        ], test_env, test_out)
     # first item is the intro file, so let's check on the first "chapter"
     # the resulting section should have a data-type of "chapter"
     assert "ch02" in result
@@ -181,7 +206,7 @@ def test_process_chapter_no_section(tmp_path):
     <h1>Hello!</h1>
 </section>
 </main>""")
-    process_chapter(tmp_path / 'nosection.html', test_out)
+    process_chapter(tmp_path / 'nosection.html', tmp_path, test_out)
     # the resulting section should have a data-type of "chapter"
     with open(test_out / 'nosection.html') as f:
         text = f.read()
@@ -198,7 +223,7 @@ def test_process_chapter_totally_invalid_file(tmp_path, caplog):
     <h1>Hello!</h1>
 </div>""")
     # first item is the intro file, so let's check on the first "chapter"
-    result = process_chapter(tmp_path / 'malformed.html')
+    result = process_chapter(tmp_path / 'malformed.html', tmp_path)
     # the resulting section should have a data-type of "chapter"
     caplog.set_level(logging.DEBUG)
     assert "is malformed" in caplog.text
@@ -221,7 +246,7 @@ def test_process_chapter_guessing_datatypes(tmp_path, datatype):
     test_out.mkdir()
     test_file_path = test_env / f'{datatype}.html'
     shutil.copy('tests/example_book/_build/html/intro.html', test_file_path)
-    process_chapter(test_file_path, test_out)
+    process_chapter(test_file_path, test_env, test_out)
     # the resulting section should have a data-type of "datatype"
     with open(test_out / f'{datatype}.html') as f:
         text = f.read()
@@ -245,7 +270,7 @@ def test_process_chapter_guessing_datatypes_inferred(tmp_path, datatype):
     test_out.mkdir()
     test_file_path = test_env / f'{datatype[0]}.html'
     shutil.copy('tests/example_book/_build/html/intro.html', test_file_path)
-    process_chapter(test_file_path, test_out)
+    process_chapter(test_file_path, test_env, test_out)
     # the resulting section should have a data-type of "datatype"
     with open(test_out / f'{datatype[0]}.html') as f:
         text = f.read()

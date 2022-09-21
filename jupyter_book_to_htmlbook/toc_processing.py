@@ -34,6 +34,9 @@ def get_book_toc(src_dir: Path) -> list:
                               "jupyterbook.org for correct syntax.")
                 sys.exit()
 
+            # add "root"
+            compiled_toc.append(_path(toc["root"]))
+
             # process chapters
             for chapter in toc['chapters']:
                 try:  # if chapter has sections

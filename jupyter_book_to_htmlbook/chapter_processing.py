@@ -200,7 +200,7 @@ def move_span_ids_to_sections(chapter):
     return chapter
 
 
-def process_chapter(toc_element, build_dir=Path('.')):
+def process_chapter(toc_element, source_dir, build_dir=Path('.')):
     """
     Takes a list of chapter files and chapter lists and then writes the chapter
     to the root directory in which the script is run. Note that this assumes
@@ -231,8 +231,22 @@ def process_chapter(toc_element, build_dir=Path('.')):
     chapter = process_math(chapter)
     chapter = move_span_ids_to_sections(chapter)
 
-    # write the file
-    out = build_dir / (ch_name + '.html')
+    # write the file, preserving any directory structure(s) from source
+    if type(toc_element) == list:
+        dir_structure = [p for p in toc_element[0].parts
+                         if p not in source_dir.parts]
+    else:
+        dir_structure = [p for p in toc_element.parts
+                         if p not in source_dir.parts]
+    parents = '/'.join(dir_structure[:-1])  # don't double the file stem
+    if parents:
+        parent_path = build_dir / parents
+        # required for the write step later
+        parent_path.mkdir(parents=True, exist_ok=True)
+        out = parent_path / (ch_name + '.html')
+    else:
+        out = build_dir / (ch_name + '.html')
+
     out.write_text(str(chapter))
 
     # return relative path of file as string for later use

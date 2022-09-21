@@ -100,14 +100,14 @@ def jupter_book_to_htmlbook(
         logging.info("No images in the source book")
 
     # get table of contents
-    toc = get_book_toc(source_dir)
+    toc = get_book_toc(Path(source))
 
     # create a list to return as output
     processed_files = []
 
     # process book files
     for element in toc:
-        file = process_chapter(element, output_dir)
+        file = process_chapter(element, source_dir, output_dir)
         processed_files.append(f'{target}/{file}')
 
     if atlas_json:
