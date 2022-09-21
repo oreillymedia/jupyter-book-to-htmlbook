@@ -29,17 +29,12 @@ def process_chapter_single_file(toc_element):
 
     # perform initial swapping and namespace designation
     try:
-        chapter = base_soup.find(class_='section')
-        chapter.name = 'section'  # type: ignore
+        chapter = base_soup.find_all('section')[0]
         chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
 
-    except AttributeError:  # does not have a section class for top-level
-        if base_soup.main and base_soup.main.section:
-            chapter = base_soup.main.section
-            chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'
-        else:  # this is an edge case, and I'm going to leave it for now
-            logging.warning("Looks like {toc_element.name} is malformed.")
-            return None, None
+    except IndexError:  # does not have a section class for top-level
+        logging.warning("Looks like {toc_element.name} is malformed.")
+        return None, None
 
     # apply appropriate data-type (best guess)
     if ch_name.lower() in front_matter:
@@ -69,34 +64,28 @@ def process_chapter_subparts(subfile):
         # move id from empty span to section
         try:
             section['id'] = section.select_one('span')['id']  # type: ignore
-            # clean up empty spans
-            del section.select_one('span')['id']  # type: ignore
         except TypeError:
             # fun fact, this happens when there's not numbering on the toc
             pass  # like before, if it's not there that's OK.
         except KeyError:
-            # fun fact, this happens when there's numbering on the toc
+            # fun fact, this happens when there is numbering on the toc
             pass  # like before, if it's not there that's OK.
         # deal with subsections
-        subsections = section.find_all(class_="section")  # type: ignore
+        subsections = section.find_all('section')[1:]  # type: ignore
         for sub in subsections:
             # remove duplicate sub-section summary ids
             # (do chapter-level stuff with post-processing scripts
             # b/c those handle in-chapter xrefs better)
             if sub['id'] == "summary":
                 sub['id'] = f"{subfile.stem}_summary"
-            if sub.select('div > h2'):
-                sub.name = 'section'
+            if sub.select('section > h2'):
                 sub['data-type'] = 'sect2'
                 # parsing subsections within seems like the best strategy
-            elif sub.select('div > h3'):
-                sub.name = 'section'
+            elif sub.select('section > h3'):
                 sub['data-type'] = 'sect3'
-            elif sub.select('div > h4'):
-                sub.name = 'section'
+            elif sub.select('section > h4'):
                 sub['data-type'] = 'sect4'
-            elif sub.select('div > h5'):
-                sub.name = 'section'
+            elif sub.select('section > h5'):
                 sub['data-type'] = 'sect5'
     return section
 
@@ -115,11 +104,7 @@ def compile_chapter_parts(ordered_chapter_files_list):
     chapter['data-type'] = 'chapter'  # type: ignore
     chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
     del chapter['class']  # type: ignore
-    # add class="pagenumrestart" if it's the first chapter
-    # (will need to be changed for parts, but -- will handle that later)
-    if base_chapter_file.as_posix().find('01') > -1 or \
-       base_chapter_file.as_posix().find('/1/') > -1:
-        chapter['class'] = "pagenumrestart"  # type: ignore
+
     # update chapter id to what is actually referred to (as far as I can tell)
     feel_better_msg = "It's possible there is no empty span here " + \
                       "and likely is not a problem."

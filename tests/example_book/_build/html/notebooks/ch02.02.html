@@ -250,12 +250,62 @@ title="Print to PDF"
     </ul>
   </div>
 </div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
 
     </div>
 </div>
 
 <!-- Table of contents -->
 <div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#subsection">
+   Subsection
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#another-subsection">
+     Another Subsection
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#yes-another">
+       Yes, Another
+      </a>
+      <ul class="nav section-nav flex-column">
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#id1">
+         Yes, Another
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#summary">
+   Summary
+  </a>
+ </li>
+</ul>
+
+    </nav>
 </div>
     </div>
     <div class="article row">
@@ -267,6 +317,45 @@ title="Print to PDF"
                 <div id="print-main-content">
                     <div id="jb-print-toc">
                         
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#subsection">
+   Subsection
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#another-subsection">
+     Another Subsection
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#yes-another">
+       Yes, Another
+      </a>
+      <ul class="nav section-nav flex-column">
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#id1">
+         Yes, Another
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#summary">
+   Summary
+  </a>
+ </li>
+</ul>
+
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -277,6 +366,26 @@ title="Print to PDF"
   <section class="tex2jax_ignore mathjax_ignore" id="this-is-another-subheading">
 <h1>This is another subheading<a class="headerlink" href="#this-is-another-subheading" title="Permalink to this headline">#</a></h1>
 <p>Along with some content… lovely.</p>
+<section id="subsection">
+<h2>Subsection<a class="headerlink" href="#subsection" title="Permalink to this headline">#</a></h2>
+<p>Of course, we need to test subsections…</p>
+<section id="another-subsection">
+<h3>Another Subsection<a class="headerlink" href="#another-subsection" title="Permalink to this headline">#</a></h3>
+<p>And sub-sub sections…</p>
+<section id="yes-another">
+<h4>Yes, Another<a class="headerlink" href="#yes-another" title="Permalink to this headline">#</a></h4>
+<p>And sub-sub-sub sections…</p>
+<section id="id1">
+<h5>Yes, Another<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h5>
+<p>And sub-sub-sub-sub sections…</p>
+</section>
+</section>
+</section>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">#</a></h2>
+<p>Finally, a summary.</p>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
