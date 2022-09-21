@@ -111,22 +111,6 @@ def compile_chapter_parts(ordered_chapter_files_list):
     chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
     del chapter['class']  # type: ignore
 
-    # update chapter id to what is actually referred to (as far as I can tell)
-    feel_better_msg = "It's possible there is no empty span here " + \
-                      "and likely is not a problem."
-
-    try:
-        id_span = chapter.find('span')  # type: ignore
-        chapter['id'] = id_span['id']  # type: ignore
-        id_span.decompose()  # type: ignore
-
-    except KeyError as e:
-        logging.debug(f'{e} in {base_chapter_file.name}\n{feel_better_msg}')
-        pass
-    except TypeError as e:
-        logging.debug(f'{e} in {base_chapter_file.name}\n{feel_better_msg}')
-        pass
-
     # work with subfiles
     for subfile in ordered_chapter_files_list[1:]:
         subsection = process_chapter_subparts(subfile)
