@@ -88,45 +88,6 @@ def test_compile_chapter_parts_happy_path(tmp_path):
     assert number_of_sections == number_of_sections_expected
 
 
-def test_compile_chapter_parts_keyerror(tmp_path, caplog):
-    """
-    It's too much of a pain to mock the circumstances in which this
-    might happen, so we'll force it and prove it works.
-    """
-    caplog.set_level(logging.DEBUG)
-    with open(tmp_path / 'keyerror.html', 'wt') as f:
-        f.write("""
-<section class="tex2jax_ignore mathjax_ignore section" id="example">
-<h1><span class="section-number">19.
-/span>Example<a class="headerlink" href="#example"
-title="Permalink to this headline">¶</a></h1>
-<p>This chapter is under development. When it’s finished, this note will be
-removed.</p>
-</section>""")
-    ordered_list = [tmp_path / 'keyerror.html']
-    compile_chapter_parts(ordered_list)
-    assert """'id' in keyerror.html""" in caplog.text
-
-
-def test_compile_chapter_parts_typeerror(tmp_path, caplog):
-    """
-    It's too much of a pain to mock the circumstances in which this
-    might happen, so we'll force it and prove it works.
-    """
-    caplog.set_level(logging.DEBUG)
-    with open(tmp_path / 'typeerror.html', 'wt') as f:
-        f.write("""
-<section class="tex2jax_ignore mathjax_ignore" id="example">
-<h1>Example<a class="headerlink" href="#example"
-title="Permalink to this headline">¶</a></h1>
-</section>""")
-    ordered_list = [tmp_path / 'typeerror.html']
-    compile_chapter_parts(ordered_list)
-    assert (
-            "'NoneType' object is not subscriptable in typeerror.html"
-            ) in caplog.text
-
-
 def test_process_chapter_single_chapter_file(tmp_path, capsys):
     """
     happy path for chapter processing a single chapter file
