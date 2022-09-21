@@ -34,6 +34,10 @@ def jupter_book_to_htmlbook(
             "--skip-jb-build",
             help="Skip running `jupyter-book` as a part of this conversion"
             ),
+        include_root: Optional[bool] = typer.Option(
+            False,
+            "--include-root",
+            help="Include the 'root' file of the jupyter-book project"),
         version: Optional[bool] = typer.Option(
             None,
             "--version",
@@ -101,6 +105,8 @@ def jupter_book_to_htmlbook(
 
     # get table of contents
     toc = get_book_toc(Path(source))
+    if not include_root:
+        toc = toc[1:]  # i.e., don't include the root
 
     # create a list to return as output
     processed_files = []
