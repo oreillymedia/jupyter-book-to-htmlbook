@@ -208,9 +208,10 @@ def process_chapter(toc_element, source_dir, build_dir=Path('.')):
 
     # perform cleans and processing
     chapter = clean_chapter(chapter)
+    # note: must process figs before xrefs
+    chapter = process_figures(chapter, build_dir)
+    chapter = process_informal_figs(chapter, build_dir)
     chapter = process_interal_refs(chapter)
-    chapter = process_figures(chapter)
-    chapter = process_informal_figs(chapter)
     chapter = process_footnotes(chapter)
     chapter = process_admonitions(chapter)
     chapter = process_math(chapter)

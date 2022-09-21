@@ -27,7 +27,7 @@ class TestMain:
                          tmp_path,
                          monkeypatch: pytest.MonkeyPatch,
                          caplog):
-        """ happy path test case """
+        """ happy path test case, with the 'root' file included """
         # setup
         caplog.set_level(logging.DEBUG)
         test_env = tmp_path / 'tmp'
@@ -37,7 +37,8 @@ class TestMain:
 
         # run, skipping build since it's included in example dir
         result = runner.invoke(app, [str(test_env), 'build',
-                                     '--skip-jb-build'])
+                                     '--skip-jb-build',
+                                     '--include-root'])
         log = caplog.text
         assert result.exit_code == 0
         assert "jupyter-book run" in log
