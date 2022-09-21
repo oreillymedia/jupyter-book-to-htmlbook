@@ -193,6 +193,32 @@ def test_process_chapter_with_subfiles(tmp_path):
     assert os.path.exists(test_out / 'ch02.00.html')
 
 
+def test_process_chapter_with_subsections(tmp_path, capsys):
+    """
+    ensure subsections are getting data-typed appropriately
+    """
+    test_env = tmp_path / 'tmp'
+    test_out = test_env / 'output'
+    test_env.mkdir()
+    test_out.mkdir()
+    shutil.copytree('tests/example_book/_build/html/notebooks',
+                    test_env, dirs_exist_ok=True)
+
+    process_chapter([
+        test_env / 'ch02.00.html',
+        test_env / 'ch02.01.html',
+        test_env / 'ch02.02.html',
+        ], test_env, test_out)
+
+    with open(test_out / 'ch02.00.html') as f:
+        text = f.read()
+        assert 'data-type="sect1"' in text
+        assert 'data-type="sect2"' in text
+        assert 'data-type="sect3"' in text
+        assert 'data-type="sect4"' in text
+        assert 'data-type="sect5"' in text
+
+
 def test_process_chapter_no_section(tmp_path):
     """
     confirm that the xml namespace gets added even if there aren't any

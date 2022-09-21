@@ -9,6 +9,29 @@ from .math_processing import process_math
 from .xref_processing import process_interal_refs
 
 
+def process_subsections(chapter):
+    """ add appropriate secX markers to subsections """
+    # deal with subsections
+    subsections = chapter.find_all('section')  # type: ignore
+    for sub in subsections:
+        # prevent duplicate sub-section summary ids
+        if sub['id'] == "summary":
+            import random
+            sub['id'] = f"{random.randint(1, 12345678)}_summary"
+        if sub.select('section > h1'):
+            sub['data-type'] = 'sect1'
+        elif sub.select('section > h2'):
+            sub['data-type'] = 'sect2'
+            # parsing subsections within seems like the best strategy
+        elif sub.select('section > h3'):
+            sub['data-type'] = 'sect3'
+        elif sub.select('section > h4'):
+            sub['data-type'] = 'sect4'
+        elif sub.select('section > h5'):
+            sub['data-type'] = 'sect5'
+    return chapter
+
+
 def process_chapter_single_file(toc_element):
     """ single-file chapter processing """
     ch_name = toc_element.stem
@@ -70,23 +93,6 @@ def process_chapter_subparts(subfile):
         except KeyError:
             # fun fact, this happens when there is numbering on the toc
             pass  # like before, if it's not there that's OK.
-        # deal with subsections
-        subsections = section.find_all('section')[1:]  # type: ignore
-        for sub in subsections:
-            # remove duplicate sub-section summary ids
-            # (do chapter-level stuff with post-processing scripts
-            # b/c those handle in-chapter xrefs better)
-            if sub['id'] == "summary":
-                sub['id'] = f"{subfile.stem}_summary"
-            if sub.select('section > h2'):
-                sub['data-type'] = 'sect2'
-                # parsing subsections within seems like the best strategy
-            elif sub.select('section > h3'):
-                sub['data-type'] = 'sect3'
-            elif sub.select('section > h4'):
-                sub['data-type'] = 'sect4'
-            elif sub.select('section > h5'):
-                sub['data-type'] = 'sect5'
     return section
 
 
@@ -215,6 +221,7 @@ def process_chapter(toc_element, source_dir, build_dir=Path('.')):
     chapter = process_admonitions(chapter)
     chapter = process_math(chapter)
     chapter = move_span_ids_to_sections(chapter)
+    chapter = process_subsections(chapter)
 
     # write the file, preserving any directory structure(s) from source
     if type(toc_element) == list:
