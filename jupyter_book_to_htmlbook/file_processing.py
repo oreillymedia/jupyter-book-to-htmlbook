@@ -84,14 +84,17 @@ def process_chapter_single_file(toc_element):
         return None, None
 
     # apply appropriate data-type (best guess)
-    if ch_name.lower() in front_matter:
-        if ch_name.lower() in allowed_data_types:
-            chapter['data-type'] = ch_name.lower()  # type: ignore
+
+    ch_stub = re.sub('[^a-zA-Z]', '', ch_name)
+
+    if ch_stub.lower() in front_matter or ch_name in front_matter:
+        if ch_stub.lower() in allowed_data_types:
+            chapter['data-type'] = ch_stub.lower()  # type: ignore
         else:
             chapter['data-type'] = "preface"  # type: ignore
-    elif ch_name.lower() in back_matter:
-        if ch_name.lower() in allowed_data_types:
-            chapter['data-type'] = ch_name.lower()  # type: ignore
+    elif ch_stub.lower() in back_matter or ch_name in back_matter:
+        if ch_stub.lower() in allowed_data_types:
+            chapter['data-type'] = ch_stub.lower()  # type: ignore
         else:
             chapter['data-type'] = "afterword"  # type: ignore
     else:

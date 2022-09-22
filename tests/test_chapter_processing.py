@@ -235,6 +235,35 @@ div class="cell_input docutils container"&gt;
 
     @pytest.mark.parametrize(
             "datatype", [
+                "preface",
+                "colophon"
+                ]
+            )
+    def test_process_chapter_guessing_datatypes_in_path(
+                                                        self,
+                                                        tmp_path,
+                                                        datatype
+                                                       ):
+        """
+        Test about guessing datatypes, which can happen even if there is other
+        stuff in the file name, e.g., 00- and so on.
+        """
+        test_env = tmp_path / 'tmp'
+        test_out = test_env / 'output'
+        test_env.mkdir()
+        test_out.mkdir()
+        test_file_path = test_env / f'00-{datatype}.html'
+        shutil.copy('tests/example_book/_build/html/intro.html',
+                    test_file_path)
+        process_chapter(test_file_path, test_env, test_out)
+        # the resulting section should have a data-type of "datatype"
+        # but retain its filename
+        with open(test_out / f'00-{datatype}.html') as f:
+            text = f.read()
+            assert text.find(f'data-type="{datatype}') > -1
+
+    @pytest.mark.parametrize(
+            "datatype", [
                 ("prereqs", "preface"),
                 ("author_bio", "afterword")
                 ]
