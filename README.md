@@ -1,24 +1,83 @@
 # Jupyter Book to HTMLBook
 
-Takes a Jupyter Book (in HTML) and turns it into an HTMLBook-compliant project.
+Takes a Jupyter Book and turns it into an HTMLBook-compliant project for consumption in Atlas, O'Reilly's book building tool. The script runs `jupyter-book` on your book directory (the one containing your *_config.yml* and *_toc.yml* files), and puts HTMLBook files in the specified target directory, updating atlas.json if it's provided.
 
-Supposes that you're in a book repo and that the output of the jupyter book script 
-is in a _./html_ directory. You can change this default in 
-*jupyter_book_to_htmlbook/jupyter_book_to_htmlbook.py*.
+**IMPORTANT**: We're now at 1.0.0, i.e., we have introduced a very breaking-change from the original version of the script! 
+
+## Installation
+
+**NOTE**: This tool requires Python ^3.9.
+
+It's not on PYPI yet, so install via the GitHub link:
+
+```
+pip install git+https://github.com/oreillymedia/jupyter-book-to-htmlbook.git
+```
+
+Or clone the repository, install poetry (`pip install poetry`), build the project (`poetry build`) and then install the locally-build wheel:
+
+```
+pip install dist/jupyter_book_to_htmlbook-X.X.X-py3-none-any.whl
+```
 
 ## Usage
 
-**IMPORTANT**: We are not currently providing configuration options for the "source" directory (i.e., where the output of `jupyter book` lives) and the "build" directories -- those must be _html/_ and _build/_ directories inside the root of your Atlas repository at the present writing. 
+Usage:`jb2htmlbook [OPTIONS] SOURCE TARGET`
 
-For usage you have two options:
+Help text: 
 
-1. Include the *jupyter_book_to_htmlbook/* directory inside your Atlas repo and run `python3 jupyter_book_to_htmlbook/jupyter_book_to_htmlbook.py` from the terminal
-2. Install the package with `pip` and use the provided `jb2atlas` command from the terminal (or inside a shell script that also runs `jupyter-book`, perhaps). 
+```
+Usage: jb2htmlbook [OPTIONS] SOURCE TARGET
 
-We're still working out some logistical things on our end about getting the package on PyPi, so for now if you want to install the package locally we recommend using `poetry`. To do so, check out the `poetry` branch (`git checkout poetry`), install poetry (`pip install poetry`), and then run `poetry install --no-dev && poetry build` to install the dependences and build the wheel. Then, then run `pip install dist/jupyter_book_to_htmlbook-0.1.0-py3-none-any.whl`.
+  Converts a Jupyter Book project into HTMLBook.
 
+  Takes your SOURCE directory (which should contain your _toc and _config
+  files), runs `jupyter-book`, converts and consolidates the output to
+  HTMLBook, and places those files in the TARGET directory.
 
-## Notes
+  If you for some reason don't want this script to run `jupyter-book` (`jb`),
+  use the SKIP_JB_BUILD option.
 
-* The `"pagenumrestart"` class is currently applied to the first chapter with parts (assuming that the chapters are numbered); this is a limitation to be overcome later (if there is a single-file chapter 1, a part, etc.)
+  If you want to UPDATE_ATLAS_JSON, provide the relative path to the
+  atlas.json file (will usually be just "atlas.json")
+
+  Returns a json list of converted "files" as output for consumption by Atlas,
+  O'Reilly's in-house publishing tool. Saves run information to
+  jupyter_book_to_htmlbook_run.log
+
+Arguments:
+  SOURCE  [required]
+  TARGET  [required]
+
+Options:
+  --atlas-json TEXT               Path to the book's atlas.json file
+  --skip-jb-build                 Skip running `jupyter-book` as a part of
+                                  this conversion
+  --version
+  --install-completion [bash|zsh|fish|powershell|pwsh]
+                                  Install completion for the specified shell.
+  --show-completion [bash|zsh|fish|powershell|pwsh]
+                                  Show completion for the specified shell, to
+                                  copy it or customize the installation.
+  --help                          Show this message and exit.
+
+```
+
+## Known Limitations
+
+* Cross references to bare files (e.g., `see [chapter 1](chapter01.ipynb)`) aren't converting as expected; in the meantime please use a heading anchor (e.g., `see [chapter 1](chapter01.ipynb#first-heading)`).
+* The `"pagenumrestart"` class is currently applied to the first chapter with parts (assuming that the chapters are numbered); this is a limitation to be overcome later (if there is a single-file chapter 1, a part, etc.).
 * Currently, bibliography references are "opinionated," and are meant to follow CMS author-date in terms of in-text citations (no work has been done on the actual *references.html* yet).
+
+## Release Notes
+
+### 1.0.0
+- First release with CLI interface
+- Supports automatically updating the atlas.json file with the list of converted jupyter book files
+
+### 0.1.0 (untagged)
+- First poetry version
+
+### 0.0.0
+- Initial conversion script targeted at a specific project.
+

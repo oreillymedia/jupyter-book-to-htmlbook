@@ -4,7 +4,7 @@ import typer
 from pathlib import Path
 from importlib import metadata
 from typing import Optional
-from .toc_processing import get_book_index
+from .toc_processing import get_book_toc
 from .chapter_processing import process_chapter
 from .atlas import update_atlas
 
@@ -34,6 +34,10 @@ def jupter_book_to_htmlbook(
             "--skip-jb-build",
             help="Skip running `jupyter-book` as a part of this conversion"
             ),
+        include_root: Optional[bool] = typer.Option(
+            False,
+            "--include-root",
+            help="Include the 'root' file of the jupyter-book project"),
         version: Optional[bool] = typer.Option(
             None,
             "--version",
@@ -100,14 +104,16 @@ def jupter_book_to_htmlbook(
         logging.info("No images in the source book")
 
     # get table of contents
-    toc = get_book_index(source_dir)
+    toc = get_book_toc(Path(source))
+    if not include_root:
+        toc = toc[1:]  # i.e., don't include the root
 
     # create a list to return as output
     processed_files = []
 
     # process book files
     for element in toc:
-        file = process_chapter(element, output_dir)
+        file = process_chapter(element, source_dir, output_dir)
         processed_files.append(f'{target}/{file}')
 
     if atlas_json:

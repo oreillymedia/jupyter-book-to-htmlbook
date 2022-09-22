@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jupyter-book-to-htmlbook"
-version = "0.1.0"
+version = "1.0.0"
 description = "A script to convert jupyter book html files to htmlbook for consumption in Atlas"
 authors = ["delfanbaum"]
 
@@ -10,6 +10,7 @@ beautifulsoup4 = "^4.11.1"
 lxml = "^4.9.1"
 typer = "^0.6.1"
 jupyter-book = "^0.13.1"
+PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
 coverage = "^6.4.3"
@@ -18,6 +19,7 @@ pytest-cov = "^3.0.0"
 
 [tool.poetry.scripts]
 jb2htmlbook = "jupyter_book_to_htmlbook.main:main"
+jb2atlas = "jupyter_book_to_htmlbook.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
