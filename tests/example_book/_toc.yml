@@ -3,10 +3,14 @@
 
 format: jb-book
 root: intro
-chapters:
-- file: notebooks/preface
-- file: notebooks/ch01
-- file: notebooks/ch02.00
-  sections:
-    - file: notebooks/ch02.01
-    - file: notebooks/ch02.02
+parts:
+  - caption: A First Part
+    chapters:
+    - file: notebooks/preface
+    - file: notebooks/ch01
+  - caption: A second
+    chapters:
+    - file: notebooks/ch02.00
+      sections:
+        - file: notebooks/ch02.01
+        - file: notebooks/ch02.02
