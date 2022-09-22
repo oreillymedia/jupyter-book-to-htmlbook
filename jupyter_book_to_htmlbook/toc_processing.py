@@ -59,6 +59,16 @@ def get_book_toc(src_dir: Path) -> list:
 
             if "parts" in toc.keys():
                 compiled_toc.extend(process_parts(toc["parts"], src_dir))
+
+            # check for a preface, and move it ahead of the first part if found
+                preface = [i for i in compiled_toc
+                           if 'preface' in str(i).lower()]
+                # just in case there are multiple matches, confirm only one
+                if len(preface) == 1:
+                    logging.info("Moving preface ahead of first part...")
+                    compiled_toc.insert(1,  # insert at position one after root
+                                        compiled_toc.pop(
+                                            compiled_toc.index(preface[0])))
             else:
                 compiled_toc.extend(process_chapters(toc["chapters"], src_dir))
 
@@ -66,6 +76,10 @@ def get_book_toc(src_dir: Path) -> list:
         message = "Can't find the _toc.yml file. Ensure you're " + \
                   "specifying a valid jupyter book project as the SOURCE."
         _log_print_and_exit(message)
+
+    logging.info("Working with the following table of contents:")
+    for path in compiled_toc:
+        logging.info(path)
 
     return compiled_toc
 

@@ -118,6 +118,76 @@ parts:
                  tmp_path / '_build/html/part2/section2-1.html']
                ]
 
+    def test_toc_with_parts_move_preface(self, tmp_path):
+        """
+        Jupyter Book part syntax doesn't seem to support the notion of a
+        'preface', so we should intelligently move any *preface* files
+        ahead of the first part so atlas doesn't get confused.
+
+        Should accommodate having extra stuff around the filename
+        """
+        with open(tmp_path / '_toc.yml', 'wt') as f:
+            f.write("""format: jb-book
+root: intro
+parts:
+  - caption: Name of Part 1
+    chapters:
+    - file: /path-to/00-Preface.ipynb
+    - file: part1/chapter2
+      sections:
+      - file: part1/section2-1
+  - caption: Name of Part 2
+    chapters:
+    - file: part2/chapter1
+    - file: part2/chapter2
+      sections:
+      - file: part2/section2-1""")
+        result = get_book_toc(tmp_path)
+        assert result == [
+                tmp_path / '_build/html/intro.html',
+                tmp_path / '_build/html/path-to/00-Preface.html',
+                tmp_path / '_build/html/_jb_part-1-name-of-part-1.html',
+                [tmp_path / '_build/html/part1/chapter2.html',
+                 tmp_path / '_build/html/part1/section2-1.html'],
+                tmp_path / '_build/html/_jb_part-2-name-of-part-2.html',
+                tmp_path / '_build/html/part2/chapter1.html',
+                [tmp_path / '_build/html/part2/chapter2.html',
+                 tmp_path / '_build/html/part2/section2-1.html']
+               ]
+
+    def test_toc_with_parts_move_preface_but_multiple(self, tmp_path):
+        """
+        If multiple "prefaces" are found, don't move them.
+        """
+        with open(tmp_path / '_toc.yml', 'wt') as f:
+            f.write("""format: jb-book
+root: intro
+parts:
+  - caption: Name of Part 1
+    chapters:
+    - file: /path-to/preface
+    - file: part1/chapter2
+      sections:
+      - file: part1/preface
+  - caption: Name of Part 2
+    chapters:
+    - file: part2/chapter1
+    - file: part2/chapter2
+      sections:
+      - file: part2/section2-1""")
+        result = get_book_toc(tmp_path)
+        assert result == [
+                tmp_path / '_build/html/intro.html',
+                tmp_path / '_build/html/_jb_part-1-name-of-part-1.html',
+                tmp_path / '_build/html/path-to/preface.html',
+                [tmp_path / '_build/html/part1/chapter2.html',
+                 tmp_path / '_build/html/part1/preface.html'],
+                tmp_path / '_build/html/_jb_part-2-name-of-part-2.html',
+                tmp_path / '_build/html/part2/chapter1.html',
+                [tmp_path / '_build/html/part2/chapter2.html',
+                 tmp_path / '_build/html/part2/section2-1.html']
+               ]
+
     def test_toc_with_parts_no_captions(self, tmp_path, caplog, capsys):
         """
         Error out if parts don't have captions, and inform the user why
