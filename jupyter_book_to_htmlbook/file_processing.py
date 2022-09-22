@@ -56,6 +56,31 @@ def process_subsections(chapter):
     return chapter
 
 
+def promote_headings(chapter):
+    """
+    we expect to have a single h1 and then a bunch of h2s
+    in a single-file chapter, but we need to promote all the headings
+    up on level for htmlbook to process them correctly
+    """
+    h2s = chapter.find_all('h2')
+    for heading in h2s:
+        heading.name = 'h1'
+    h3s = chapter.find_all('h3')
+    for heading in h3s:
+        heading.name = 'h2'
+    h4s = chapter.find_all('h4')
+    for heading in h4s:
+        heading.name = 'h3'
+    h5s = chapter.find_all('h5')
+    for heading in h5s:
+        heading.name = 'h4'
+    h6s = chapter.find_all('h6')
+    for heading in h6s:
+        heading.name = 'h5'
+
+    return chapter
+
+
 def process_chapter_single_file(toc_element):
     """ single-file chapter processing """
     ch_name = toc_element.stem
@@ -82,6 +107,9 @@ def process_chapter_single_file(toc_element):
     except IndexError:  # does not have a section class for top-level
         logging.warning("Looks like {toc_element.name} is malformed.")
         return None, None
+
+    # promote headings
+    chapter = promote_headings(chapter)
 
     # apply appropriate data-type (best guess)
 

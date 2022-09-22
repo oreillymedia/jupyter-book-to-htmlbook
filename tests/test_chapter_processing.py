@@ -7,7 +7,8 @@ from jupyter_book_to_htmlbook.file_processing import (
         clean_chapter,
         compile_chapter_parts,
         move_span_ids_to_sections,
-        process_chapter
+        process_chapter,
+        process_chapter_single_file
 )
 
 
@@ -101,10 +102,86 @@ div class="cell_input docutils container"&gt;
         shutil.copy('tests/example_book/_build/html/notebooks/ch01.html',
                     test_env / 'ch01.html')
         result = process_chapter((test_env / 'ch01.html'), test_env, test_out)
-            # first item is the intro file, so let's check on the first "chapter"
+        # first item is the intro file, so let's check on the first "chapter"
         assert os.path.exists(test_out / 'ch01.html')
         # check on return
         assert "ch01.html" in result
+
+    def test_chapter_promote_headings(self, tmp_path, caplog):
+        """
+        we expect to have a single h1 and then a bunch of h2s
+        in a single-file chapter, but we need to promote all the headings
+        up on level for htmlbook to process them correctly
+        """
+        with open(tmp_path / 'ch.html', 'wt') as f:
+            f.write("""<section class="tex2jax_ignore mathjax_ignore"
+id="this-is-another-subheading">
+<h1>This is a chapter heading</h1>
+<p>Along with some content… lovely.</p>
+<section id="subsection">
+<h2>Subsection
+<a class="headerlink" href="#subsection" title="Permalink to this headline">
+#</a></h2>
+<p>Of course, we need to test subsections…</p>
+<section id="another-subsection">
+<h3>Another Subsection
+<a class="headerlink" href="#-subsection" title="Permalink to this headline">
+#</a></h3>
+<p>And sub-sub sections…</p>
+<section id="yes-another">
+<h4>Yes, Another
+<a class="headerlink" href="#yes-another" title="Permalink to this headline">
+#</a></h4>
+<p>And sub-sub-sub sections…</p>
+<section id="id1">
+<h5>Yes, Another
+<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h5>
+<p>And sub-sub-sub-sub sections…</p>
+<section id="another">
+<h6>A level that shouldn't be</h6>
+<p>Text</p>
+</section>
+</section></section></section></section>
+<section id="summary">
+<h2>Summary
+<a class="headerlink" href="#summary" title="Permalink to this headline">#</a>
+</h2>
+<p>Finally, a summary.</p></section></section>""")
+        result = process_chapter_single_file(tmp_path / 'ch.html')[0]
+        assert str(result) == """<section data-type="chapter" id="this""" + \
+                              """-is-another-subheading" xmlns="http:/""" + \
+                              """/www.w3.org/1999/xhtml">
+<h1>This is a chapter heading</h1>
+<p>Along with some content… lovely.</p>
+<section id="subsection">
+<h1>Subsection
+<a class="headerlink" href="#subsection" title="Permalink to this headline">
+#</a></h1>
+<p>Of course, we need to test subsections…</p>
+<section id="another-subsection">
+<h2>Another Subsection
+<a class="headerlink" href="#-subsection" title="Permalink to this headline">
+#</a></h2>
+<p>And sub-sub sections…</p>
+<section id="yes-another">
+<h3>Yes, Another
+<a class="headerlink" href="#yes-another" title="Permalink to this headline">
+#</a></h3>
+<p>And sub-sub-sub sections…</p>
+<section id="id1">
+<h4>Yes, Another
+<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h4>
+<p>And sub-sub-sub-sub sections…</p>
+<section id="another">
+<h5>A level that shouldn't be</h5>
+<p>Text</p>
+</section>
+</section></section></section></section>
+<section id="summary">
+<h1>Summary
+<a class="headerlink" href="#summary" title="Permalink to this headline">#</a>
+</h1>
+<p>Finally, a summary.</p></section></section>"""
 
     def test_process_chapter_filepaths(self, tmp_path):
         """
