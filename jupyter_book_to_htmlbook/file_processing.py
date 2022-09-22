@@ -9,6 +9,30 @@ from .math_processing import process_math
 from .xref_processing import process_interal_refs
 
 
+def process_part(part_path: Path, output_dir: Path):
+    """
+    create a file based on the placeholder path
+    with the name designated in the placeholder path
+    and the correct part numbering
+    """
+    info = re.search(r'_jb_part-([0-9]+)-(.+?).html', str(part_path))
+    if info:
+        part_number = info.group(1)
+        # undo earlier space replacement and do a simple title case
+        part_name = info.group(2).replace('-', ' ').title()
+
+        with open(output_dir / f'part-{part_number}.html', 'wt') as f:
+            f.write(f"""
+<div xmlns="http://www.w3.org/1999/xhtml" data-type="part" id="part-1">
+<h1>{part_name}</h1>
+</div>""".lstrip())
+        return f'part-{part_number}.html'
+    else:
+        logging.error("Unable to parse part information from " +
+                      str(part_path))
+        return
+
+
 def process_subsections(chapter):
     """ add appropriate secX markers to subsections """
     # deal with subsections

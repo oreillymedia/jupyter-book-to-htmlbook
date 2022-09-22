@@ -44,6 +44,7 @@ class TestMain:
         assert 'build/intro.html' in result.stdout
         assert os.path.exists(tmp_path / 'build')
         assert os.path.isfile(tmp_path / 'build/intro.html')
+        assert os.path.isfile(tmp_path / 'build/part-1.html')
         with open(tmp_path / 'build/notebooks/ch01.html', 'rt') as f:
             assert 'data-type="chapter"' in f.read()
 
