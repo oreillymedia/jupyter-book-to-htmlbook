@@ -9,6 +9,15 @@ except ImportError:
 
 
 def _path(file_stub, src_dir):
+    """
+    return a path based on the file stub, and remove any file extension
+    if present (remove based on expected valid jupyter book file types)
+    """
+    jb_filetypes = ['.ipynb', '.md', '.rst']
+
+    for extension in jb_filetypes:
+        file_stub = file_stub.replace(extension, '')
+
     return Path(src_dir / f'_build/html/{file_stub}.html')
 
 
