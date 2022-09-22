@@ -33,6 +33,28 @@ chapters:
                           tmp_path / "_build/html/notebooks/ch01.html",
                           tmp_path / "_build/html/notebooks/ch02.html"]
 
+    def test_toc_with_file_extensions(self, tmp_path):
+        """
+        Apparently one _can_ include a file extension in the toc. This
+        shouldn't cause our script to fail, but rather we ought just remove
+        them
+        """
+        with open(tmp_path / '_toc.yml', 'wt') as f:
+            f.write("""# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: intro.ipynb
+chapters:
+- file: notebooks/preface.md
+- file: notebooks/ch01.ipynb
+- file: notebooks/ch02.rst""")
+        result = get_book_toc(tmp_path)
+        assert result == [tmp_path / '_build/html/intro.html',
+                          tmp_path / "_build/html/notebooks/preface.html",
+                          tmp_path / "_build/html/notebooks/ch01.html",
+                          tmp_path / "_build/html/notebooks/ch02.html"]
+
     def test_toc_with_sections(self, tmp_path):
         """
         happy-path, can we pull the list as expected
