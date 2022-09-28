@@ -5,7 +5,7 @@ from pathlib import Path
 from importlib import metadata
 from typing import Optional
 from .toc_processing import get_book_toc
-from .chapter_processing import process_chapter
+from .file_processing import process_chapter, process_part
 from .atlas import update_atlas
 
 
@@ -113,8 +113,12 @@ def jupter_book_to_htmlbook(
 
     # process book files
     for element in toc:
-        file = process_chapter(element, source_dir, output_dir)
-        processed_files.append(f'{target}/{file}')
+        if '/_jb_part' in str(element):  # process part paths
+            file = process_part(element, output_dir)
+            processed_files.append(f'{target}/{file}')
+        else:  # process chapter paths
+            file = process_chapter(element, source_dir, output_dir)
+            processed_files.append(f'{target}/{file}')
 
     if atlas_json:
         atlas_path = Path(atlas_json)

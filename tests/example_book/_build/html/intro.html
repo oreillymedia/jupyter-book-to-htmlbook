@@ -107,7 +107,12 @@ const thebe_selector_output = ".output, .cell_output"
                 </a>
             </li>
         </ul>
-        <ul class="nav bd-sidenav">
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  A First Part
+ </span>
+</p>
+<ul class="nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="notebooks/preface.html">
    Preface
@@ -118,6 +123,13 @@ const thebe_selector_output = ".output, .cell_output"
    Jupyter Notebooks and Atlas
   </a>
  </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  A second
+ </span>
+</p>
+<ul class="nav bd-sidenav">
  <li class="toctree-l1 has-children">
   <a class="reference internal" href="notebooks/ch02.00.html">
    Production Process for Jupyter Notebook Books
@@ -280,9 +292,15 @@ title="Print to PDF"
 <p>Check out <a class="reference external" href="https://jupyterbook.org">the Jupyter Book documentation</a> for more information.</p>
 <p>Here is an example:</p>
 <div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">A First Part</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/preface.html">Preface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/ch01.html">Jupyter Notebooks and Atlas</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">A second</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/ch02.00.html">Production Process for Jupyter Notebook Books</a></li>
 </ul>
 </div>
