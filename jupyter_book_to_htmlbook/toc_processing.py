@@ -59,16 +59,20 @@ def get_book_toc(src_dir: Path) -> list:
 
             if "parts" in toc.keys():
                 compiled_toc.extend(process_parts(toc["parts"], src_dir))
-
             # check for a preface, and move it ahead of the first part if found
-                preface = [i for i in compiled_toc
-                           if 'preface' in str(i).lower()]
-                # just in case there are multiple matches, confirm only one
-                if len(preface) == 1:
-                    logging.info("Moving preface ahead of first part...")
+                prefaces = [i for i in compiled_toc
+                            if type(i) != list and  # i.e., not a sub-file
+                            # the relative_to check helps avoid false-positives
+                            # with tmp_path in pytest
+                            'preface' in str(i.relative_to(src_dir)).lower()]
+                # go backwards through prefaces to preserve ordering
+                for preface in prefaces[::-1]:
+                    logging.info(
+                        f"Moving preface ({preface}) ahead of first part..."
+                    )
                     compiled_toc.insert(1,  # insert at position one after root
                                         compiled_toc.pop(
-                                            compiled_toc.index(preface[0])))
+                                            compiled_toc.index(preface)))
             else:
                 compiled_toc.extend(process_chapters(toc["chapters"], src_dir))
 

@@ -157,7 +157,8 @@ parts:
 
     def test_toc_with_parts_move_preface_but_multiple(self, tmp_path):
         """
-        If multiple "prefaces" are found, don't move them.
+        If multiple "prefaces" are found, make sure they are correctly ordered
+        at the beginning of the toc
         """
         with open(tmp_path / '_toc.yml', 'wt') as f:
             f.write("""format: jb-book
@@ -166,9 +167,10 @@ parts:
   - caption: Name of Part 1
     chapters:
     - file: /path-to/preface
+    - file: /path-to/second-preface
     - file: part1/chapter2
       sections:
-      - file: part1/preface
+      - file: part1/chapter-section
   - caption: Name of Part 2
     chapters:
     - file: part2/chapter1
@@ -178,14 +180,45 @@ parts:
         result = get_book_toc(tmp_path)
         assert result == [
                 tmp_path / '_build/html/intro.html',
-                tmp_path / '_build/html/_jb_part-1-name-of-part-1.html',
                 tmp_path / '_build/html/path-to/preface.html',
+                tmp_path / '_build/html/path-to/second-preface.html',
+                tmp_path / '_build/html/_jb_part-1-name-of-part-1.html',
                 [tmp_path / '_build/html/part1/chapter2.html',
-                 tmp_path / '_build/html/part1/preface.html'],
+                 tmp_path / '_build/html/part1/chapter-section.html'],
                 tmp_path / '_build/html/_jb_part-2-name-of-part-2.html',
                 tmp_path / '_build/html/part2/chapter1.html',
                 [tmp_path / '_build/html/part2/chapter2.html',
                  tmp_path / '_build/html/part2/section2-1.html']
+               ]
+
+    def test_prefaces_in_sections_do_not_move(self, tmp_path):
+        """ if a "*preface*" is in a section:, however, do not move it """
+        with open(tmp_path / '_toc.yml', 'wt') as f:
+            f.write("""format: jb-book
+root: intro
+parts:
+  - caption: Name of Part 1
+    chapters:
+    - file: /path-to/preface
+    - file: /path-to/second-preface
+    - file: part1/chapter2
+      sections:
+      - file: part1/chapter-section
+      - file: part1/preface-1
+  - caption: Name of Part 2
+    chapters:
+    - file: example""")
+        result = get_book_toc(tmp_path)
+        assert result == [
+                tmp_path / '_build/html/intro.html',
+                tmp_path / '_build/html/path-to/preface.html',
+                tmp_path / '_build/html/path-to/second-preface.html',
+                tmp_path / '_build/html/_jb_part-1-name-of-part-1.html',
+                [tmp_path / '_build/html/part1/chapter2.html',
+                 tmp_path / '_build/html/part1/chapter-section.html',
+                 tmp_path / '_build/html/part1/preface-1.html'],
+                tmp_path / '_build/html/_jb_part-2-name-of-part-2.html',
+                tmp_path / '_build/html/example.html'
                ]
 
     def test_toc_with_parts_no_captions(self, tmp_path, caplog, capsys):
