@@ -96,7 +96,7 @@ def jupter_book_to_htmlbook(
 
     # setup images directory
     if Path(f'{source_dir}/_images').exists():
-        image_dir = output_dir / 'images'
+        image_dir = output_dir / '_images'
         image_dir.mkdir(parents=True, exist_ok=True)
         shutil.copytree(f'{source_dir}/_images/', image_dir,
                         dirs_exist_ok=True)
