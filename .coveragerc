@@ -1,4 +1,7 @@
 [report]
 
-exclude_lines =
-    if __name__ == .__main__.:
+exclude_lines = 
+    # our main function only calls the app, which is tested elsewhere
+    def main
+    app()
+    except ImportError

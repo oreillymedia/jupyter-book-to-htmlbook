@@ -1,0 +1,69 @@
+{
+  "branch": "main",
+  "files": [
+    "cover.html",
+    "praise.html",
+    "titlepage.html",
+    "copyright.html",
+    "dedication.html",
+    "toc.html",
+    "foreward.adoc",
+    "preface.html",
+    "ch01.html",
+    "ch02.html",
+    "ch03.html",
+    "ch04.html",
+    "ch05.html",
+    "ch06.html",
+    "ch07.html",
+    "ch08.html",
+    "ch09.html",
+    "ch10.html",
+    "appa.html",
+    "appb.html",
+    "ix.html",
+    "author_bio.html",
+    "colo.html"
+  ],
+  "formats": {
+    "pdf": {
+      "version": "print",
+      "color_count": "1",
+      "index": true,
+      "toc": true,
+      "syntaxhighlighting": true,
+      "show_comments": false,
+      "trim_size": "7inx9.1875in",
+      "antennahouse_version": "AHFormatterV62_64-MR4"
+    },
+    "epub": {
+      "index": true,
+      "toc": true,
+      "epubcheck": true,
+      "syntaxhighlighting": true,
+      "show_comments": false,
+      "downsample_images": false,
+      "mathmlreplacement": false
+    },
+    "mobi": {
+      "index": true,
+      "toc": true,
+      "syntaxhighlighting": true,
+      "show_comments": false,
+      "downsample_images": false
+    },
+    "html": {
+      "index": true,
+      "toc": true,
+      "syntaxhighlighting": true,
+      "show_comments": false,
+      "consolidated": false
+    }
+  },
+  "theme": "oreillymedia/animal_theme_sass",
+  "title": "Example Book",
+  "print_isbn13": "0000000000000",
+  "lang": "en",
+  "accent_color": "",
+  "templating": false
+}

@@ -1,3 +1,4 @@
+import logging
 from bs4 import BeautifulSoup
 
 from jupyter_book_to_htmlbook.footnote_processing import process_footnotes
@@ -31,7 +32,7 @@ points.<span data-type="footnote">Isn't the internet amazing?</span>
 </div>"""
 
 
-def test_prcoess_footnotes_no_href(capsys):
+def test_prcoess_footnotes_no_href(caplog):
     """
     Probably would never happen, but in case (for example) the href attr
     was missing on the reference, throw an error showing the footnote ref
@@ -40,12 +41,12 @@ def test_prcoess_footnotes_no_href(capsys):
     <a id='test' class='footnote-reference'>something</a>""", 'html.parser')
     result = process_footnotes(chapter)
     assert result == chapter
-    output = capsys.readouterr().out.rstrip()
-    assert output == "Error converting footnote " + \
-                     '"<a class="footnote-reference" id="test">something</a>".'
+    caplog.set_level(logging.DEBUG)
+    expected_issue = '"<a class="footnote-reference" id="test">something</a>".'
+    assert expected_issue in caplog.text
 
 
-def test_prcoess_footnotes_poorly_formed(capsys):
+def test_prcoess_footnotes_poorly_formed(caplog):
     """
     Probably might happen; there is some value error going on somewhere, e.g.,
     a bad ref location, so throw an error noting the footnote ref in question
@@ -55,6 +56,6 @@ def test_prcoess_footnotes_poorly_formed(capsys):
                             'html.parser')
     result = process_footnotes(chapter)
     assert result == chapter
-    output = capsys.readouterr().out.rstrip()
-    assert output == "Error converting footnote " + \
-                     '"<a class="footnote-reference" href="na" id="id1"></a>".'
+    caplog.set_level(logging.DEBUG)
+    expected_issue = '"<a class="footnote-reference" href="na" id="id1"></a>".'
+    assert expected_issue in caplog.text

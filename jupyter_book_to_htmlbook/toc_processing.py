@@ -1,50 +1,133 @@
-from bs4 import BeautifulSoup
+import logging
+import sys
 from pathlib import Path
+from yaml import load  # type: ignore
+try:
+    from yaml import CSafeLoader as SafeLoader
+except ImportError:
+    from yaml import SafeLoader
 
 
-def get_book_index(basedir: Path) -> list:
+def _path(file_stub, src_dir):
+    """
+    return a path based on the file stub, and remove any file extension
+    if present (remove based on expected valid jupyter book file types)
+    """
+    jb_filetypes = ['.ipynb', '.md', '.rst']
+
+    for extension in jb_filetypes:
+        file_stub = file_stub.replace(extension, '')
+
+    return Path(src_dir / f'_build/html/{file_stub}.html')
+
+
+def _log_print_and_exit(message):
+    """
+    helper function to log a script-ending error message, print it,
+    and exit with an error code indicating failure
+    """
+    logging.error(message)
+    print(message)
+    sys.exit(1)
+
+
+def get_book_toc(src_dir: Path) -> list:
     """
     Takes the 'genindex' file from a Jupyter Book HTML site and returns a
     list of chapter URIs and lists of chapter URIs where there is more than one
     file per chapter.
     """
-    indexfile = basedir / 'genindex.html'
-    bookfile_uris = []
+    compiled_toc = []
 
-    with open(indexfile, 'r') as f:
-        soup = BeautifulSoup(f.read(), 'html.parser')
+    try:
+        with open(src_dir / "_toc.yml") as f:
+            toc = load(f.read(), SafeLoader)
+            # exit if we see some format other than jb-book
+            try:
+                if toc["format"] != "jb-book":
+                    message = ("Unsupported jupyter book format: " +
+                               toc["format"] + ". The only supported" +
+                               " format is 'jb-book'.")
+                    _log_print_and_exit(message)
+            except KeyError:
+                message = ("Malformed _toc.yml file. Please see " +
+                           "jupyterbook.org for correct syntax.")
+                _log_print_and_exit(message)
 
-    for link in soup.find_all('a'):
-        uri = link.get('href')
-        if uri is not None and not uri.find('://') > -1:
-            bookfile_uris.append(Path(f'{basedir}/{uri}'))
-    # remove the index file
-    bookfile_uris = bookfile_uris[1:]
+            # add "root"
+            compiled_toc.append(_path(toc["root"], src_dir))
 
-    book_toc = []
-    chapter_collection = []
+            if "parts" in toc.keys():
+                compiled_toc.extend(process_parts(toc["parts"], src_dir))
+            # check for a preface, and move it ahead of the first part if found
+                prefaces = [i for i in compiled_toc
+                            if type(i) != list and  # i.e., not a sub-file
+                            # the relative_to check helps avoid false-positives
+                            # with tmp_path in pytest
+                            'preface' in str(i.relative_to(src_dir)).lower()]
+                # go backwards through prefaces to preserve ordering
+                for preface in prefaces[::-1]:
+                    logging.info(
+                        f"Moving preface ({preface}) ahead of first part..."
+                    )
+                    compiled_toc.insert(1,  # insert at position one after root
+                                        compiled_toc.pop(
+                                            compiled_toc.index(preface)))
+            else:
+                compiled_toc.extend(process_chapters(toc["chapters"], src_dir))
 
-    # combine chapters into ordered lists
-    for file in bookfile_uris:
-        if not str(file).find('/ch/') > -1:  # i.e., not in a chapter folder
-            # if we're at the end of a chapter collection, add it
-            if len(chapter_collection) != 0:
-                book_toc.append(chapter_collection)
-            # then add the next file
-            book_toc.append(file)
-        else:  # i.e., in a chapter folder
-            # if we're not in a chapter yet, start the chapter
-            if len(chapter_collection) == 0:
-                chapter_collection.append(file)
-            # if we're in the same chapter, add the file
-            elif str(file).split('/')[-2] == (
-                        str(chapter_collection[0]).split('/')[-2]
-                    ):
-                chapter_collection.append(file)
-            else:  # if we're in a new chapter
-                # add the last chapter to the book_toc
-                book_toc.append(chapter_collection)
-                # clear out the collection,
-                # replace with next chapter intro file
-                chapter_collection = [file]
-    return book_toc
+    except FileNotFoundError:
+        message = "Can't find the _toc.yml file. Ensure you're " + \
+                  "specifying a valid jupyter book project as the SOURCE."
+        _log_print_and_exit(message)
+
+    logging.info("Working with the following table of contents:")
+    for path in compiled_toc:
+        logging.info(path)
+
+    return compiled_toc
+
+
+def process_chapters(chapter_list, src_dir) -> list:
+    """
+    takes a `chapters:` list, optionally with sections
+    and returns a list (or list of) of Paths
+    """
+    chapters = []
+    for chapter in chapter_list:
+        try:  # if chapter has sections
+            chapter_files: list[Path] = []
+            # append first file
+            chapter_files.append(_path(chapter['file'], src_dir))
+
+            for section in chapter["sections"]:
+                chapter_files.append(_path(section['file'], src_dir))
+
+            chapters.append(chapter_files)
+
+        except KeyError:  # chapter _doesn't_ have sections
+            chapters.append(_path(chapter['file'], src_dir))
+
+    return chapters
+
+
+def process_parts(parts, src_dir):
+    """ part processing function"""
+    part_number = 0
+    part_files = []
+    for part in parts:
+        part_number += 1  # increment numbering
+        # create a distinct placeholder Path for downstream processing
+        try:
+            part_title = part["caption"].replace(' ', '-').lower()
+        except TypeError:  # because it's looking for a string, getting an int
+            message = ("Missing part caption in _toc.yml. " +
+                       "Part captions are required.")
+            _log_print_and_exit(message)
+        part_stub = f'_jb_part-{part_number}-{part_title}'
+        part_files.append(_path(part_stub, src_dir))
+        # now add the chapters
+        part_files.extend(
+            process_chapters(part["chapters"], src_dir)
+        )
+    return part_files

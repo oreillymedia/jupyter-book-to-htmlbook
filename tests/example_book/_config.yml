@@ -1,0 +1,15 @@
+# Book settings
+# Learn more at https://jupyterbook.org/customize/config.html
+
+title: Hello World with Jupyter Book
+author: Terry the Tarsier
+
+# Force re-execution of notebooks on each build.
+# See https://jupyterbook.org/content/execute.html
+execute:
+  execute_notebooks: force
+
+# Define the name of the latex output file for PDF builds
+latex:
+  latex_documents:
+    targetname: book.tex
