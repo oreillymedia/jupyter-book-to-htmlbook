@@ -110,6 +110,7 @@ def jupter_book_to_htmlbook(
 
     # create a list to return as output
     processed_files = []
+    book_ids: list[str] = []
 
     # process book files
     for element in toc:
@@ -117,8 +118,12 @@ def jupter_book_to_htmlbook(
             file = process_part(element, output_dir)
             processed_files.append(f'{target}/{file}')
         else:  # process chapter paths
-            file = process_chapter(element, source_dir, output_dir)
+            file, chapter_ids = process_chapter(element,
+                                                source_dir,
+                                                output_dir,
+                                                book_ids)
             processed_files.append(f'{target}/{file}')
+            book_ids.extend(chapter_ids)
 
     if atlas_json:
         atlas_path = Path(atlas_json)

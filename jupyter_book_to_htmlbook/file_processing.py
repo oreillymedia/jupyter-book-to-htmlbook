@@ -6,7 +6,7 @@ from .admonition_processing import process_admonitions
 from .figure_processing import process_figures, process_informal_figs
 from .footnote_processing import process_footnotes
 from .math_processing import process_math
-from .xref_processing import process_interal_refs
+from .xref_processing import process_interal_refs, process_ids
 
 
 def process_part(part_path: Path, output_dir: Path):
@@ -38,10 +38,6 @@ def process_subsections(chapter):
     # deal with subsections
     subsections = chapter.find_all('section')  # type: ignore
     for sub in subsections:
-        # prevent duplicate sub-section summary ids
-        if sub['id'] == "summary":
-            import random
-            sub['id'] = f"{random.randint(1, 12345678)}_summary"
         if sub.select('section > h1'):
             sub['data-type'] = 'sect1'
         elif sub.select('section > h2'):
@@ -230,7 +226,10 @@ def move_span_ids_to_sections(chapter):
     return chapter
 
 
-def process_chapter(toc_element, source_dir, build_dir=Path('.')):
+def process_chapter(toc_element,
+                    source_dir,
+                    build_dir=Path('.'),
+                    book_ids: list = []):
     """
     Takes a list of chapter files and chapter lists and then writes the chapter
     to the root directory in which the script is run. Note that this assumes
@@ -262,6 +261,7 @@ def process_chapter(toc_element, source_dir, build_dir=Path('.')):
     chapter = process_math(chapter)
     chapter = move_span_ids_to_sections(chapter)
     chapter = process_subsections(chapter)
+    chapter, ids = process_ids(chapter, book_ids)
 
     # write the file, preserving any directory structure(s) from source
     if type(toc_element) == list:
@@ -282,4 +282,4 @@ def process_chapter(toc_element, source_dir, build_dir=Path('.')):
     out.write_text(str(chapter))
 
     # return relative path of file as string for later use
-    return str(out.relative_to(build_dir))
+    return str(out.relative_to(build_dir)), ids
