@@ -62,4 +62,5 @@ def process_ids(chapter, existing_ids=[]):
             # log the change
             logging.info(f"Duplicate ID \"{uid}\" changed to \"{new_id}\"")
 
-    return chapter, chapter.find_all(id=True)
+    chapter_ids = [element['id'] for element in chapter.find_all(id=True)]
+    return chapter, chapter_ids
