@@ -7,6 +7,7 @@ from .figure_processing import process_figures, process_informal_figs
 from .footnote_processing import process_footnotes
 from .math_processing import process_math
 from .xref_processing import process_interal_refs, process_ids
+from .code_processing import process_code
 
 
 def process_part(part_path: Path, output_dir: Path):
