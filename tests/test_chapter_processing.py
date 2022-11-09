@@ -197,9 +197,9 @@ id="this-is-another-subheading">
         shutil.copytree(test_env / 'notebooks',
                         test_env / 'chapters/notebooks')
         result = process_chapter((test_env / 'notebooks/ch01.html'),
-                                 test_env, test_out)
+                                 test_env, test_out)[0]
         result += process_chapter((test_env / 'chapters/notebooks/ch01.html'),
-                                  test_env, test_out)
+                                  test_env, test_out)[0]
         # first item is the intro file, so let's check on the first "chapter"
         assert os.path.exists(test_out / 'notebooks/ch01.html')
         assert os.path.exists(test_out / 'chapters/notebooks/ch01.html')
@@ -222,7 +222,7 @@ id="this-is-another-subheading">
             test_env / 'ch02.00.html',
             test_env / 'ch02.01.html',
             test_env / 'ch02.02.html',
-            ], test_env, test_out)
+            ], test_env, test_out)[0]
         # first item is the intro file, so let's check on the first "chapter"
         # the resulting section should have a data-type of "chapter"
         assert "ch02" in result
