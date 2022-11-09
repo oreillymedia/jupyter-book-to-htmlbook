@@ -14,3 +14,6 @@ parts:
       sections:
         - file: notebooks/ch02.01
         - file: notebooks/ch02.02
+  - caption: Code
+    chapters:
+      - file: notebooks/code
