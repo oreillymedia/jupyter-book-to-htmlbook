@@ -16,7 +16,7 @@ def test_unique_ids():
     chapter = BeautifulSoup("""<h1 id="foo">Hello</h1>""", "html.parser")
     result, chapter_ids = process_ids(chapter, existing_ids)
     assert re.search(r'id="foo_[0-9]+', str(result))
-    assert len(chapter_ids) == 1
+    assert re.match(r'foo_[0-9]+', chapter_ids[0])
 
 
 def test_xrefs_are_updated_when_ids_change():
