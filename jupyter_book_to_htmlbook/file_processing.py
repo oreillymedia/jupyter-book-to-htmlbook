@@ -260,6 +260,7 @@ def process_chapter(toc_element,
     chapter = process_footnotes(chapter)
     chapter = process_admonitions(chapter)
     chapter = process_math(chapter)
+    chapter = process_code(chapter)
     chapter = move_span_ids_to_sections(chapter)
     chapter = process_subsections(chapter)
     chapter, ids = process_ids(chapter, book_ids)
