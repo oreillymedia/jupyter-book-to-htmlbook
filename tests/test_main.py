@@ -90,3 +90,62 @@ class TestMain:
         log = caplog.text
         assert result.exit_code == 0
         assert "jupyter-book run" in log
+
+    @pytest.mark.jb
+    @pytest.mark.slow
+    def test_missing_files_raises_python_error(self,
+                                               tmp_path,
+                                               monkeypatch: pytest.MonkeyPatch,
+                                               ):
+        """
+        Given that we're quieting `jb build` so much, we want to ensure
+        that our script is still erroring out appropriately when there
+        are missing files included in _toc.yml.
+        """
+
+        test_env = tmp_path / 'tmp'
+        test_env.mkdir()
+        shutil.copytree('tests/example_book', test_env, dirs_exist_ok=True)
+        f = test_env / '_toc.yml'
+        f.write_text("""
+format: jb-book
+root: intro
+parts:
+  - caption: A First Part
+    chapters:
+    - file: notebooks/ch01
+    - file: notebooks/missing
+""")
+
+        monkeypatch.chdir(tmp_path)  # patch for our build target
+        result = runner.invoke(app, [str(test_env), 'build'])
+        assert result.exit_code != 0
+        assert type(result.exception) == FileNotFoundError
+
+    @pytest.mark.jb
+    @pytest.mark.slow
+    def test_build_with_nonincluded_files_succeeds(
+            self,
+            tmp_path,
+            monkeypatch: pytest.MonkeyPatch,
+            ):
+        """
+        We want to ensure that if we're only selecting a subset of files
+        in _toc.yml (for ERs, for example), the build succeeds
+        """
+        test_env = tmp_path / 'tmp'
+        test_env.mkdir()
+        shutil.copytree('tests/example_book', test_env, dirs_exist_ok=True)
+        f = test_env / '_toc.yml'
+        f.write_text("""
+format: jb-book
+root: intro
+parts:
+  - caption: A First Part
+    chapters:
+    - file: notebooks/ch01
+""")
+
+        monkeypatch.chdir(tmp_path)  # patch for our build target
+        result = runner.invoke(app, [str(test_env), 'build'])
+        assert result.exit_code == 0

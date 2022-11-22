@@ -85,8 +85,13 @@ def jupter_book_to_htmlbook(
         # Bonus is that it keeps the command similar to what an author will be
         # using locally.
         import subprocess
-        jb_info = subprocess.run(['jupyter-book', 'build',
-                                 source],
+        jb_info = subprocess.run(['jupyter-book',
+                                  'build',
+                                  source,
+                                  # silence warnings, which instead appear to
+                                  # error out inside Atlas; instead we'll rely
+                                  # on Atlas's own missing xref checker
+                                  '-qq'],
                                  # hide chatty jupyter-book build output
                                  stdout=subprocess.DEVNULL)
         # but log any errors
