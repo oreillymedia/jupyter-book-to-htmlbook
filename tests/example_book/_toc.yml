@@ -16,4 +16,5 @@ parts:
         - file: notebooks/ch02.02
   - caption: Code
     chapters:
-      - file: notebooks/code
+      - file: notebooks/code_py
+      - file: notebooks/code_r
