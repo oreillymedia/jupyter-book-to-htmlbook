@@ -42,7 +42,21 @@ def process_code(chapter):
                 del span['class']
 
             # add language info if available
-            if "python" in parent_classes:
+            if (  # handle R
+                    # use `find` for `%%` since we only want it if it's
+                    # the very first span tag
+                    pre_tag.find('span', string="%%") and
+                    pre_tag.find_all('span', string="R")
+               ):
+                pre_tag["data-code-language"] = "r"
+                # remove possibly confusing parent classes
+                del div.parent['class']
+                # remove extraneous rpy2 flagging
+                pre_tag.find('span', string="%%").decompose()
+                # can use "find" now since the <span>R</span:> should
+                # be the first tag now
+                pre_tag.find('span', string="R").decompose()
+            elif "python" in parent_classes:  # handle python
                 pre_tag["data-code-language"] = "python"
 
             logging.info(f"Code after: {div}")

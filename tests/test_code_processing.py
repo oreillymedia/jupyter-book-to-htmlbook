@@ -12,7 +12,15 @@ from pathlib import Path
 @pytest.fixture
 def code_example_python():
     chapter = Path(
-                     "tests/example_book/_build/html/notebooks/code.html"
+                     "tests/example_book/_build/html/notebooks/code_py.html"
+                  ).read_text()
+    return BeautifulSoup(chapter, 'lxml')
+
+
+@pytest.fixture
+def code_example_r():
+    chapter = Path(
+                     "tests/example_book/_build/html/notebooks/code_r.html"
                   ).read_text()
     return BeautifulSoup(chapter, 'lxml')
 
@@ -35,6 +43,62 @@ class TestCodeProcessing:
         result = process_code(code_example_python)
         assert result.find('pre')['data-type'] == "programlisting"
         assert result.find('pre')['data-code-language'] == "python"
+
+    def test_add_r_datatype(self, code_example_r):
+        """
+        Jupyter Book should add the data-code-language appropriately IF
+        we are seeing that we're loading `%load_ext rpy2.ipython` and we
+        have a block with `%%R` at the beginning. If it's a "python" notebook
+        the highlight-ipython3 class is being applied, but that's not really
+        relevant so it should be removed.
+        """
+        result = process_code(code_example_r)
+        check_div = result.find_all('pre')[1]
+        # check second div, since first div is the `load_ext` command
+        assert check_div['data-code-language'] == "r"
+        assert "highlight-ipython3" not in str(check_div.parent['class'])
+
+    def test_add_r_datatype_removes_rpy2_flag(self, code_example_r):
+        """
+        In order to tell the notebook that a cell is an R cell (in an otherwise
+        Python notebook), authors must include `%%R` at the beginning of the
+        cell. Per author feedback, we should remove that, since if there are
+        two languages in the text, the preferred distinguishing mechanism is
+        comments (e.g., `##R`).
+        """
+        result = process_code(code_example_r)
+        # check second div, since first div is the `load_ext` command
+        check_div = result.find_all('pre')[1]
+        # note that these are two separate spans, and we're using "find" since
+        # we only want to confirm that they're not at the beginning
+        assert not check_div.find('span', string="%%")
+        assert not check_div.find_all('span', string="R")
+
+    def test_add_r_formatting_edge_case(self):
+        """
+        While not common anymore in Python >= 3.6, there is still the
+        possibility that older string interpolation syntax might include
+        `%%R` somewhere in the code, so we want to ensure that we're only
+        tagging blocks that _start_ with `%%R` as `r` language blocks.
+        """
+        snippet = """
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">r</span> <span class="o">=</span>
+<span class="s1">&#39;s = </span><span class="si">%r</span>
+<span class="se">\n</span><span class="s1">print(s</span>
+<span class="si">%%</span><span class="s1">R)&#39;</span>
+<span class="nb">print</span><span class="p">(</span>
+<span class="n">r</span><span class="o">%</span><span class="k">r</span>
+)
+</pre></div>
+</div>
+</div>
+"""
+        soup = BeautifulSoup(snippet, 'html.parser')
+        result = process_code(soup)
+        assert 'data-code-language="r"' not in str(result)
 
     def test_extraneous_span_classes_are_removed(self, code_example_python):
         """
