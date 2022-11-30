@@ -11,55 +11,37 @@ def process_code(chapter):
     cell_number = 0
     highlight_divs = chapter.find_all(class_="highlight")
 
-    # instead have to do this differently, += 1 on IN only
     for div in highlight_divs:
         try:
-            # get parent and grandparent information
             parent_classes = str(div.parent["class"])
-            grandparent = div.parent.parent
-            logging.info(f"Code before: {div}")
 
+            # apply `data-type` attribute
             pre_tag = div.pre
             pre_tag["data-type"] = "programlisting"
-
-            # apply numbering
-            if "cell_input" in str(grandparent["class"]):
-                cell_number += 1
-                pre_tag = number_codeblock(pre_tag, cell_number)
-
-            elif (
-                    "cell_output" in grandparent["class"] and
-                    # ensure we're not in a hidden-input cell
-                    "tag_hide-input" not in grandparent.parent["class"]
-                 ):
-                # check to ensure the preceding in block isn't hidden
-                pre_tag = number_codeblock(pre_tag,
-                                           cell_number,
-                                           in_block=False)
 
             # remove existing span classes
             for span in pre_tag.find_all('span'):
                 del span['class']
 
             # add language info if available
-            if (  # handle R
-                    # use `find` for `%%` since we only want it if it's
-                    # the very first span tag
+            if (  # handle R, use `find` for `%%` since we only want it if it's
+                  # the very first span tag
                     pre_tag.find('span', string="%%") and
                     pre_tag.find_all('span', string="R")
                ):
                 pre_tag["data-code-language"] = "r"
                 # remove possibly confusing parent classes
                 del div.parent['class']
-                # remove extraneous rpy2 flagging
+                # remove extraneous rpy2 flags on first element (thus "find")
                 pre_tag.find('span', string="%%").decompose()
-                # can use "find" now since the <span>R</span:> should
-                # be the first tag now
                 pre_tag.find('span', string="R").decompose()
-            elif "python" in parent_classes:  # handle python
+
+            # handle python
+            elif "python" in parent_classes:
                 pre_tag["data-code-language"] = "python"
 
-            logging.info(f"Code after: {div}")
+            # apply numbering
+            cell_number = number_codeblock(pre_tag, cell_number)
 
         except TypeError:
             logging.warning(f"Unable to apply cell numbering to {div}")
@@ -70,14 +52,31 @@ def process_code(chapter):
     return chapter
 
 
-def number_codeblock(pre_block, cell_number, in_block=True):
+def number_codeblock(pre_block, cell_number):
     """
     Adds numbering markers (`In [##]: ` or `Out[##]: `) to cell blocks
+
+    Note that BeautifulSoup modifies elements in place, so instead of
+    returning the pre_block element, we're only returning the cell_number
+    to be used in subsequent cells.
     """
-    if in_block:
+
+    # grandparent of highlight div contains in/out information
+    grandparent = pre_block.parent.parent.parent
+
+    if "cell_input" in str(grandparent["class"]):
+        in_block = True
+        cell_number += 1
         marker = f"In [{cell_number}]: "
-    else:
+    elif (
+            "cell_output" in grandparent["class"] and
+            # ensure we're not in a hidden-input cell
+            "tag_hide-input" not in grandparent.parent["class"]
+         ):
+        in_block = False
         marker = f"Out[{cell_number}]: "
+    else:
+        return cell_number
 
     # insert marker
     pre_block.insert(0, marker)
@@ -95,4 +94,4 @@ def number_codeblock(pre_block, cell_number, in_block=True):
                 # so a "brute force" approach to indentation works fine
                 element.replace_with(element.replace('\n', f'\n{indent}'))
 
-    return pre_block
+    return cell_number

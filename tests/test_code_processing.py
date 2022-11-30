@@ -174,8 +174,8 @@ class TestNumbering:
         """
         in_div = code_example_python.find('div', class_="cell_input")
         in_pre = in_div.find('pre')
-        result = number_codeblock(in_pre, 1)
-        assert "In [1]: " in str(result)
+        number_codeblock(in_pre, 0)
+        assert "In [1]: " in str(in_pre)
 
     @pytest.mark.parametrize("numbering", [1, 20, 100])
     def test_in_blocks_are_indented_correctly(self,
@@ -195,11 +195,10 @@ class TestNumbering:
         expected_indentations = [ind + (" " * len(f"In [{numbering}]: "))
                                  for ind in preprocess_indentations]
         # add numbering
-        result = number_codeblock(in_pre, numbering)
+        number_codeblock(in_pre, numbering)
 
         # check indents
-        postprocess_indentations = re.findall(r'(\n\s*)',
-                                              str(result))
+        postprocess_indentations = re.findall(r'(\n\s*)', str(in_pre))
         assert postprocess_indentations == expected_indentations
 
     def test_out_blocks_are_numbered(self, code_example_python):
@@ -207,10 +206,10 @@ class TestNumbering:
         Output blocks should be marked as such and numbered via the usual
         Jupyter Notebook formatting of `Out[##]`.
         """
-        in_div = code_example_python.find('div', class_="cell_input")
+        in_div = code_example_python.find('div', class_="cell_output")
         in_pre = in_div.find('pre')
-        result = number_codeblock(in_pre, 1, in_block=False)
-        assert "Out[1]: " in str(result)
+        number_codeblock(in_pre, 1)
+        assert "Out[1]: " in str(in_pre)
 
     @pytest.mark.parametrize("numbering", [1, 20, 100])
     def test_out_blocks_are_indented_correctly(self,
@@ -228,9 +227,8 @@ class TestNumbering:
         expected_indentations = [ind + (" " * len(f"Out[{numbering}]: "))
                                  for ind in preprocess_indentations]
         # add numbering
-        result = number_codeblock(in_pre, numbering, False)
+        number_codeblock(in_pre, numbering)
 
         # check indents
-        postprocess_indentations = re.findall(r'(\n\s*)',
-                                              str(result))
+        postprocess_indentations = re.findall(r'(\n\s*)', str(in_pre))
         assert postprocess_indentations == expected_indentations
