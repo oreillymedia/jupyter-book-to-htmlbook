@@ -74,6 +74,17 @@ class TestCodeProcessing:
         assert not check_div.find('span', string="%%")
         assert not check_div.find_all('span', string="R")
 
+    def test_add_r_datatype_removes_newline(self, code_example_r):
+        """
+        In addition to removing the `%%R` characters, we should start the
+        block at the first non-whitespace character as you'd expect, so in
+        our test case, we're looking to ensure that the second member of
+        check_div.contents *doesn't* start with a newline.
+        """
+        result = process_code(code_example_r)
+        check_div = result.find_all('pre')[1]
+        assert check_div.contents[1].find('\n') != 0
+
     def test_add_r_formatting_edge_case(self):
         """
         While not common anymore in Python >= 3.6, there is still the

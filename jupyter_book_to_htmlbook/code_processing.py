@@ -22,6 +22,11 @@ def process_code(chapter):
             # remove existing span classes
             for span in pre_tag.find_all('span'):
                 del span['class']
+                # clean up empty strings
+                if not span.string:
+                    # Log message in advance of any unanticipated edge case
+                    logging.info(f"Removing empty span {span} in process_code")
+                    span.decompose()
 
             # add language info if available
             if (  # handle R, use `find` for `%%` since we only want it if it's
@@ -35,6 +40,10 @@ def process_code(chapter):
                 # remove extraneous rpy2 flags on first element (thus "find")
                 pre_tag.find('span', string="%%").decompose()
                 pre_tag.find('span', string="R").decompose()
+                # remove left space/extra newline on first child element
+                if pre_tag.contents:
+                    start_code = pre_tag.contents[0]
+                    pre_tag.contents[0].replace_with(start_code.lstrip())
 
             # handle python
             elif "python" in parent_classes:
