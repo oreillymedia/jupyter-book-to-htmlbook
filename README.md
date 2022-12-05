@@ -71,6 +71,13 @@ Options:
 
 ## Release Notes
 
+### 1.0.1 - 1.0.5
+- Add support for R via `rpy2` syntax in Notebooks
+- Further quiet `jb build` to support Atlas builds
+- Dependency security version updates
+- Better code block handling, including `In[]/Out[]`
+- Duplicate IDs are now removed programmatically globally in the book
+
 ### 1.0.0
 - First release with CLI interface
 - Supports automatically updating the atlas.json file with the list of converted jupyter book files
