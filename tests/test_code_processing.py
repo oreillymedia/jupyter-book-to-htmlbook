@@ -243,3 +243,27 @@ class TestNumbering:
         # check indents
         postprocess_indentations = re.findall(r'(\n\s*)', str(in_pre))
         assert postprocess_indentations == expected_indentations
+
+    def test_r_blocks_are_indented_corrently(self, code_example_r):
+        """
+        Ensure R blocks are indented correctly as well. Note that we're testing
+        without `%%R` since that'll be removed prior to numbering, and,
+        frustratingly, the results are different.
+        """
+        in_div = BeautifulSoup("""<div class="cell_input docutils container">
+<div><div class="highlight">
+<pre data-code-language="r" data-type="programlisting">## R
+5^8
+</pre></div>
+</div>
+</div>""", 'html.parser')
+        in_pre = in_div.find('pre')
+        preprocess_indentations = re.findall(r'(\n\s*)', str(in_pre))
+        expected_indentations = [ind + (" " * len("In [1]: "))
+                                 for ind in preprocess_indentations]
+        # need to process, numbering with that
+        number_codeblock(in_pre, 0)
+
+        # check indents
+        postprocess_indentations = re.findall(r'(\n\s*)', str(in_pre))
+        assert postprocess_indentations == expected_indentations

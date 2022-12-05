@@ -94,10 +94,16 @@ def number_codeblock(pre_block, cell_number):
     indent = ' ' * len(marker)
 
     # update tab alignment
-    for element in pre_block.contents:
+    for index, element in enumerate(pre_block.contents):
         if type(element) == NavigableString:
-            if re.match(r'\n\s*', element):
-                element.insert_after(indent)
+            if re.search(r'\n\s*', element):
+                indented_code = element.replace('\n', f'\n{indent}')
+                # remove unneeded blank space b/t two newlines for
+                # cleanliness (and to keep old tests passing)
+                indented_code = indented_code.replace(f'\n{indent}\n', '\n\n')
+                # the index-replace contortions are required by the
+                # vagaries of modifying NavigableString.
+                pre_block.contents[index].replace_with(indented_code)
             elif not in_block:
                 # out blocks won't have spans put into them willy-nilly
                 # so a "brute force" approach to indentation works fine
