@@ -230,7 +230,8 @@ def move_span_ids_to_sections(chapter):
 def process_chapter(toc_element,
                     source_dir,
                     build_dir=Path('.'),
-                    book_ids: list = []):
+                    book_ids: list = [],
+                    skip_cell_numbering: bool = False):
     """
     Takes a list of chapter files and chapter lists and then writes the chapter
     to the root directory in which the script is run. Note that this assumes
@@ -260,7 +261,7 @@ def process_chapter(toc_element,
     chapter = process_footnotes(chapter)
     chapter = process_admonitions(chapter)
     chapter = process_math(chapter)
-    chapter = process_code(chapter)
+    chapter = process_code(chapter, skip_cell_numbering)
     chapter = move_span_ids_to_sections(chapter)
     chapter = process_subsections(chapter)
     chapter, ids = process_ids(chapter, book_ids)

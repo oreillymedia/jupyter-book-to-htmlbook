@@ -34,6 +34,11 @@ def jupter_book_to_htmlbook(
             "--skip-jb-build",
             help="Skip running `jupyter-book` as a part of this conversion"
             ),
+        skip_cell_numbering: Optional[bool] = typer.Option(
+            False,
+            "--skip-numbering",
+            help="Skip the numbering of In[]/Out[] code cells"
+            ),
         include_root: Optional[bool] = typer.Option(
             False,
             "--include-root",
@@ -126,7 +131,8 @@ def jupter_book_to_htmlbook(
             file, chapter_ids = process_chapter(element,
                                                 source_dir,
                                                 output_dir,
-                                                book_ids)
+                                                book_ids,
+                                                skip_cell_numbering)
             processed_files.append(f'{target}/{file}')
             book_ids.extend(chapter_ids)
 

@@ -46,6 +46,32 @@ class TestMain:
         with open(tmp_path / 'build/notebooks/ch01.html', 'rt') as f:
             assert 'data-type="chapter"' in f.read()
 
+    def test_skip_code(self,
+                       tmp_path,
+                       monkeypatch: pytest.MonkeyPatch,
+                       caplog):
+        """
+        Ensure that when we say to skip numbering, code cells aren't numbered
+        """
+        # setup
+        caplog.set_level(logging.DEBUG)
+        test_env = tmp_path / 'tmp'
+        test_env.mkdir()
+        shutil.copytree('tests/example_book', test_env, dirs_exist_ok=True)
+        monkeypatch.chdir(tmp_path)  # patch for our build target
+
+        # run, skipping build since it's included in example dir
+        result = runner.invoke(app, [str(test_env), 'build',
+                                     '--skip-jb-build',
+                                     '--skip-numbering'])
+        log = caplog.text
+        assert result.exit_code == 0
+        assert "jupyter-book run" in log
+        assert os.path.isfile(tmp_path / 'build/part-1.html')
+        with open(tmp_path / 'build/notebooks/ch01.html', 'rt') as f:
+            assert 'In [' not in f.read()
+            assert 'Out[' not in f.read()
+
     def test_simple_case_with_json(self,
                                    tmp_path,
                                    monkeypatch: pytest.MonkeyPatch,

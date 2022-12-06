@@ -3,7 +3,7 @@ import logging
 from bs4 import NavigableString  # type: ignore
 
 
-def process_code(chapter):
+def process_code(chapter, skip_numbering=False):
     """
     Turn rendered <pre> blocks into appropriately marked-up HTMLBook
     """
@@ -50,7 +50,8 @@ def process_code(chapter):
                 pre_tag["data-code-language"] = "python"
 
             # apply numbering
-            cell_number = number_codeblock(pre_tag, cell_number)
+            if not skip_numbering:
+                cell_number = number_codeblock(pre_tag, cell_number)
 
         except TypeError:
             logging.warning(f"Unable to apply cell numbering to {div}")
