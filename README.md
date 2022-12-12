@@ -53,6 +53,7 @@ Options:
   --atlas-json TEXT               Path to the book's atlas.json file
   --skip-jb-build                 Skip running `jupyter-book` as a part of
                                   this conversion
+  --skip-numbering      Skip the numbering of In[]/Out[] code cells
   --version
   --install-completion [bash|zsh|fish|powershell|pwsh]
                                   Install completion for the specified shell.
