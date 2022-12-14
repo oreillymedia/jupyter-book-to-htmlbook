@@ -72,6 +72,9 @@ Options:
 
 ## Release Notes
 
+### 1.0.6
+- Add support for sidebars as described in the [Jupyter Book documentation](https://jupyterbook.org/en/stable/content/layout.html#sidebars-within-content)
+
 ### 1.0.1 - 1.0.5
 - Add support for R via `rpy2` syntax in Notebooks
 - Further quiet `jb build` to support Atlas builds
