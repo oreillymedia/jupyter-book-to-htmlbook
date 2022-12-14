@@ -1,7 +1,8 @@
 from bs4 import BeautifulSoup  # type: ignore
 from jupyter_book_to_htmlbook.text_processing import (
     clean_chapter,
-    move_span_ids_to_sections
+    move_span_ids_to_sections,
+    process_sidebars
     )
 
 
@@ -56,3 +57,20 @@ def test_move_span_ids_to_sections():
 <section class="section" data-type="sect2" id="sec-biastypes">
 <h2>Types of Bias</h2>
 <p>Bias comes in many forms!</p></section>"""
+
+
+def test_sidebar_processing():
+    """
+    Sidebars from jupyter book (from the ```{sidebar} syntax) are
+    formatted as <aside>s with a "sidebar" class. For HTMLBook, these
+    need to have sidebar data-types, and the paragraph with the
+    "sidebar-title" class should be an <h5> element.
+    """
+    chapter_text = BeautifulSoup("""<aside class="sidebar">
+<p class="sidebar-title">Here Is a Sidebar Title</p>
+<p>And this is some sidebar content!</p>
+</div>
+</aside>""", "html.parser")
+    process_sidebars(chapter_text)
+    assert chapter_text.find("aside")["data-type"] == "sidebar"
+    assert chapter_text.find("h5").string == "Here Is a Sidebar Title"

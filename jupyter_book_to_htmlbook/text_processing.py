@@ -55,3 +55,20 @@ def move_span_ids_to_sections(chapter):
         # remove span so no dup ids
         span.decompose()
     return chapter
+
+
+def process_sidebars(chapter):
+    """
+    Sidebars should be tagged with appropriate datatype and
+    should have the correct heading level (h5)
+    """
+    sidebars = chapter.find_all("aside", class_="sidebar")
+
+    for aside in sidebars:
+        aside["data-type"] = "sidebar"
+
+        if aside.find("p", class_="sidebar-title"):
+            title = aside.find("p", class_="sidebar-title")
+            title.name = "h5"
+
+    return chapter

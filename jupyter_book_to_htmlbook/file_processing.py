@@ -10,7 +10,8 @@ from .xref_processing import process_interal_refs, process_ids
 from .code_processing import process_code
 from .text_processing import (
         clean_chapter,
-        move_span_ids_to_sections
+        move_span_ids_to_sections,
+        process_sidebars
     )
 
 
@@ -211,6 +212,7 @@ def process_chapter(toc_element,
     chapter = process_math(chapter)
     chapter = process_code(chapter, skip_cell_numbering)
     chapter = move_span_ids_to_sections(chapter)
+    chapter = process_sidebars(chapter)
     chapter = process_subsections(chapter)
     chapter, ids = process_ids(chapter, book_ids)
 
