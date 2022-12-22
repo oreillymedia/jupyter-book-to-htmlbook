@@ -127,6 +127,8 @@ def process_chapter_single_file(toc_element):
             chapter['data-type'] = ch_stub.lower()  # type: ignore
         else:
             chapter['data-type'] = "afterword"  # type: ignore
+    elif ch_stub.lower()[:4] == "appx":
+        chapter['data-type'] = "appendix"
     else:
         chapter['data-type'] = 'chapter'  # type: ignore
     del chapter['class']  # type: ignore

@@ -312,3 +312,21 @@ id="this-is-another-subheading">
         with open(test_out / f'{datatype[0]}.html') as f:
             text = f.read()
             assert text.find(f'data-type="{datatype[1]}') > -1
+
+    def test_process_chapter_appendix_datatypes(self, tmp_path):
+        """
+        Filenames that begin with "appx*" should have the "appendix"
+        data-type applied.
+        """
+        test_env = tmp_path / 'tmp'
+        test_out = test_env / 'build'
+        test_env.mkdir()
+        test_out.mkdir()
+        test_file_path = test_env / 'appx_a.html'
+        shutil.copy('tests/example_book/_build/html/intro.html',
+                    test_file_path)
+        process_chapter(test_file_path, test_env, test_out)
+        # the resulting section should have a data-type of "datatype"
+        with open(test_out / 'appx_a.html') as f:
+            text = f.read()
+            assert text.find('data-type="appendix"') > -1
