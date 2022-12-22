@@ -1,6 +1,7 @@
 import logging
 import re
 from pathlib import Path
+from typing import Union
 from bs4 import BeautifulSoup  # type: ignore
 from .admonition_processing import process_admonitions
 from .figure_processing import process_figures, process_informal_figs
@@ -83,9 +84,11 @@ def promote_headings(chapter):
     return chapter
 
 
-def process_chapter_single_file(toc_element):
-    """ single-file chapter processing """
-    ch_name = toc_element.stem
+def apply_datatype(chapter, ch_name):
+    """
+    Does a best-guess application of a data-type based on file name.
+    """
+    ch_stub = re.sub('[^a-zA-Z]', '', ch_name)
 
     # list of front and back matter guessed-at filenames
     front_matter = ['preface', 'notation', 'prereqs',
@@ -97,25 +100,6 @@ def process_chapter_single_file(toc_element):
                           "copyright-page", "dedication", "acknowledgments",
                           "afterword", "conclusion", 'foreword',
                           'introduction', 'preface']
-
-    with open(toc_element, 'r') as f:
-        base_soup = BeautifulSoup(f, 'lxml')
-
-    # perform initial swapping and namespace designation
-    try:
-        chapter = base_soup.find_all('section')[0]
-        chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
-
-    except IndexError:  # does not have a section class for top-level
-        logging.warning("Looks like {toc_element.name} is malformed.")
-        return None, None
-
-    # promote headings
-    chapter = promote_headings(chapter)
-
-    # apply appropriate data-type (best guess)
-
-    ch_stub = re.sub('[^a-zA-Z]', '', ch_name)
 
     if ch_stub.lower() in front_matter or ch_name in front_matter:
         if ch_stub.lower() in allowed_data_types:
@@ -132,6 +116,45 @@ def process_chapter_single_file(toc_element):
     else:
         chapter['data-type'] = 'chapter'  # type: ignore
     del chapter['class']  # type: ignore
+
+    return chapter
+
+
+def process_chapter_soup(toc_element: Union[Path, list[Path]]):
+    """ unified file chapter processing """
+
+    if isinstance(toc_element, list):  # i.e., an ordered list of chapter parts
+        chapter_file = toc_element[0]
+        chapter_parts = toc_element[1:]
+    else:
+        chapter_file = toc_element
+        chapter_parts = None
+
+    ch_name = chapter_file.stem
+
+    with open(chapter_file, 'r') as f:
+        base_soup = BeautifulSoup(f, 'lxml')
+
+    # perform initial swapping and namespace designation
+    try:
+        chapter = base_soup.find_all('section')[0]
+        chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
+        del chapter['class']
+
+    except IndexError:  # does not have a section class for top-level
+        logging.warning("Looks like {toc_element.name} is malformed.")
+        return None, None
+
+    # promote subheadings within "base" chapter
+    chapter = promote_headings(chapter)
+
+    if chapter_parts:
+        for subfile in chapter_parts:
+            subsection = process_chapter_subparts(subfile)
+            chapter.append(subsection)
+
+    # apply appropriate data-type (best guess)
+    chapter = apply_datatype(chapter, ch_name)
 
     return chapter, ch_name
 
@@ -155,29 +178,6 @@ def process_chapter_subparts(subfile):
     return section
 
 
-def compile_chapter_parts(ordered_chapter_files_list):
-    """
-    Takes a list of chapter file URIs and returns a basic, sectioned
-    chapter soup (i.e., with no other htmlbook optimizations)
-    """
-    # work with main file
-    base_chapter_file = ordered_chapter_files_list[0]
-    with open(base_chapter_file, 'r') as f:
-        base_soup = BeautifulSoup(f, 'lxml')
-    sections = base_soup.find_all('section')
-    chapter = sections[0]  # first section is the "main" section
-    chapter['data-type'] = 'chapter'  # type: ignore
-    chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
-    del chapter['class']  # type: ignore
-
-    # work with subfiles
-    for subfile in ordered_chapter_files_list[1:]:
-        subsection = process_chapter_subparts(subfile)
-        chapter.append(subsection)  # type: ignore
-
-    return chapter
-
-
 def process_chapter(toc_element,
                     source_dir,
                     build_dir=Path('.'),
@@ -189,18 +189,11 @@ def process_chapter(toc_element,
     that the files are in some /html/ directory or some such
     """
 
-    if isinstance(toc_element, Path):  # single-file chapter
-        chapter, ch_name = process_chapter_single_file(toc_element)
+    chapter, ch_name = process_chapter_soup(toc_element)
 
-        # if the file happens to be bad, just return (logged elsewhere)
-        if chapter is None or ch_name is None:
-            return
+    if not chapter:  # guard against malformed files
+        return
 
-    else:  # i.e., an ordered list of chapter parts
-        chapter = compile_chapter_parts(toc_element)
-        ch_name = toc_element[0].stem
-
-    # see where we're at
     logging.info(f"Processing {ch_name}...")
 
     # perform cleans and processing

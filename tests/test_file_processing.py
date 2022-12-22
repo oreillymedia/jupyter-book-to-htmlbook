@@ -3,9 +3,8 @@ import os
 import pytest
 import shutil
 from jupyter_book_to_htmlbook.file_processing import (
-        compile_chapter_parts,
         process_chapter,
-        process_chapter_single_file
+        process_chapter_soup
 )
 
 
@@ -22,11 +21,11 @@ class TestChapterProcess:
         shutil.copytree('tests/example_book/_build/html/notebooks',
                         test_env, dirs_exist_ok=True)
 
-        result = compile_chapter_parts([
+        result = process_chapter_soup([
             test_env / 'ch02.00.html',
             test_env / 'ch02.01.html',
             test_env / 'ch02.02.html',
-            ])
+            ])[0]
         # the resulting section should have a data-type of "chapter"
         assert result["data-type"] == "chapter"
         # number of level-1 subsections should be one less than the group
@@ -93,7 +92,7 @@ id="this-is-another-subheading">
 <a class="headerlink" href="#summary" title="Permalink to this headline">#</a>
 </h2>
 <p>Finally, a summary.</p></section></section>""")
-        result = process_chapter_single_file(tmp_path / 'ch.html')[0]
+        result = process_chapter_soup(tmp_path / 'ch.html')[0]
         assert str(result) == """<section data-type="chapter" id="this""" + \
                               """-is-another-subheading" xmlns="http:/""" + \
                               """/www.w3.org/1999/xhtml">
@@ -217,6 +216,7 @@ id="this-is-another-subheading">
             text = f.read()
             assert text.find('xmlns="http://www.w3.org/1999/xhtml"') > -1
 
+    @pytest.mark.in_dev
     def test_process_chapter_totally_invalid_file(self, tmp_path, caplog):
         """
         if we ever try to process something that's super malformed, don't,
@@ -329,4 +329,36 @@ id="this-is-another-subheading">
         # the resulting section should have a data-type of "datatype"
         with open(test_out / 'appx_a.html') as f:
             text = f.read()
+            assert text.find('data-type="appendix"') > -1
+
+    def test_process_appendix_with_subsections(self, tmp_path, capsys):
+        """
+        ensure subsections are getting data-typed appropriately when
+        they're a part of an appendix
+        """
+        test_env = tmp_path / 'tmp'
+        test_out = test_env / 'output'
+        test_env.mkdir()
+        test_out.mkdir()
+        shutil.copytree('tests/example_book/_build/html/notebooks',
+                        test_env, dirs_exist_ok=True)
+
+        # prep files
+        os.rename(test_env / 'ch02.00.html', test_env / 'appx_a.00.html')
+        os.rename(test_env / 'ch02.01.html', test_env / 'appx_a.01.html')
+        os.rename(test_env / 'ch02.02.html', test_env / 'appx_a.02.html')
+
+        process_chapter([
+            test_env / 'appx_a.00.html',
+            test_env / 'appx_a.01.html',
+            test_env / 'appx_a.02.html',
+            ], test_env, test_out)
+
+        with open(test_out / 'appx_a.00.html') as f:
+            text = f.read()
+            assert 'data-type="sect1"' in text
+            assert 'data-type="sect2"' in text
+            assert 'data-type="sect3"' in text
+            assert 'data-type="sect4"' in text
+            assert 'data-type="sect5"' in text
             assert text.find('data-type="appendix"') > -1
