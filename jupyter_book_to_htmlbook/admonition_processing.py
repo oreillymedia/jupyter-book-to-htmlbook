@@ -17,7 +17,7 @@ def process_admonitions(chapter):
                 admn['data-type'] = type
             else:
                 admn['data-type'] = "note"
-        del(admn['class'])
+        del admn['class']
         if admn.find(class_="admonition-title"):
             title = admn.find(class_="admonition-title")
             try:

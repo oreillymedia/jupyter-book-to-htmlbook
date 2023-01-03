@@ -7,7 +7,7 @@ from .admonition_processing import process_admonitions
 from .figure_processing import process_figures, process_informal_figs
 from .footnote_processing import process_footnotes
 from .math_processing import process_math
-from .xref_processing import process_interal_refs, process_ids
+from .reference_processing import process_interal_refs, process_ids
 from .code_processing import process_code
 from .text_processing import (
         clean_chapter,
