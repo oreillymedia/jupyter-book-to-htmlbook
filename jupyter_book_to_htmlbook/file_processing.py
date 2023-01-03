@@ -7,7 +7,11 @@ from .admonition_processing import process_admonitions
 from .figure_processing import process_figures, process_informal_figs
 from .footnote_processing import process_footnotes
 from .math_processing import process_math
-from .xref_processing import process_interal_refs, process_ids
+from .reference_processing import (
+        process_interal_refs,
+        process_ids,
+        add_glossary_datatypes
+    )
 from .code_processing import process_code
 from .text_processing import (
         clean_chapter,
@@ -113,6 +117,8 @@ def apply_datatype(chapter, ch_name):
             chapter['data-type'] = "afterword"  # type: ignore
     elif ch_stub.lower()[:4] == "appx":
         chapter['data-type'] = "appendix"
+    elif ch_stub.lower() == "glossary":
+        chapter['data-type'] = "glossary"
     else:
         chapter['data-type'] = 'chapter'  # type: ignore
     del chapter['class']  # type: ignore
@@ -209,6 +215,10 @@ def process_chapter(toc_element,
     chapter = move_span_ids_to_sections(chapter)
     chapter = process_sidebars(chapter)
     chapter = process_subsections(chapter)
+
+    if chapter["data-type"] == "glossary":
+        add_glossary_datatypes(chapter)
+
     chapter, ids = process_ids(chapter, book_ids)
 
     # write the file, preserving any directory structure(s) from source

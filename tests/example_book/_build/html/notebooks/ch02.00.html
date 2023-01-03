@@ -171,6 +171,18 @@ const thebe_selector_output = ".output, .cell_output"
   </a>
  </li>
 </ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  References
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="glossary.html">
+   Glossary
+  </a>
+ </li>
+</ul>
 
     </div>
 </nav></div>
@@ -346,10 +358,12 @@ title="Print to PDF"
 <p>For example, this ought to display as a note.</p>
 </div>
 <p>The MyST markdown format also includes nice things like definition lists:</p>
-<p>A first term
-: Some information about that first term.</p>
-<p>A second term
-: Some information about <em>this</em> term.</p>
+<dl class="simple myst">
+<dt>A first term</dt><dd><p>Some information about that first term.</p>
+</dd>
+<dt>A second term</dt><dd><p>Some information about <em>this</em> term.</p>
+</dd>
+</dl>
 <p>Also, somewhat frighteningly, there appears to be index terms now? But it’s not clear to me that we actually need to support that feature.</p>
 <p id="index-0">Still, we ought to support the newer figure syntax, as in <a class="reference internal" href="#example-fig"><span class="std std-ref">this figure</span></a>.</p>
 <figure class="align-default" id="example-fig">

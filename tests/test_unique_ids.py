@@ -1,7 +1,7 @@
 import re
 from bs4 import BeautifulSoup  # type: ignore
 from typer.testing import CliRunner
-from jupyter_book_to_htmlbook.xref_processing import process_ids
+from jupyter_book_to_htmlbook.reference_processing import process_ids
 
 runner = CliRunner()
 

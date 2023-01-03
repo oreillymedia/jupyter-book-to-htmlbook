@@ -1,3 +1,4 @@
+import copy
 import logging
 import random
 
@@ -64,3 +65,49 @@ def process_ids(chapter, existing_ids=[]):
 
     chapter_ids = [element['id'] for element in chapter.find_all(id=True)]
     return chapter, chapter_ids
+
+
+def add_glossary_datatypes(chapter):
+    """
+    Adds appropriate data types to glossary definition lists and terms.
+
+    (Assumes being called only on a "glossary.*" file)
+    """
+
+    # We need to get base soup for adding new tags; the IndexError handling
+    # is to facilitate testing when there isn't a root "document" behind
+    # the "chapter"
+    try:
+        soup = [x for x in chapter.parents][-1]
+    except IndexError:
+        soup = chapter
+
+    glossary_lists = chapter.find_all("dl")
+    for gloss in glossary_lists:
+        gloss["data-type"] = "glossary"
+        terms = gloss.find_all("dt")
+        for term in terms:
+            term["data-type"] = "glossterm"
+            for element in term.contents:
+                if element.name == "a" and "headerlink" in element["class"]:
+                    element.decompose()
+
+            # Wrap term string or elements in dfn tags per HTMLBook spec
+            try:
+                term.string.wrap(soup.new_tag("dfn"))
+            except AttributeError:
+                # there's no easy to wrap multiple things in bs4
+                # so this is the workaround
+                rebuilt_term = soup.new_tag("dt")
+                rebuilt_term["data-type"] = "glossterm"
+                rebuilt_term.append(soup.new_tag("dfn"))
+                for child in term.contents:
+                    # due to frustrating subtleties with the way bs4
+                    # handles children, we need to make a copy here
+                    rebuilt_term.dfn.append(copy.copy(child))
+                term.replace_with(rebuilt_term)
+
+        defs = gloss.find_all("dd")
+        for defn in defs:
+            defn["data-type"] = "glossdef"
+    return chapter
