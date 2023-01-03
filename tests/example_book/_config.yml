@@ -13,3 +13,10 @@ execute:
 latex:
   latex_documents:
     targetname: book.tex
+    
+parse:
+  myst_enable_extensions:
+    # don't forget to list any other extensions you want enabled,
+    # including those that are enabled by default!
+    - deflist # Required to use definitions lists 
+              # See https://jupyterbook.org/en/stable/content/content-blocks.html#definition-lists
