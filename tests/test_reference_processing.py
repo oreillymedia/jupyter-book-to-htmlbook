@@ -20,15 +20,18 @@ class TestInternalRefs:
         Should convert bib refs to spans containing CMS author-date style
         citations
         """
-        text = '<p>For a more detailed breakdown, see ' + \
-               '<span id="1">[<a class="reference internal" href="../../' + \
-               'references.html#id35">Leek and Peng, 2015</a>]</span>.</p>' + \
-               '<p>In the next section, we’ll talk about...</p>'
+        text = """
+<p>Finally, here is a citation <span id="id1">[<a class="reference internal"
+href="#id6" title="Terry Baruch...">Baruch, 1993</a>]</span>.
+And then some others <span id="id2">[<a class="reference internal"
+href="#id5" title="Terry Aadams...">Aadams, 1993</a>]</span>,
+<span id="id3">[<a class="reference internal" href="#id7"
+title="Terry Carver...">Carver, 1993</a>]</span>.</p>
+"""
         chapter = BeautifulSoup(text, 'html.parser')
         result = process_interal_refs(chapter)
-        assert str(result) == ("<p>For a more detailed breakdown, see <span>" +
-                               "(Leek and Peng 2015)</span>.</p><p>In the " +
-                               "next section, we’ll talk about...</p>")
+        assert not result.find("a")
+        assert "(Baruch 1993)" in result.find("span").contents
 
     def test_alert_on_external_images(self, caplog):
         """

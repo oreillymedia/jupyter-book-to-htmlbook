@@ -10,17 +10,21 @@ def process_interal_refs(chapter):
     references to valid htmlbook xrefs. Currently opinionated towards CMS
     author-date.
     """
-    xrefs = chapter.find_all(class_='internal')
+    xrefs = chapter.find_all("a", class_='internal')
     for ref in xrefs:
-        # handle bib references, be opinionated!
-        if ref['href'].find('references.html') > -1:
+        # handle bib references
+        if (
+                ref.parent.name == "span" and
+                ref.parent.contents[0] == "[" and
+                ref.parent.contents[-1] == "]"
+           ):
             ref.name = 'span'
             del ref['href']
             # remove any internal tags
             inner_str = ''
             for part in ref.contents:
                 inner_str += part.string
-            # remove last comma per CMS
+            # remove last comma (before year/date) per CMS
             inner_str = ','.join(inner_str.split(',')[0:-1]) + \
                         inner_str.split(',')[-1]
             ref.string = f'({inner_str})'

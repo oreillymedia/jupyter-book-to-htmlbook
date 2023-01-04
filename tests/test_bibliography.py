@@ -6,21 +6,15 @@ from jupyter_book_to_htmlbook.file_processing import (
     )
 from jupyter_book_to_htmlbook.reference_processing import process_citations
 
-"""
-[[bibliography]]
-[appendix]
-[role="bibliography"]
-== Bibliography
-
-Bibliography content starts here.
-"""
-
 
 class TestBibliography:
     """
     Tests targeting "bibliography" content included in the book, including:
     * End of book "bibliography" appendix
     * End-of-file / chapter bibliographies
+
+    NOTE: Tests against citations/references should be found in the
+    test_references.py file.
     """
 
     def test_bib_appx_datatype(self, tmp_path):
