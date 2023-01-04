@@ -10,6 +10,7 @@ from .math_processing import process_math
 from .reference_processing import (
         process_interal_refs,
         process_ids,
+        process_citations,
         add_glossary_datatypes
     )
 from .code_processing import process_code
@@ -115,7 +116,7 @@ def apply_datatype(chapter, ch_name):
             chapter['data-type'] = ch_stub.lower()  # type: ignore
         else:
             chapter['data-type'] = "afterword"  # type: ignore
-    elif ch_stub.lower()[:4] == "appx":
+    elif ch_stub.lower()[:4] == "appx" or ch_stub == "bibliography":
         chapter['data-type'] = "appendix"
     elif ch_stub.lower() == "glossary":
         chapter['data-type'] = "glossary"
@@ -124,6 +125,25 @@ def apply_datatype(chapter, ch_name):
     del chapter['class']  # type: ignore
 
     return chapter
+
+
+def get_main_section(soup):
+    """
+    Gets the main "section," or the main chapter text, and additionally
+    checks to see if there is a separate bibliography section, returning
+    that if it exists to be dealt with later.
+    """
+    sections = soup.find_all('section')
+    try:
+        main = sections[0]
+    except IndexError:  # does not have a section class for top-level
+        logging.warning("Looks like {toc_element.name} is malformed.")
+        return None, None
+    if len(sections) > 1:
+        bibliography = soup.find('section', id="bibliography")
+    else:
+        bibliography = None
+    return main, bibliography
 
 
 def process_chapter_soup(toc_element: Union[Path, list[Path]]):
@@ -142,34 +162,43 @@ def process_chapter_soup(toc_element: Union[Path, list[Path]]):
         base_soup = BeautifulSoup(f, 'lxml')
 
     # perform initial swapping and namespace designation
-    try:
-        chapter = base_soup.find_all('section')[0]
+    chapter, bib = get_main_section(base_soup)
+
+    if not chapter:
+        return None, None
+
+    else:
         chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
         del chapter['class']
 
-    except IndexError:  # does not have a section class for top-level
-        logging.warning("Looks like {toc_element.name} is malformed.")
-        return None, None
+        # promote subheadings within "base" chapter
+        chapter = promote_headings(chapter)
 
-    # promote subheadings within "base" chapter
-    chapter = promote_headings(chapter)
+        if chapter_parts:
+            for subfile in chapter_parts:
+                subsection, sub_bib = process_chapter_subparts(subfile)
+                chapter.append(subsection)
+                if bib and sub_bib:
+                    entries = sub_bib.find_all("dd")
+                    bib.dl.extend(entries)
+                elif sub_bib:
+                    bib = sub_bib
 
-    if chapter_parts:
-        for subfile in chapter_parts:
-            subsection = process_chapter_subparts(subfile)
-            chapter.append(subsection)
+        # apply appropriate data-type (best guess)
+        chapter = apply_datatype(chapter, ch_name)
 
-    # apply appropriate data-type (best guess)
-    chapter = apply_datatype(chapter, ch_name)
+        # add bibliography, if present
+        if bib:
+            chapter.append(bib)
 
-    return chapter, ch_name
+        return chapter, ch_name
 
 
 def process_chapter_subparts(subfile):
     """ processing for chapters with "sections" """
     with open(subfile, 'r') as f:
         soup = BeautifulSoup(f, 'lxml')
-        section = soup.find_all('section')[0]
+        section, bib = get_main_section(soup)
         section['data-type'] = 'sect1'  # type: ignore
         del section['class']  # type: ignore
         # move id from empty span to section
@@ -181,7 +210,7 @@ def process_chapter_subparts(subfile):
         except KeyError:
             # fun fact, this happens when there is numbering on the toc
             pass  # like before, if it's not there that's OK.
-    return section
+    return section, bib
 
 
 def process_chapter(toc_element,
@@ -208,6 +237,7 @@ def process_chapter(toc_element,
     chapter = process_figures(chapter, build_dir)
     chapter = process_informal_figs(chapter, build_dir)
     chapter = process_interal_refs(chapter)
+    chapter = process_citations(chapter)
     chapter = process_footnotes(chapter)
     chapter = process_admonitions(chapter)
     chapter = process_math(chapter)

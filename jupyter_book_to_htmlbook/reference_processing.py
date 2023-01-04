@@ -111,3 +111,18 @@ def add_glossary_datatypes(chapter):
         for defn in defs:
             defn["data-type"] = "glossdef"
     return chapter
+
+
+def process_citations(chapter):
+    """
+    Process and handle bibliographical citations in a chapter
+    """
+    bib_lists = chapter.find_all("dl", class_="citation")
+    for bib in bib_lists:
+        bib.name = "ul"
+        bib["class"] = "author-date"
+        for dt in bib.find_all("dt"):
+            dt.decompose()
+        for dd in bib.find_all("dd"):
+            dd.name = "li"
+    return chapter
