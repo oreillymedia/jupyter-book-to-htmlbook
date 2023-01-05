@@ -41,19 +41,20 @@ def clean_chapter(chapter, rm_numbering=True):
 
 def move_span_ids_to_sections(chapter):
     """
-    Takes span tags with "sec-" ids and moves the id to the parent section tag
-    so Atlas can find the cross reference.
+    Takes empty span tags under a section parent with a heading next sibling
+    and moves the id to the parent section tag so Atlas can find the cross
+    reference.
     """
-    sec_spans = chapter.find_all("span", id=re.compile('sec-*'))
-    for span in sec_spans:
-        # get id
-        span_id = span['id']
-        # get next heading
-        section = span.find_parent('section')
-        # add span id to section
-        section['id'] = span_id
-        # remove span so no dup ids
-        span.decompose()
+    empty_id_spans = chapter.find_all("span", id=True, string="")
+    for span in empty_id_spans:
+        if (
+                span.parent.name == "section" and
+                span.next_sibling.name in ["h1", "h2", "h3", "h4", "h5"]
+           ):
+            # add span id to section
+            span.parent['id'] = span['id']
+            # remove the now unneeded span
+            span.decompose()
     return chapter
 
 

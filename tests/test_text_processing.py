@@ -43,20 +43,21 @@ div class="cell_input docutils container"&gt;
 def test_move_span_ids_to_sections():
     """
     Atlas requires that cross reference targets sections so that
-    the text will appear as expected. This test is to confirm that
-    the ids we added ("sec-") to the invisible spans earlier for cross
-    referencing are then applied to the parent section.
+    the links and cross-reference text will appear as expected in Atlas
     """
     chapter_text = """
+<section data-type="chapter" id="analytics" xmlns="http://w3.org/1999/xhtml">
+<span id="chp-1"></span><h1>Analytics</h1>
 <section class="section" data-type="sect2" id="types-of-bias">
 <span id="sec-biastypes"></span><h2>Types of Bias</h2>
-<p>Bias comes in many forms!</p>"""
+<p>Bias <span id="donotmove"></span>comes in many forms!</p>
+</section></section>"""
     chapter = BeautifulSoup(chapter_text, 'html.parser')
     result = move_span_ids_to_sections(chapter)
-    assert str(result) == """
-<section class="section" data-type="sect2" id="sec-biastypes">
-<h2>Types of Bias</h2>
-<p>Bias comes in many forms!</p></section>"""
+    sections = result.find_all("section")
+    assert sections[0]["id"] == "chp-1"
+    assert sections[1]["id"] == "sec-biastypes"
+    assert not result.find("p", id=True)
 
 
 def test_sidebar_processing():
