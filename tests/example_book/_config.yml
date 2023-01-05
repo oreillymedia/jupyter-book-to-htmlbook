@@ -20,3 +20,10 @@ parse:
     # including those that are enabled by default!
     - deflist # Required to use definitions lists 
               # See https://jupyterbook.org/en/stable/content/content-blocks.html#definition-lists
+
+bibtex_bibfiles:
+  - references.bib
+
+sphinx:
+  config:
+    bibtex_reference_style: author_year

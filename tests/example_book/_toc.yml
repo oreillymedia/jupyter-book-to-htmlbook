@@ -21,3 +21,4 @@ parts:
   - caption: References
     chapters:
       - file: notebooks/glossary
+      - file: bibliography

@@ -10,17 +10,21 @@ def process_interal_refs(chapter):
     references to valid htmlbook xrefs. Currently opinionated towards CMS
     author-date.
     """
-    xrefs = chapter.find_all(class_='internal')
+    xrefs = chapter.find_all("a", class_='internal')
     for ref in xrefs:
-        # handle bib references, be opinionated!
-        if ref['href'].find('references.html') > -1:
+        # handle bib references
+        if (
+                ref.parent.name == "span" and
+                ref.parent.contents[0] == "[" and
+                ref.parent.contents[-1] == "]"
+           ):
             ref.name = 'span'
             del ref['href']
             # remove any internal tags
             inner_str = ''
             for part in ref.contents:
                 inner_str += part.string
-            # remove last comma per CMS
+            # remove last comma (before year/date) per CMS
             inner_str = ','.join(inner_str.split(',')[0:-1]) + \
                         inner_str.split(',')[-1]
             ref.string = f'({inner_str})'
@@ -110,4 +114,19 @@ def add_glossary_datatypes(chapter):
         defs = gloss.find_all("dd")
         for defn in defs:
             defn["data-type"] = "glossdef"
+    return chapter
+
+
+def process_citations(chapter):
+    """
+    Process and handle bibliographical citations in a chapter
+    """
+    bib_lists = chapter.find_all("dl", class_="citation")
+    for bib in bib_lists:
+        bib.name = "ul"
+        bib["class"] = "author-date"
+        for dt in bib.find_all("dt"):
+            dt.decompose()
+        for dd in bib.find_all("dd"):
+            dd.name = "li"
     return chapter
