@@ -1,11 +1,14 @@
 import logging
 import pytest
 import re
+import shutil
 from bs4 import BeautifulSoup  # type: ignore
 from jupyter_book_to_htmlbook.code_processing import (
         process_code,
         number_codeblock,
+        process_code_examples
     )
+from jupyter_book_to_htmlbook.file_processing import process_chapter
 from pathlib import Path
 
 
@@ -23,6 +26,23 @@ def code_example_r():
                      "tests/example_book/_build/html/notebooks/code_r.html"
                   ).read_text()
     return BeautifulSoup(chapter, 'lxml')
+
+
+@pytest.fixture
+def code_example_data_type():
+    return BeautifulSoup("""<div class="cell tag_example docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="c1"># hello</span>
+<span class="c1"># An example example title</span>
+
+<span class="k">def</span> <span class="nf">h</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
+</div>
+""", "html.parser")
 
 
 class TestCodeProcessing:
@@ -267,3 +287,166 @@ class TestNumbering:
         # check indents
         postprocess_indentations = re.findall(r'(\n\s*)', str(in_pre))
         assert postprocess_indentations == expected_indentations
+
+
+class TestCodeExamples:
+    """
+    Tests around code blocks that should be rendered as "Examples" in the text,
+    signaled by the "tag_example" class appended to the cell div
+    """
+
+    def test_example_datatype_is_added(self, code_example_data_type):
+        """
+        Test that when we see "tag_example" in a class list, the
+        appropriate "example" data type is added
+        """
+        result = process_code_examples(code_example_data_type)
+        example_div = result.find("div", class_="tag_example")
+        assert example_div.get("data-type") == "example"
+
+    def test_example_uuid_is_added(self, code_example_data_type):
+        """
+        Test that when we see "tag_example" in a class list, the
+        appropriate id for the example (based on first comment in
+        code) is applied to the div with the "example" data-type
+        """
+        result = process_code_examples(code_example_data_type)
+        example_div = result.find("div", class_="tag_example")
+        assert example_div["id"] == "hello"
+
+    def test_example_heading_is_added(self, code_example_data_type):
+        """
+        Test that when we see "tag_example" in a class list, the
+        appropriate heading for the example (based on 2nd comment in
+        code) is added in an h5 tag to the div with the "example" data-type
+        """
+        result = process_code_examples(code_example_data_type)
+        example_div = result.find("div", class_="tag_example")
+        assert example_div.find("h5")
+        assert example_div.find("h5").string == "An example example title"
+
+    def test_example_signal_comments_are_removed(self, code_example_data_type):
+        """
+        We don't need (or want) the signaling names/headings to appear in
+        the final book, so let's ensure those are removed, but also that
+        we're not leaving a bunch of extra space there.
+        """
+        result = process_code_examples(code_example_data_type)
+        example_pre = result.find("pre")
+        assert not example_pre.find("span", class_="c1", string="# hello")
+        assert not example_pre.find("span", class_="c1",
+                                    string="# An example example title")
+        assert "\n" not in example_pre.contents[0:3]
+        assert "\n\n" not in example_pre.contents[0:3]
+
+    def test_malformed_example_missing_uuid(self, caplog):
+        """
+        Ensure that we're logging failures (e.g., when an author doesn't
+        include both a uuid and title)
+        """
+        expect_fail = BeautifulSoup("""
+<div class="cell tag_example docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="c1"># This is an example title</span>
+
+<span class="k">def</span> <span class="nf">h</span><span class="p">():</span>
+    <span class="k">pass</span></pre></div></div></div></div>
+""", "html.parser")
+        caplog.set_level(logging.DEBUG)
+        result = process_code_examples(expect_fail)
+        log = caplog.text
+        assert "Unable to apply example formatting" in log
+        assert not result.find("div", class_="highlight").get("data-type")
+
+    def test_malformed_example_missing_title(self, caplog):
+        """
+        Ensure that we're logging failures (e.g., when an author doesn't
+        include both a uuid and title)
+        """
+        expect_fail = BeautifulSoup("""
+<div class="cell tag_example docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="c1"># hello</span>
+
+<span class="k">def</span> <span class="nf">h</span><span class="p">():</span>
+    <span class="k">pass</span></pre></div></div></div></div>
+""", "html.parser")
+        caplog.set_level(logging.DEBUG)
+        result = process_code_examples(expect_fail)
+        log = caplog.text
+        assert "Unable to apply example formatting" in log
+        assert not result.find("div", class_="highlight").get("data-type")
+
+    def test_malformed_example_with_extra_comments_later(self, caplog):
+        """
+        Ensure that we're logging failures (e.g., when an author doesn't
+        include both a uuid and title)
+        """
+        expect_fail = BeautifulSoup("""
+<div class="cell tag_example docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="c1"># hello</span>
+
+<span class="k">def</span> <span class="nf">h</span><span class="p">():</span>
+    <span class="k">pass</span><span class="c1">FAIL!</span></pre></div></div>
+</div></div>""", "html.parser")
+        caplog.set_level(logging.DEBUG)
+        result = process_code_examples(expect_fail)
+        log = caplog.text
+        assert "Missing first two line comments for" in log
+        assert not result.find("div", class_="highlight").get("data-type")
+
+    def test_examples_and_highlight_in_chapter_processing(self, tmp_path):
+        """
+        More an integration test, ensuring that when we process a chapter
+        the examples are data-typed as such, and that they still get their
+        highlighting
+        """
+        test_env = tmp_path / 'tmp'
+        test_out = test_env / 'output'
+        test_env.mkdir()
+        test_out.mkdir()
+        shutil.copytree('tests/example_book/_build/html/notebooks',
+                        test_env, dirs_exist_ok=True)
+
+        process_chapter(test_env / "code_py.html",
+                        test_env, test_out)
+        with open(test_out / 'code_py.html') as f:
+            soup = BeautifulSoup(f.read(), "html.parser")
+
+        examples = soup.find_all("div", class_="tag_example")
+        assert len(examples) == 2
+        for example_div in examples:
+            assert example_div["data-type"] == "example"
+            assert example_div.find("h5")
+            assert example_div.find("pre")["data-code-language"] == "python"
+
+    def test_example_pulls_in_output(self):
+        """
+        If the code example has any output, it should be included in the
+        example div
+        """
+        chapter = BeautifulSoup("""
+<div class="cell tag_example docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="c1"># hello_tim_with_output</span>
+<span class="c1"># An example, but with output</span>
+
+<span class="n">hello</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate">
+<div class="highlight"><pre><span></span>Hello, Tim! Nice to meet you!
+</pre></div>
+</div>
+</div>
+</div>""", "html.parser")
+        result = process_code_examples(chapter)
+        example_div = result.find("div", class_="tag_example")
+        assert example_div.find("div", class_="cell_output")
