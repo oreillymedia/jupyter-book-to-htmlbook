@@ -1,6 +1,7 @@
 import copy
 import logging
 import random
+from .helpers import base_soup
 
 
 def process_interal_refs(chapter):
@@ -81,10 +82,7 @@ def add_glossary_datatypes(chapter):
     # We need to get base soup for adding new tags; the IndexError handling
     # is to facilitate testing when there isn't a root "document" behind
     # the "chapter"
-    try:
-        soup = [x for x in chapter.parents][-1]
-    except IndexError:
-        soup = chapter
+    soup = base_soup(chapter)
 
     glossary_lists = chapter.find_all("dl")
     for gloss in glossary_lists:

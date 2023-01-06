@@ -1,3 +1,6 @@
+from .helpers import base_soup
+
+
 def process_math(chapter):
     """
     Takes latex math notation and applies HTMLBook-compliant metadata such that
@@ -8,9 +11,7 @@ def process_math(chapter):
         eq['data-type'] = "tex"
         if eq.name == 'div':  # wrap divs as equations
             # we have to get the soup to make a new tag...
-            # this will be slow depending on how far down the rabbit hole
-            # the equation is
-            soup = [x for x in eq.parents][-1]
+            soup = base_soup(chapter)
             eq.wrap(soup.new_tag("div"))
             eq.parent["data-type"] = "equation"
     return chapter
