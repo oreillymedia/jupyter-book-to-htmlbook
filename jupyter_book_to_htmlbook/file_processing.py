@@ -13,7 +13,7 @@ from .reference_processing import (
         process_citations,
         add_glossary_datatypes
     )
-from .code_processing import process_code
+from .code_processing import process_code, process_code_examples
 from .text_processing import (
         clean_chapter,
         move_span_ids_to_sections,
@@ -241,6 +241,8 @@ def process_chapter(toc_element,
     chapter = process_footnotes(chapter)
     chapter = process_admonitions(chapter)
     chapter = process_math(chapter)
+    # note: best to run examples before code processing
+    chapter = process_code_examples(chapter)
     chapter = process_code(chapter, skip_cell_numbering)
     chapter = move_span_ids_to_sections(chapter)
     chapter = process_sidebars(chapter)
