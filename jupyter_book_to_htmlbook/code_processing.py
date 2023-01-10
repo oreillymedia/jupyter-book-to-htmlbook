@@ -125,9 +125,16 @@ def process_code_examples(chapter):
         pre_block = example_cell.find("pre")
         comments = pre_block.find_all("span", class_="c1")
 
-        # ensure comments are within the first three spans (since we
-        # expect an empty span to start based on their highlighter)
-        if len(comments) < 2 or not (
+        if (  # it's an R block
+                (pre_block.find("span", class_="o", string="%%") ==
+                    pre_block.find_all("span")[1]) and
+                (pre_block.find("span", class_="k", string="R") ==
+                    pre_block.find_all("span")[2])
+           ):
+            example_name, example_title = example_get_name_and_title_r(
+                                                                 pre_block)
+
+        elif len(comments) < 2 or not (  # it's malformed
                 comments[0] in pre_block.find_all("span")[0:3] and
                 comments[1] in pre_block.find_all("span")[0:3]
                ):
@@ -136,30 +143,33 @@ def process_code_examples(chapter):
                 f"Unable to apply example formatting to {example_cell}.")
             return example_cell
 
-        example_name, example_title = example_get_name_and_title(comments)
+        # ensure comments are within the first three spans (since we
+        # expect an empty span to start based on their highlighter)
+        else:  # we're getting what we expect
+            example_name, example_title = example_get_name_and_title(comments)
+            # remove empty space left by decomposed spans
+            # assuming they add the empty span at the beginning of block
+            for element in pre_block.contents[0:3]:
+                if (
+                        type(element) == NavigableString and
+                        element.string in ["\n", "\n\n"]
+                   ):
+                    element.replace_with('')
 
-        logging.info("Applying example formatting to and removing" +
-                     f" first comments from: {example_cell}")
+            logging.info("Applying example formatting to and removing" +
+                         f" first comments from: {example_cell}")
 
-        # remove empty space left by decomposed spans
-        # assuming they add the empty span at the beginning of block, do [0:3]
-        for element in pre_block.contents[0:3]:
-            if (
-                    type(element) == NavigableString and
-                    element.string in ["\n", "\n\n"]
-               ):
-                element.replace_with('')
+        if example_name is not None and example_title is not None:
+            # apply data-type to cell (gets us including output for free)
+            example_cell["data-type"] = "example"
+            example_cell["id"] = example_name
 
-        # apply data-type to cell (gets us including output for free)
-        example_cell["data-type"] = "example"
-        example_cell["id"] = example_name
-
-        # add an h5 tag with the appropriate heading
-        soup = base_soup(example_cell)
-        heading = soup.new_tag("h5")
-        example_cell.insert(0, heading)
-        # have to have the tag in the tree before adding the title
-        heading.append(example_title)
+            # add an h5 tag with the appropriate heading
+            soup = base_soup(example_cell)
+            heading = soup.new_tag("h5")
+            example_cell.insert(0, heading)
+            # have to have the tag in the tree before adding the title
+            heading.append(example_title)
 
     return chapter
 
@@ -180,3 +190,24 @@ def example_get_name_and_title(comments):
     comments[1].decompose()
 
     return example_name, example_title
+
+
+def example_get_name_and_title_r(pre_block):
+    """
+    Pulls and removes name and title information from R blocks.
+    """
+    # first three elements will be spans letting us know it's an R block
+    r_code = pre_block.contents[3]
+    expected_comments = r'# (.*?)\n# (.*?)\n## R'
+    id_and_title = re.search(expected_comments, r_code)
+    try:
+        example_name = id_and_title.group(1)
+        example_title = id_and_title.group(2)
+        new_r_code = re.sub(expected_comments, "## R", r_code)
+        pre_block.contents[3].replace_with(new_r_code)
+        return example_name, example_title
+    except (IndexError, AttributeError) as error:
+        logging.warning(
+            "Missing first two line comments for uuid and title." +
+            f"Unable to apply example formatting: {error}.")
+        return None, None

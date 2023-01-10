@@ -45,6 +45,26 @@ def code_example_data_type():
 """, "html.parser")
 
 
+@pytest.fixture
+def code_example_data_type_r():
+    return BeautifulSoup("""
+<div class="cell tag_example docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="o">%%</span><span class="k">R</span>
+# example_r
+# A formal R example
+## R
+5^8
+</pre></div></div></div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate">
+<div class="highlight">
+<pre><span></span>[1] 390625
+</pre></div></div></div></div>
+""", "html.parser")
+
+
 class TestCodeProcessing:
     """
     Tests around handing of code blocks in Jupyter Books
@@ -450,3 +470,61 @@ class TestCodeExamples:
         result = process_code_examples(chapter)
         example_div = result.find("div", class_="tag_example")
         assert example_div.find("div", class_="cell_output")
+
+    def test_example_in_r(self, code_example_data_type_r):
+        result = process_code_examples(code_example_data_type_r)
+        example_div = result.find("div", class_="tag_example")
+        assert example_div.get("data-type") == "example"
+        assert example_div.get("id") == "example_r"
+        assert example_div.find("h5", string="A formal R example")
+        assert ("# example_r\n# A formal R example\n" not in
+                example_div.find("pre").contents[3])
+
+    def test_examples_and_highlight_in_chapter_processing_r(self, tmp_path):
+        """
+        More an integration test, ensuring that when we process a chapter
+        the examples are data-typed as such, and that they still get their
+        highlighting
+        """
+        test_env = tmp_path / 'tmp'
+        test_out = test_env / 'output'
+        test_env.mkdir()
+        test_out.mkdir()
+        shutil.copytree('tests/example_book/_build/html/notebooks',
+                        test_env, dirs_exist_ok=True)
+
+        process_chapter(test_env / "code_r.html",
+                        test_env, test_out)
+        with open(test_out / 'code_r.html') as f:
+            soup = BeautifulSoup(f.read(), "html.parser")
+
+        examples = soup.find_all("div", class_="tag_example")
+        assert len(examples) == 1
+        assert examples[0]["data-type"] == "example"
+        assert examples[0].find("h5")
+        assert examples[0].find("pre")["data-code-language"] == "r"
+
+    def test_examples_malformed_r(self, caplog):
+        """
+        What do we do if an example R block doesn't have the correct
+        comment hashes? We do nothing!
+        """
+        malformed_example = BeautifulSoup("""
+<div class="cell tag_example docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="o">%%</span><span class="k">R</span>
+# example_r
+## R
+5^8
+</pre></div></div></div>
+</div>""", "html.parser")
+        result = process_code_examples(malformed_example)
+        example_div = result.find("div", class_="tag_example")
+        caplog.set_level(logging.DEBUG)
+        log = caplog.text
+        assert not example_div.get("data-type") == "example"
+        assert not example_div.get("id") == "example_r"
+        assert not example_div.find("h5", string="A formal R example")
+        assert result == malformed_example
+        assert "Missing first two line comments for" in log
