@@ -69,6 +69,72 @@ style="width: 200px; height: 200px;" /></a>
             '<figure class="informal"><img alt="flower" ' +
             'src="_images/flower.png"/></figure>')
 
+    def test_extra_p_tags_and_spaces_are_removed_from_captions(self):
+        """
+        In order to render captions correctly, we should ensure
+        that the <figcaption> contains only text, without any extraneous
+        whitespace or <p> tags
+        """
+        text = """<figure class="align-default" id="example-fig">
+<a class="reference internal image-reference" href="images/flower.png">
+<img alt="images/flower.png" src="../_images/flower.png"
+style="height: 150px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">
+Here is my figure caption!</span>
+<a class="headerlink" href="#example-fig" title="Permalink to this image">#</a>
+</p></figcaption>"""
+        chapter = Soup(text, 'html.parser')
+        result = process_figures(chapter, Path('example'))
+        caption = result.find("figcaption")
+        assert not caption.p
+        assert "\n" not in caption.string
+        assert caption.string[0] != " "
+
+    def test_markup_is_preserved_in_captions(self):
+        """
+        Any markup in a figure caption should be preserved, but there
+        should be no left spacing or newlines still
+        """
+        text = """<figure class="align-default" id="example-fig">
+<a class="reference internal image-reference" href="images/flower.png">
+<img alt="images/flower.png" src="../_images/flower.png"
+style="height: 150px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">
+Here is my <code>figure</code> caption!</span>
+<a class="headerlink" href="#example-fig" title="Permalink to this image">#</a>
+</p></figcaption>"""
+        chapter = Soup(text, 'html.parser')
+        result = process_figures(chapter, Path('example'))
+        caption = result.find("figcaption")
+        assert not caption.p
+        assert caption.find("code")
+        assert "\n" not in caption.contents[0]
+
+    def test_markup_is_preserved_in_captions_at_beginning(self):
+        """
+        Any markup in a figure caption should be preserved, even
+        if it's at the beginning, and that the spaces aren't weird
+        because of it in the rest of the caption
+        """
+        text = """<figure class="align-default" id="example-fig">
+<a class="reference internal image-reference" href="images/flower.png">
+<img alt="images/flower.png" src="../_images/flower.png"
+style="height: 150px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">
+<strong>Here</strong> is <em>my</em> figure caption!</span>
+<a class="headerlink" href="#example-fig" title="Permalink to this image">#</a>
+</p></figcaption>"""
+        chapter = Soup(text, 'html.parser')
+        result = process_figures(chapter, Path('example'))
+        caption = result.find("figcaption")
+        assert caption.find("strong")
+        assert caption.find("em")
+        assert caption.contents[2] == " is "
+        assert caption.contents[4][0] == " "  # leading space is retained
+
     # edge cases
     def test_no_anchor_wrap(self):
         """

@@ -1,4 +1,5 @@
 from pathlib import Path
+from bs4 import NavigableString
 
 
 def process_figures(chapter, build_dir: Path):
@@ -28,6 +29,15 @@ def process_figures(chapter, build_dir: Path):
             caption_number.decompose()
         except AttributeError:
             pass  # i.e., no caption numbering
+
+        # clean up the figure caption
+        caption_text = figure.find("span", class_="caption-text")
+        if figure.find("figcaption"):
+            figure.find("figcaption").replace_with(caption_text)
+            caption_text.name = "figcaption"
+            if type(caption_text.contents[0]) == NavigableString:
+                caption_text.contents[0].replace_with(
+                        caption_text.contents[0].string.lstrip())
 
     return chapter
 
