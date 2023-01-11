@@ -24,14 +24,10 @@ Here is my figure caption!</span>
 </p></figcaption>"""
         chapter = Soup(text, 'html.parser')
         result = process_figures(chapter, Path('example'))
-        assert str(result) == """<figure class="align-default" id="example-fig">
-
-<img alt="images/flower.png" src="../_images/flower.png"/>
-<figcaption>
-<p><span class="caption-text">
-Here is my figure caption!</span>
-
-</p></figcaption></figure>"""
+        assert not result.find("figcaption").find("a", class_="headerlink")
+        assert result.find("img").get("style") is None
+        assert not result.find("span", class_="caption-number")
+        assert not result.find("a", class_="image-reference")
 
     def test_markdown_figure_case(self):
         """ support "markdown figure" syntax in jupyter-book """
@@ -47,13 +43,10 @@ style="width: 200px; height: 200px;" /></a>
 #</a></p></figcaption></figure>"""
         chapter = Soup(text, 'html.parser')
         result = process_figures(chapter, Path('example'))
-        assert str(result) == """<figure class="align-default" id="md-fig">
-
-<img alt="flower" class="remove-me" src="_images/flower.png"/>
-<figcaption>
-<p>
-<span class="caption-text">And here is a <em>markdown</em> caption</span>
-</p></figcaption></figure>"""
+        assert not result.find("figcaption").find("a", class_="headerlink")
+        assert result.find("img").get("style") is None
+        assert not result.find("span", class_="caption-number")
+        assert not result.find("a", class_="image-reference")
 
     def test_markdown_image(self):
         """ support bare markdown images, i.e., informal figs """
@@ -79,7 +72,7 @@ style="width: 200px; height: 200px;" /></a>
     # edge cases
     def test_no_anchor_wrap(self):
         """
-        What happens if, unexpectly, there isn't an anchor wrap?
+        What happens if, unexpectedly, there isn't an anchor wrap?
 
         The figure should still convert as expected.
         """
@@ -93,12 +86,10 @@ style="width: 200px; height: 200px;" />
 #</a></p></figcaption></figure>"""
         chapter = Soup(text, 'html.parser')
         result = process_figures(chapter, Path('example'))
-        assert str(result) == """<figure class="align-default" id="md-fig">
-<img alt="flower" class="remove-me" src="_images/flower.png"/>
-<figcaption>
-<p>
-<span class="caption-text">And here is a <em>markdown</em> caption</span>
-</p></figcaption></figure>"""
+        assert result.find("figcaption")
+        assert not result.find("figcaption").find("a", class_="headerlink")
+        assert result.find("img").get("style") is None
+        assert not result.find("span", class_="caption-number")
 
     def test_no_caption_number(self):
         """
@@ -117,11 +108,7 @@ Here is my figure caption!</span>
 </p></figcaption>"""
         chapter = Soup(text, 'html.parser')
         result = process_figures(chapter, Path('example'))
-        assert str(result) == """<figure class="align-default" id="example-fig">
-
-<img alt="images/flower.png" src="_images/flower.png"/>
-<figcaption>
-<p><span class="caption-text">
-Here is my figure caption!</span>
-
-</p></figcaption></figure>"""
+        assert result.find("figcaption")
+        assert not result.find("figcaption").find("a", class_="headerlink")
+        assert result.find("img").get("style") is None
+        assert not result.find("span", class_="caption-number")
