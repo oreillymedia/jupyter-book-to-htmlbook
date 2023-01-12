@@ -359,6 +359,12 @@ title="Print to PDF"
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The rpy2.ipython extension is already loaded. To reload it, use:
+  %reload_ext rpy2.ipython
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -391,6 +397,28 @@ plot(discoveries, col = &quot;#333333&quot;, lwd = 3, type = &quot;h&quot;, xlab
 <div class="cell_output docutils container">
 <img alt="../_images/code_r_4_0.png" src="../_images/code_r_4_0.png" />
 <img alt="../_images/code_r_4_1.png" src="../_images/code_r_4_1.png" />
+</div>
+</div>
+<p>Then, we want a code-generated figure reference, as shown in <a class="reference internal" href="#code-output-fig"><span class="std std-ref">An example figure caption</span></a>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="k">R</span>
+
+## R
+data(discoveries)
+plot(discoveries, col = &quot;#333333&quot;, lwd = 3, xlab = &quot;Year&quot;,
+     main=&quot;Number of important discoveries per year&quot;)
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<figure class="align-default" id="code-output-fig">
+<img alt="../_images/code_r_6_0.png" src="../_images/code_r_6_0.png" />
+<figcaption>
+<p><span class="caption-text"><p>An example figure caption</p>
+</span><a class="headerlink" href="#code-output-fig" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
 </div>
 </div>
 <p>Finally, <em>an</em> example. Specifically <span class="xref std std-ref">example_r</span>.</p>

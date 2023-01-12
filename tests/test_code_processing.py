@@ -22,10 +22,17 @@ def code_example_python():
 
 @pytest.fixture
 def code_example_r():
-    chapter = Path(
-                     "tests/example_book/_build/html/notebooks/code_r.html"
-                  ).read_text()
-    return BeautifulSoup(chapter, 'lxml')
+    return BeautifulSoup("""
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="o">%%</span><span class="k">R</span>
+## R
+5^8
+</pre></div></div></div><div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate">
+<div class="highlight"><pre><span></span>[1] 390625
+</pre></div></div></div></div>""", "html.parser")
 
 
 @pytest.fixture
@@ -93,9 +100,8 @@ class TestCodeProcessing:
         relevant so it should be removed.
         """
         result = process_code(code_example_r)
-        check_div = result.find_all('pre')[1]
-        # check second div, since first div is the `load_ext` command
-        assert check_div['data-code-language'] == "r"
+        check_div = result.find_all('pre')[0]
+        assert check_div.get('data-code-language') == "r"
         assert "highlight-ipython3" not in str(check_div.parent['class'])
 
     def test_add_r_datatype_removes_rpy2_flag(self, code_example_r):
@@ -108,7 +114,7 @@ class TestCodeProcessing:
         """
         result = process_code(code_example_r)
         # check second div, since first div is the `load_ext` command
-        check_div = result.find_all('pre')[1]
+        check_div = result.find_all('pre')[0]
         # note that these are two separate spans, and we're using "find" since
         # we only want to confirm that they're not at the beginning
         assert not check_div.find('span', string="%%")
