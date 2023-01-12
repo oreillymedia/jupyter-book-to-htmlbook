@@ -405,6 +405,29 @@ class TestCodeExamples:
         assert "Unable to apply example formatting" in log
         assert not result.find("div", class_="highlight").get("data-type")
 
+    def test_malformed_example_does_not_destroy_chapter(self, caplog):
+        """
+        Once we had a bad return given failures; this test is to
+        ensure that even if we don't add example formatting, we also
+        do not only return the bad block.
+        """
+        expect_fail = BeautifulSoup("""
+<div id="do_not_lose_me">Hello!</div>
+<div class="cell tag_example docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="c1"># This is an example title</span>
+
+<span class="k">def</span> <span class="nf">h</span><span class="p">():</span>
+    <span class="k">pass</span></pre></div></div></div></div>
+""", "html.parser")
+        caplog.set_level(logging.DEBUG)
+        result = process_code_examples(expect_fail)
+        log = caplog.text
+        assert "Unable to apply example formatting" in log
+        assert not result.find("div", class_="highlight").get("data-type")
+        assert result.find("div", id="do_not_lose_me")
+
     def test_malformed_example_with_extra_comments_later(self, caplog):
         """
         Ensure that we're logging failures (e.g., when an author doesn't

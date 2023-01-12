@@ -138,7 +138,7 @@ def process_code_examples(chapter):
             logging.warning(
                 "Missing first two line comments for uuid and title." +
                 f"Unable to apply example formatting to {example_cell}.")
-            return example_cell
+            return chapter
 
         # ensure comments are within the first three spans (since we
         # expect an empty span to start based on their highlighter)
