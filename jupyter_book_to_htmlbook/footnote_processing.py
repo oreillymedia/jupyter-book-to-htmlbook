@@ -10,7 +10,7 @@ def process_footnotes(chapter):
     # move the contents of the ref to the anchor point
     for ref in footnote_refs:
         try:
-            ref_id = ref['href'].split('#')[-1]
+            ref_id = ref.get('href').split('#')[-1]
             # double next_sibling b/c next sibling is a space
             ref_location = chapter.find(
                                         "dt", {"id": ref_id}
@@ -18,14 +18,13 @@ def process_footnotes(chapter):
             footnote_contents = ref_location.find('p').children
             ref.name = 'span'
             ref['data-type'] = 'footnote'
-            del(ref['href'])
-            del(ref['class'])
-            del(ref['id'])
+            del ref['href']
+            del ref['class']
+            del ref['id']
             ref.string = ''
             for child in footnote_contents:
                 ref.append(child)
-        except KeyError:
-            logging.warning(f'Error converting footnote "{ref}".')
+
         except AttributeError:
             logging.warning(f'Error converting footnote "{ref}".')
     # remove the list of footnote contents

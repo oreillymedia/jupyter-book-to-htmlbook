@@ -14,7 +14,7 @@ def process_code(chapter, skip_numbering=False):
 
     for div in highlight_divs:
         try:
-            parent_classes = str(div.parent["class"])
+            parent_classes = str(div.parent.get("class"))
 
             # apply `data-type` attribute
             pre_tag = div.pre
@@ -57,9 +57,6 @@ def process_code(chapter, skip_numbering=False):
         except TypeError:
             logging.warning(f"Unable to apply cell numbering to {div}")
 
-        except KeyError:
-            logging.warning(f"Unable to apply cell numbering to {div}")
-
     return chapter
 
 
@@ -75,14 +72,14 @@ def number_codeblock(pre_block, cell_number):
     # grandparent of highlight div contains in/out information
     grandparent = pre_block.parent.parent.parent
 
-    if "cell_input" in str(grandparent["class"]):
+    if "cell_input" in str(grandparent.get("class")):
         in_block = True
         cell_number += 1
         marker = f"In [{cell_number}]: "
     elif (
-            "cell_output" in grandparent["class"] and
+            "cell_output" in grandparent.get("class") and
             # ensure we're not in a hidden-input cell
-            "tag_hide-input" not in grandparent.parent["class"]
+            "tag_hide-input" not in grandparent.parent.get("class")
          ):
         in_block = False
         marker = f"Out[{cell_number}]: "

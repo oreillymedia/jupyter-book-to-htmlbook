@@ -248,7 +248,7 @@ def process_chapter(toc_element,
     chapter = process_sidebars(chapter)
     chapter = process_subsections(chapter)
 
-    if chapter["data-type"] == "glossary":
+    if chapter.get("data-type") == "glossary":
         add_glossary_datatypes(chapter)
 
     chapter, ids = process_ids(chapter, book_ids)

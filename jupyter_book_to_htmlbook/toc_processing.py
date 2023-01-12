@@ -44,7 +44,7 @@ def get_book_toc(src_dir: Path) -> list:
             toc = load(f.read(), SafeLoader)
             # exit if we see some format other than jb-book
             try:
-                if toc["format"] != "jb-book":
+                if toc.get("format") != "jb-book":
                     message = ("Unsupported jupyter book format: " +
                                toc["format"] + ". The only supported" +
                                " format is 'jb-book'.")

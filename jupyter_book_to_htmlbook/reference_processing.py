@@ -34,7 +34,7 @@ def process_interal_refs(chapter):
             parent.contents = ref
             # remove any id tags on the parent to avoid duplicates
             del parent['id']
-        elif ref['href'].find('htt') > -1:
+        elif ref.get('href').find('htt') > -1:
             logging.warning(f"External image reference: {ref['href']}")
         else:  # i.e., non reference xrefs
             ref['data-type'] = 'xref'

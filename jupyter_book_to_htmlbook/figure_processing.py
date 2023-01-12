@@ -1,5 +1,5 @@
 from pathlib import Path
-from bs4 import NavigableString
+from bs4 import NavigableString  # type: ignore
 
 
 def process_figures(chapter, build_dir: Path):

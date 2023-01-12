@@ -52,7 +52,7 @@ def move_span_ids_to_sections(chapter):
                 span.next_sibling.name in ["h1", "h2", "h3", "h4", "h5"]
            ):
             # add span id to section
-            span.parent['id'] = span['id']
+            span.parent['id'] = span.get('id')
             # remove the now unneeded span
             span.decompose()
     return chapter
