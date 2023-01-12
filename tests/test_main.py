@@ -109,6 +109,8 @@ class TestMain:
         test_env = tmp_path / 'tmp'
         test_env.mkdir()
         shutil.copytree('tests/example_book', test_env, dirs_exist_ok=True)
+        # we want to test running jupyter book here, so remove _build/
+        shutil.rmtree(test_env / '_build')
         monkeypatch.chdir(tmp_path)  # patch for our build target
 
         # run, skipping build since it's included in example dir
@@ -132,6 +134,8 @@ class TestMain:
         test_env = tmp_path / 'tmp'
         test_env.mkdir()
         shutil.copytree('tests/example_book', test_env, dirs_exist_ok=True)
+        # we want to test running jupyter book here, so remove _build/
+        shutil.rmtree(test_env / '_build')
         f = test_env / '_toc.yml'
         f.write_text("""
 format: jb-book
@@ -162,6 +166,8 @@ parts:
         test_env = tmp_path / 'tmp'
         test_env.mkdir()
         shutil.copytree('tests/example_book', test_env, dirs_exist_ok=True)
+        # we want to test running jupyter book here, so remove _build/
+        shutil.rmtree(test_env / '_build')
         f = test_env / '_toc.yml'
         f.write_text("""
 format: jb-book
