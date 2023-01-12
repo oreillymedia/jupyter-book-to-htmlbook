@@ -72,6 +72,17 @@ Options:
 
 ## Release Notes
 
+### 1.0.7
+
+Features:
+- Add support for formal code examples in Python and R via the "example" cell tag
+- Add support for glossaries
+- Add basic support for bibtex bibliographies
+
+Bug fixes:
+- Fix bug with top-level heading IDs causing xrefs to fail
+- Remove extraneous spacing in figure captions
+
 ### 1.0.6
 - Add support for sidebars as described in the [Jupyter Book documentation](https://jupyterbook.org/en/stable/content/layout.html#sidebars-within-content)
 
