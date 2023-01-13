@@ -4,7 +4,7 @@ import random
 from .helpers import base_soup
 
 
-def process_interal_refs(chapter):
+def process_internal_refs(chapter):
     """
     Processes internal a tags with "reference internal" classes.
     Converts bib references into spans (to deal with later), and other
@@ -42,6 +42,26 @@ def process_interal_refs(chapter):
             uri = uri.split('#')[-1]
             ref.string = f'#{uri}'
             ref['href'] = f'#{uri}'
+    return chapter
+
+
+def process_remaining_refs(chapter):
+    """
+    Processing for any non-internal "xref" classed spans (i.e., those
+    that Jupyter can't find targets for)
+    """
+    xrefs = chapter.find_all("span", class_="xref")
+    for ref in xrefs:
+        # convert to proper htmlbook cross reference
+        if ref.string and ref.string.find(" ") == -1:
+            ref.name = "a"
+            ref["data-type"] = "xref"
+            ref["href"] = f"#{ref.string}"
+            ref.string = ref.get("href")
+        else:  # in the unlikely case of a badly formatted xref
+            logging.warning(
+                f"Failed to apply xref formatting to {ref}.")
+
     return chapter
 
 
