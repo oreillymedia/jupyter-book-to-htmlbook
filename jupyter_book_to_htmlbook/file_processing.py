@@ -8,7 +8,8 @@ from .figure_processing import process_figures, process_informal_figs
 from .footnote_processing import process_footnotes
 from .math_processing import process_math
 from .reference_processing import (
-        process_interal_refs,
+        process_internal_refs,
+        process_remaining_refs,
         process_ids,
         process_citations,
         add_glossary_datatypes
@@ -239,7 +240,7 @@ def process_chapter(toc_element,
     # note: must process figs before xrefs
     chapter = process_figures(chapter, build_dir)
     chapter = process_informal_figs(chapter, build_dir)
-    chapter = process_interal_refs(chapter)
+    chapter = process_internal_refs(chapter)
     chapter = process_citations(chapter)
     chapter = process_footnotes(chapter)
     chapter = process_admonitions(chapter)
@@ -250,10 +251,13 @@ def process_chapter(toc_element,
     chapter = move_span_ids_to_sections(chapter)
     chapter = process_sidebars(chapter)
     chapter = process_subsections(chapter)
+    # finally, process any remaining xrefs
+    chapter = process_remaining_refs(chapter)
 
     if chapter.get("data-type") == "glossary":
         add_glossary_datatypes(chapter)
 
+    # ensure we have unique IDs across the book
     chapter, ids = process_ids(chapter, book_ids)
 
     # write the file, preserving any directory structure(s) from source
