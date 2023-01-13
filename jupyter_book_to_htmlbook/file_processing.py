@@ -225,11 +225,14 @@ def process_chapter(toc_element,
     """
 
     chapter, ch_name = process_chapter_soup(toc_element)
+    logging.info(f"Processing {ch_name}...")
 
     if not chapter:  # guard against malformed files
-        return
-
-    logging.info(f"Processing {ch_name}...")
+        logging.warning(f"Failed to process {toc_element}.")
+        raise RuntimeError(
+            f"Failed to process {toc_element}. Please check for error in " +
+            "your source file(s). Contact the Tools team for additional " +
+            "support.")
 
     # perform cleans and processing
     chapter = clean_chapter(chapter)
@@ -248,7 +251,7 @@ def process_chapter(toc_element,
     chapter = process_sidebars(chapter)
     chapter = process_subsections(chapter)
 
-    if chapter["data-type"] == "glossary":
+    if chapter.get("data-type") == "glossary":
         add_glossary_datatypes(chapter)
 
     chapter, ids = process_ids(chapter, book_ids)

@@ -227,11 +227,9 @@ id="this-is-another-subheading">
     <h1>Hello!</h1>
 </div>""")
         # first item is the intro file, so let's check on the first "chapter"
-        result = process_chapter(tmp_path / 'malformed.html', tmp_path)
-        # the resulting section should have a data-type of "chapter"
-        caplog.set_level(logging.DEBUG)
-        assert "is malformed" in caplog.text
-        assert result is None
+        with pytest.raises(RuntimeError):
+            process_chapter(tmp_path / 'malformed.html', tmp_path)
+            assert "Failed to process" in caplog.text
 
     @pytest.mark.parametrize(
             "datatype", [
