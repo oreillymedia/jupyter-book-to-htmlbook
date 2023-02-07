@@ -72,6 +72,6 @@ def process_sidebars(chapter):
 
         if aside.find("p", class_="sidebar-title"):
             title = aside.find("p", class_="sidebar-title")
-            title.name = "h5"
+            title.name = "h1"
 
     return chapter
