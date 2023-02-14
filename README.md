@@ -82,6 +82,7 @@ Features:
 Bug fixes:
 - Fix bug with top-level heading IDs causing xrefs to fail
 - Remove extraneous spacing in figure captions
+- Remove epub-breaking attrs (incl. `valign` and `halign` on table cells)
 
 ### 1.0.6
 - Add support for sidebars as described in the [Jupyter Book documentation](https://jupyterbook.org/en/stable/content/layout.html#sidebars-within-content)
