@@ -1,20 +1,22 @@
-import re
-
-
 def clean_chapter(chapter, rm_numbering=True):
     """
     "Cleans" the chapter from any script or style tags, removes table borders,
-    removes any style attrs, and by default removes any section numbering.
+    table valign/width attributes, removes any style attrs, and by default
+    removes any section numbering.
     """
     remove_tags = ['style', 'script']
+    remove_attrs = ['style', 'valign', 'halign', 'width']
+
     all_tags = chapter.find_all()
     for tag in all_tags:
         if tag.name in remove_tags:
             tag.decompose()
         if tag.name == 'table':
             del tag['border']
-    for tag in chapter.find_all(attrs={'style': True}):
-        del tag['style']
+
+    for attr in remove_attrs:
+        for tag in chapter.find_all(attrs={attr: True}):
+            del tag[attr]
 
     # (optionally) remove numbering
     if rm_numbering:

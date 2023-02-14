@@ -40,6 +40,28 @@ div class="cell_input docutils container"&gt;
 </h2>"""
 
 
+def test_chapter_cleans_table_specific():
+    """
+    A few table-specific edge cases to check, including a no-border table
+    and tables with valign/width attributes
+    """
+    chapter = BeautifulSoup("""<table>
+<tr halign="left">
+<th rowspan="2" valign="top">0</th>
+<td width="50%">NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+</table>""", "html.parser")
+    result = clean_chapter(chapter)
+    halign_tr = result.find("tr")
+    valign_th = result.find("th")
+    width_td = result.find("td")  # it'll find the first
+    assert not halign_tr.get("valign")
+    assert not valign_th.get("valign")
+    assert not width_td.get("width")
+
+
 def test_move_span_ids_to_sections():
     """
     Atlas requires that cross reference targets sections so that
