@@ -96,4 +96,4 @@ def test_sidebar_processing():
 </aside>""", "html.parser")
     process_sidebars(chapter_text)
     assert chapter_text.find("aside")["data-type"] == "sidebar"
-    assert chapter_text.find("h5").string == "Here Is a Sidebar Title"
+    assert chapter_text.find("h1").string == "Here Is a Sidebar Title"
