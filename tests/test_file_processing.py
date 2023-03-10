@@ -52,7 +52,7 @@ class TestChapterProcess:
         # check on return
         assert "ch01.html" in result
 
-    def test_chapter_promote_headings(self, tmp_path, caplog):
+    def test_chapter_promote_headings(self, tmp_path):
         """
         we expect to have a single h1 and then a bunch of h2s
         in a single-file chapter, but we need to promote all the headings
@@ -227,9 +227,10 @@ id="this-is-another-subheading">
     <h1>Hello!</h1>
 </div>""")
         # first item is the intro file, so let's check on the first "chapter"
+        caplog.set_level(logging.DEBUG)
         with pytest.raises(RuntimeError):
             process_chapter(tmp_path / 'malformed.html', tmp_path)
-            assert "Failed to process" in caplog.text
+        assert "Failed to process" in caplog.text
 
     @pytest.mark.parametrize(
             "datatype", [

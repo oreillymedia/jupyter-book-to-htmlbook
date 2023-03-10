@@ -2,13 +2,13 @@
 
 Takes a Jupyter Book and turns it into an HTMLBook-compliant project for consumption in Atlas, O'Reilly's book building tool. The script runs `jupyter-book` on your book directory (the one containing your *_config.yml* and *_toc.yml* files), and puts HTMLBook files in the specified target directory, updating atlas.json if it's provided.
 
-**IMPORTANT**: We're now at 1.0.0, i.e., we have introduced a very breaking-change from the original version of the script! 
+**IMPORTANT**: We're now at >1.0.0, i.e., we have introduced a very breaking-change from the original version of the script! 
 
 ## Installation
 
 **NOTE**: This tool requires Python ^3.9.
 
-It's not on PYPI yet, so install via the GitHub link:
+Install via the GitHub link:
 
 ```
 pip install git+https://github.com/oreillymedia/jupyter-book-to-htmlbook.git
@@ -54,6 +54,8 @@ Options:
   --skip-jb-build                 Skip running `jupyter-book` as a part of
                                   this conversion
   --skip-numbering      Skip the numbering of In[]/Out[] code cells
+  --include-root                  Include the 'root' file of the jupyter-book
+                                  project
   --version
   --install-completion [bash|zsh|fish|powershell|pwsh]
                                   Install completion for the specified shell.
@@ -64,11 +66,9 @@ Options:
 
 ```
 
-## Known Limitations
+## Current Known Limitations
 
-* Cross references to bare files (e.g., `see [chapter 1](chapter01.ipynb)`) aren't converting as expected; in the meantime please use a heading anchor (e.g., `see [chapter 1](chapter01.ipynb#first-heading)`).
-* The `"pagenumrestart"` class is currently applied to the first chapter with parts (assuming that the chapters are numbered); this is a limitation to be overcome later (if there is a single-file chapter 1, a part, etc.).
-* Currently, bibliography references are "opinionated," and are meant to follow CMS author-date in terms of in-text citations (no work has been done on the actual *references.html* yet).
+* Jupyter Book can only process one metadata-named code-generated figure per file. The workaround for this is to save any resultant figures to disk and refer to them as any other figure.
 
 ## Release Notes
 
@@ -78,10 +78,12 @@ Features:
 - Add support for formal code examples in Python and R via the "example" cell tag
 - Add support for glossaries
 - Add basic support for bibtex bibliographies
+- Align sidebar heading levels with changes in Atlas
 
 Bug fixes:
 - Fix bug with top-level heading IDs causing xrefs to fail
 - Remove extraneous spacing in figure captions
+- Remove epub-breaking attrs (incl. `valign` and `halign` on table cells)
 
 ### 1.0.6
 - Add support for sidebars as described in the [Jupyter Book documentation](https://jupyterbook.org/en/stable/content/layout.html#sidebars-within-content)
