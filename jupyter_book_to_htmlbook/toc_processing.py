@@ -119,7 +119,7 @@ def process_parts(parts, src_dir):
         part_number += 1  # increment numbering
         # create a distinct placeholder Path for downstream processing
         try:
-            part_title = part["caption"].replace(' ', '-').lower()
+            part_title = part["caption"].replace(' ', '-')
         except TypeError:  # because it's looking for a string, getting an int
             message = ("Missing part caption in _toc.yml. " +
                        "Part captions are required.")

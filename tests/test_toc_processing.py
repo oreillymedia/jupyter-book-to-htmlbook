@@ -108,11 +108,11 @@ parts:
         result = get_book_toc(tmp_path)
         assert result == [
                 tmp_path / '_build/html/intro.html',
-                tmp_path / '_build/html/_jb_part-1-name-of-part-1.html',
+                tmp_path / '_build/html/_jb_part-1-Name-of-Part-1.html',
                 tmp_path / '_build/html/part1/chapter1.html',
                 [tmp_path / '_build/html/part1/chapter2.html',
                  tmp_path / '_build/html/part1/section2-1.html'],
-                tmp_path / '_build/html/_jb_part-2-name-of-part-2.html',
+                tmp_path / '_build/html/_jb_part-2-Name-of-Part-2.html',
                 tmp_path / '_build/html/part2/chapter1.html',
                 [tmp_path / '_build/html/part2/chapter2.html',
                  tmp_path / '_build/html/part2/section2-1.html']
@@ -146,10 +146,10 @@ parts:
         assert result == [
                 tmp_path / '_build/html/intro.html',
                 tmp_path / '_build/html/path-to/00-Preface.html',
-                tmp_path / '_build/html/_jb_part-1-name-of-part-1.html',
+                tmp_path / '_build/html/_jb_part-1-Name-of-Part-1.html',
                 [tmp_path / '_build/html/part1/chapter2.html',
                  tmp_path / '_build/html/part1/section2-1.html'],
-                tmp_path / '_build/html/_jb_part-2-name-of-part-2.html',
+                tmp_path / '_build/html/_jb_part-2-Name-of-Part-2.html',
                 tmp_path / '_build/html/part2/chapter1.html',
                 [tmp_path / '_build/html/part2/chapter2.html',
                  tmp_path / '_build/html/part2/section2-1.html']
@@ -182,10 +182,10 @@ parts:
                 tmp_path / '_build/html/intro.html',
                 tmp_path / '_build/html/path-to/preface.html',
                 tmp_path / '_build/html/path-to/second-preface.html',
-                tmp_path / '_build/html/_jb_part-1-name-of-part-1.html',
+                tmp_path / '_build/html/_jb_part-1-Name-of-Part-1.html',
                 [tmp_path / '_build/html/part1/chapter2.html',
                  tmp_path / '_build/html/part1/chapter-section.html'],
-                tmp_path / '_build/html/_jb_part-2-name-of-part-2.html',
+                tmp_path / '_build/html/_jb_part-2-Name-of-Part-2.html',
                 tmp_path / '_build/html/part2/chapter1.html',
                 [tmp_path / '_build/html/part2/chapter2.html',
                  tmp_path / '_build/html/part2/section2-1.html']
@@ -213,11 +213,11 @@ parts:
                 tmp_path / '_build/html/intro.html',
                 tmp_path / '_build/html/path-to/preface.html',
                 tmp_path / '_build/html/path-to/second-preface.html',
-                tmp_path / '_build/html/_jb_part-1-name-of-part-1.html',
+                tmp_path / '_build/html/_jb_part-1-Name-of-Part-1.html',
                 [tmp_path / '_build/html/part1/chapter2.html',
                  tmp_path / '_build/html/part1/chapter-section.html',
                  tmp_path / '_build/html/part1/preface-1.html'],
-                tmp_path / '_build/html/_jb_part-2-name-of-part-2.html',
+                tmp_path / '_build/html/_jb_part-2-Name-of-Part-2.html',
                 tmp_path / '_build/html/example.html'
                ]
 
