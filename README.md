@@ -72,6 +72,11 @@ Options:
 
 ## Release Notes
 
+### 1.0.8
+
+Bug fixes:
+- Part caption casing is preserved from `_toc.yaml`
+
 ### 1.0.7
 
 Features:
