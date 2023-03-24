@@ -32,7 +32,7 @@ def process_part(part_path: Path, output_dir: Path):
     if info:
         part_number = info.group(1)
         # undo earlier space replacement and do a simple title case
-        part_name = info.group(2).replace('-', ' ').title()
+        part_name = info.group(2).replace('-', ' ')
 
         with open(output_dir / f'part-{part_number}.html', 'wt') as f:
             f.write(f"""
