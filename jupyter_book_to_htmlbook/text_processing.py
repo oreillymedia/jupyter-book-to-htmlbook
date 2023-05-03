@@ -51,6 +51,7 @@ def move_span_ids_to_sections(chapter):
     for span in empty_id_spans:
         if (
                 span.parent.name == "section" and
+                span.next_sibling and  # guard in case of no next_sibling
                 span.next_sibling.name in ["h1", "h2", "h3", "h4", "h5"]
            ):
             # add span id to section
