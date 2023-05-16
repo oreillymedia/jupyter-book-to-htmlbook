@@ -5,6 +5,7 @@ import shutil
 from bs4 import BeautifulSoup  # type: ignore
 from jupyter_book_to_htmlbook.code_processing import (
         process_code,
+        process_inline_code,
         number_codeblock,
         process_code_examples
     )
@@ -557,3 +558,29 @@ class TestCodeExamples:
         assert not example_div.find("h5", string="A formal R example")
         assert result == malformed_example
         assert "Missing first two line comments for" in log
+
+
+class TestInlineCode:
+    """
+    Smoke tests around the translation of inline code
+    """
+
+    def test_unwrap_inline_spans(self):
+        """
+        We should not allow spans inside inline code
+        """
+
+        html = BeautifulSoup("""<p>Some text with
+<code><span class="pre">code</span></code>.</p>""",
+                             "html.parser")
+        result = process_inline_code(html)
+
+        assert not result.find("span")
+        assert str(result.find("code")) == "<code>code</code>"
+
+    def test_unwrap_inline_spans_does_not_affect_pre(self,
+                                                     code_example_data_type):
+        expected = str(code_example_data_type)
+        result = process_inline_code(code_example_data_type)
+        assert str(result) == expected
+

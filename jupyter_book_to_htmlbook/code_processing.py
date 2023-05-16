@@ -60,6 +60,25 @@ def process_code(chapter, skip_numbering=False):
     return chapter
 
 
+def process_inline_code(chapter):
+    """
+    Because the platform occasionally has unexpected class styling, we want to
+    make sure that inline code in particular is clean. Note that the current
+    target version of Jupyter Book doesn't put <code> inside <pre> tags, so our
+    "dumb" inline searcher should work. There is a test to confirm this.
+
+    NOTE: This is a temporary fix; we should really clean out all classes
+    except those we explicitly want from the chapter files
+    """
+    inline_codes = chapter.find_all("code")
+
+    for code in inline_codes:
+        if code.find("span"):
+            code.span.unwrap()
+
+    return chapter
+
+
 def number_codeblock(pre_block, cell_number):
     """
     Adds numbering markers (`In [##]: ` or `Out[##]: `) to cell blocks
