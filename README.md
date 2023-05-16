@@ -72,6 +72,11 @@ Options:
 
 ## Release Notes
 
+### 1.0.9
+
+Bug fixes:
+- Remove spans inside `<code>` tags that display incorrectly on the ORM learning platform.
+
 ### 1.0.8
 
 Bug fixes:
