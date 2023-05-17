@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jupyter-book-to-htmlbook"
-version = "1.0.9"
+version = "1.1.0"
 description = "A script to convert jupyter book html files to htmlbook for consumption in Atlas"
 authors = ["delfanbaum"]
 
