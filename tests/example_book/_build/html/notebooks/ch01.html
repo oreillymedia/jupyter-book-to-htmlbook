@@ -327,7 +327,7 @@ document.write(`
 <p>There should be more text here, so:</p>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vehicula mauris nulla, id finibus orci accumsan placerat. Mauris rhoncus ex in ipsum pellentesque, sed blandit arcu scelerisque. Aenean ut malesuada ligula. Mauris porttitor finibus nunc in dignissim. Phasellus sed diam gravida, aliquet nisi quis, placerat sapien. In augue lacus, egestas accumsan vulputate non, gravida at ex. Vivamus malesuada lectus nec blandit ultricies. Duis feugiat tortor vitae velit accumsan, eu imperdiet purus mattis. Fusce eu viverra arcu. Duis nec ex varius, tristique turpis ut, blandit sapien. Quisque non pellentesque nulla, vitae varius arcu. In maximus auctor pretium. Nunc elementum ac diam ut lobortis. Aliquam nec sapien eu ligula commodo aliquam. Integer in molestie libero, dignissim rhoncus lorem. Donec a laoreet magna.</p>
 <p>In malesuada sagittis libero ut bibendum. Sed dolor lacus, placerat eu ultricies nec, sollicitudin imperdiet sem. Vestibulum condimentum est a lacinia suscipit. Fusce vitae lacus et magna sollicitudin pulvinar. Morbi erat ipsum, vehicula sed orci et, rutrum hendrerit justo. Phasellus porttitor elementum mattis. Ut et commodo ligula.</p>
-<p>Also, here is a citation <span id="id1">[<a class="reference internal" href="ch02.01.html#id6" title="Terry Baruch. The title of the work. Volume 4 of 10. The name of the publisher, The address, 3 edition, 7 1993. ISBN 3257227892. An optional note.">Baruch, 1993</a>]</span>. And then some others <span id="id2">[<a class="reference internal" href="ch02.01.html#id5" title="Terry Aadams. The title of the work. The name of the journal, 4(2):201-213, 7 1993. An optional note.">Aadams, 1993</a>]</span>, <span id="id3">[<a class="reference internal" href="ch02.01.html#id7" title="Terry Carver. The title of the work. How it was published, The address of the publisher, 7 1993, An optional note.">Carver, 1993</a>]</span>.</p>
+<p>Also, here is a citation <span id="id1">[<a class="reference internal" href="ch02.01.html#id9" title="Terry Baruch. The title of the work. Volume 4 of 10. The name of the publisher, The address, 3 edition, 7 1993. ISBN 3257227892. An optional note.">Baruch, 1993</a>]</span>. And then some others <span id="id2">[<a class="reference internal" href="ch02.01.html#id8" title="Terry Aadams. The title of the work. The name of the journal, 4(2):201-213, 7 1993. An optional note.">Aadams, 1993</a>]</span>, <span id="id3">[<a class="reference internal" href="ch02.01.html#id10" title="Terry Carver. The title of the work. How it was published, The address of the publisher, 7 1993, An optional note.">Carver, 1993</a>]</span>.</p>
 <p>Sed nec vehicula nibh. Praesent vitae commodo lacus, sed vestibulum lacus. In egestas felis faucibus ultrices dapibus. Sed consectetur quam et leo tristique convallis. Nulla a diam libero. Vestibulum sit amet neque imperdiet, dictum urna sed, vehicula dolor. Integer tincidunt vulputate ex, at cursus tortor molestie sed. Maecenas at posuere justo. Nunc massa erat, rutrum id volutpat gravida, rhoncus in quam. Phasellus ex purus, consectetur nec dui ut, ultrices porta tortor.</p>
 <p>Also, why not some executable code? See the following:</p>
 <div class="cell docutils container">
@@ -362,7 +362,44 @@ I love pears!
 </div>
 </div>
 </div>
-<p>So that was some <code class="docutils literal notranslate"><span class="pre">code</span></code>, which is really great, not unlike <em>italic</em> text.</p>
+<p>So that was some <code class="docutils literal notranslate"><span class="pre">code</span></code>, which is really great, not unlike <em>italic</em> text. Finally, some hidden code:</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The source for this his hidden!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The source for this his hidden!
+</pre></div>
+</div>
+</div>
+</div>
+<p>And here we have hidden output:</p>
+<div class="cell tag_hide-output docutils container">
+<div class="cell_input above-output-prompt docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Don&#39;t see me!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<details class="hide below-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell output</span>
+<span class="expanded">Hide code cell output</span>
+</summary>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Don&#39;t see me!
+</pre></div>
+</div>
+</div>
+</details>
+</div>
 </section>
 
     <script type="text/x-thebe-config">

@@ -319,10 +319,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">This Is a Chapter Section in Its Own File</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a></li>
-</ul>
-</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">This Is a Chapter Section in Its Own File</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#bibliography">Bibliography</a></li>
 </ul>
 
@@ -339,8 +336,8 @@ document.write(`
   <section id="this-is-a-chapter-section-in-its-own-file">
 <h1>This Is a Chapter Section in Its Own File<a class="headerlink" href="#this-is-a-chapter-section-in-its-own-file" title="Permalink to this heading">#</a></h1>
 <p>What’s interesting is that, without the <code class="docutils literal notranslate"><span class="pre">leveloffset</span></code> markers around the <code class="docutils literal notranslate"><span class="pre">include</span></code> directives, this would show up as a main-level heading! Obviously that’s now what we want, so let’s explore that a little further.</p>
-<p>Here is a test. This is a example of footnote.<span class="xref myst"><sup>1</sup></span> Another footnote, but this time the period is on the outside<span class="xref myst"><sup>2</sup></span>.</p>
-<p>Wildly, there is a third.<span class="xref myst"><sup>3</sup></span></p>
+<p>Here is a test. This is a example of footnote.<a class="footnote-reference brackets" href="#fn1" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> Another footnote, but this time the period is on the outside<a class="footnote-reference brackets" href="#fn2" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p>
+<p>Wildly, there is a third.<a class="footnote-reference brackets" href="#fn3" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p>
 <p>Some code:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -350,33 +347,38 @@ document.write(`
 </div>
 </div>
 </div>
-<p>Finally, here is a citation <span id="id1">[<a class="reference internal" href="#id6" title="Terry Baruch. The title of the work. Volume 4 of 10. The name of the publisher, The address, 3 edition, 7 1993. ISBN 3257227892. An optional note.">Baruch, 1993</a>]</span>. And then some others <span id="id2">[<a class="reference internal" href="#id5" title="Terry Aadams. The title of the work. The name of the journal, 4(2):201-213, 7 1993. An optional note.">Aadams, 1993</a>]</span>, <span id="id3">[<a class="reference internal" href="#id7" title="Terry Carver. The title of the work. How it was published, The address of the publisher, 7 1993, An optional note.">Carver, 1993</a>]</span>.</p>
-<section id="notes">
-<h2>Notes<a class="headerlink" href="#notes" title="Permalink to this heading">#</a></h2>
-<ol class="arabic simple">
-<li><p><span id="fn1"></span> footnote 1</p></li>
-<li><p><span id="fn2"></span> footnote 2, except now with an <a class="reference external" href="http://example.com">example link</a>.</p></li>
-<li><p><span id="fn3"></span> Here is, again, another footnote.</p></li>
-</ol>
-</section>
+<p>Finally, here is a citation <span id="id4">[<a class="reference internal" href="#id9" title="Terry Baruch. The title of the work. Volume 4 of 10. The name of the publisher, The address, 3 edition, 7 1993. ISBN 3257227892. An optional note.">Baruch, 1993</a>]</span>. And then some others <span id="id5">[<a class="reference internal" href="#id8" title="Terry Aadams. The title of the work. The name of the journal, 4(2):201-213, 7 1993. An optional note.">Aadams, 1993</a>]</span>, <span id="id6">[<a class="reference internal" href="#id10" title="Terry Carver. The title of the work. How it was published, The address of the publisher, 7 1993, An optional note.">Carver, 1993</a>]</span>.</p>
 </section>
 <section id="bibliography">
 <h1>Bibliography<a class="headerlink" href="#bibliography" title="Permalink to this heading">#</a></h1>
-<div class="docutils container" id="id4">
-<div class="citation" id="id5" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Aad93</a><span class="fn-bracket">]</span></span>
+<div class="docutils container" id="id7">
+<div class="citation" id="id8" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">Aad93</a><span class="fn-bracket">]</span></span>
 <p>Terry Aadams. The title of the work. <em>The name of the journal</em>, 4(2):201–213, 7 1993. An optional note.</p>
 </div>
-<div class="citation" id="id6" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Bar93</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id9" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">Bar93</a><span class="fn-bracket">]</span></span>
 <p>Terry Baruch. <em>The title of the work</em>. Volume 4 of 10. The name of the publisher, The address, 3 edition, 7 1993. ISBN 3257227892. An optional note.</p>
 </div>
-<div class="citation" id="id7" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">Car93</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id10" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">Car93</a><span class="fn-bracket">]</span></span>
 <p>Terry Carver. The title of the work. How it was published, The address of the publisher, 7 1993, An optional note.</p>
 </div>
 </div>
 </div>
+<hr class="footnotes docutils" />
+<aside class="footnote brackets" id="fn1" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>First footnote text</p>
+</aside>
+<aside class="footnote brackets" id="fn2" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Second footnote text</p>
+</aside>
+<aside class="footnote brackets" id="fn3" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p>Third footnote text</p>
+</aside>
 </section>
 
     <script type="text/x-thebe-config">
@@ -446,10 +448,7 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">This Is a Chapter Section in Its Own File</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a></li>
-</ul>
-</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">This Is a Chapter Section in Its Own File</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#bibliography">Bibliography</a></li>
 </ul>
 
