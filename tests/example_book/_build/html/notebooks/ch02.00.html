@@ -7,7 +7,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
     <title>Production Process for Jupyter Notebook Books &#8212; Hello World with Jupyter Book</title>
   
@@ -348,12 +348,13 @@ document.write(`
 <p><span class="caption-number">Fig. 1 </span><span class="caption-text">Here is my figure caption!</span><a class="headerlink" href="#example-fig" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
-<p>And finally, alternate footnote syntax.<a class="footnote-reference brackets" href="#mylabel" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+<p>And finally, alternate footnote syntax.<a class="footnote-reference brackets" href="#mylabel" id="id1">1</a></p>
 <hr class="footnotes docutils" />
-<aside class="footnote brackets" id="mylabel" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
-<p>My footnote text.</p>
-</aside>
+<dl class="footnote brackets">
+<dt class="label" id="mylabel"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>My footnote text.</p>
+</dd>
+</dl>
 <div class="toctree-wrapper compound">
 </div>
 </section>
