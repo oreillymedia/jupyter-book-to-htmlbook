@@ -157,12 +157,8 @@ const thebe_selector_output = ".output, .cell_output"
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">A second</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Production Process for Jupyter Notebook Books</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="ch02.01.html">This Is a Chapter Section in Its Own File</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Production Process for Jupyter Notebook Books</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="ch02.02.html">This is another subheading</a></li>
-</ul>
-</li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Code</span></p>
 <ul class="nav bd-sidenav">
@@ -171,6 +167,7 @@ const thebe_selector_output = ".output, .cell_output"
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">References</span></p>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="footnotes.html">Footnote Test</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
 </ul>
@@ -296,7 +293,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
 </div></div>
       
     </div>
@@ -312,6 +311,16 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Production Process for Jupyter Notebook Books</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#bibliography">Bibliography</a></li>
+</ul>
+
+            </nav>
         </div>
     </div>
 </div>
@@ -327,7 +336,7 @@ document.write(`
 <div><p>We’ll just have to see what we can see.</p>
 <p class="attribution">—Terry</p>
 </div></blockquote>
-<p>This chapter disucsses the (working) production process for Jupyter Notebooks, as well as serves as an example of a chapter that’s broken out into multiple Jupyter Notebook files.</p>
+<p>This chapter disucsses the (working) production process for Jupyter Notebooks, as well as serves as an example of a chapter that’s broken out into multiple Jupyter Notebook files. Sometimes we’ll cite a book <span id="id1">[<a class="reference internal" href="ch02.01.html#id6" title="Terry Baruch. The title of the work. Volume 4 of 10. The name of the publisher, The address, 3 edition, 7 1993. ISBN 3257227892. An optional note.">Baruch, 1993</a>]</span> also.</p>
 <p>Really, however, we’re looking at special things, like admonitions and fancy new syntax.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -348,10 +357,20 @@ document.write(`
 <p><span class="caption-number">Fig. 1 </span><span class="caption-text">Here is my figure caption!</span><a class="headerlink" href="#example-fig" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
-<p>And finally, alternate footnote syntax.<a class="footnote-reference brackets" href="#mylabel" id="id1">1</a></p>
+<p>And finally, alternate footnote syntax.<a class="footnote-reference brackets" href="#mylabel" id="id2">1</a></p>
+</section>
+<section id="bibliography">
+<h1>Bibliography<a class="headerlink" href="#bibliography" title="Permalink to this heading">#</a></h1>
+<div class="docutils container" id="id3">
+<dl class="citation">
+<dt class="label" id="id5"><span class="brackets"><a class="fn-backref" href="#id1">Bar93</a></span></dt>
+<dd><p>Terry Baruch. <em>The title of the work</em>. Volume 4 of 10. The name of the publisher, The address, 3 edition, 7 1993. ISBN 3257227892. An optional note.</p>
+</dd>
+</dl>
+</div>
 <hr class="footnotes docutils" />
 <dl class="footnote brackets">
-<dt class="label" id="mylabel"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dt class="label" id="mylabel"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
 <dd><p>My footnote text.</p>
 </dd>
 </dl>
@@ -417,6 +436,22 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Production Process for Jupyter Notebook Books</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#bibliography">Bibliography</a></li>
+</ul>
+
+  </nav></div>
+
+</div></div>
               
             
           </div>
