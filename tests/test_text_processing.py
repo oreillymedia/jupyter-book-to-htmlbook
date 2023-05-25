@@ -1,9 +1,39 @@
+import pytest
+import shutil
+import subprocess
+from pathlib import Path
 from bs4 import BeautifulSoup  # type: ignore
 from jupyter_book_to_htmlbook.text_processing import (
     clean_chapter,
     move_span_ids_to_sections,
     process_sidebars
     )
+
+
+@pytest.mark.slow
+def test_passthroughs(fresh_book_html):
+    """
+    Test around various markup and passthroughs, also meant to serve
+    as a "smoke test" during future Jupyter Book version upgrades
+    """
+    with (fresh_book_html / "notebooks/markup.html").open("r") as f:
+        chapter = f.read()
+    soup = BeautifulSoup(chapter, "html.parser")
+    clean_chapter(soup, False)
+
+    # keep together
+    assert soup.find("span", class_="keep-together")
+    # note inside complex list
+    assert soup.find("div",
+                     attrs={"data-type": "note"}).parent.name == "li"
+    # section with pagebreak-before
+    assert soup.find("section", attrs={"data-type": "sect2",
+                                       "class": ["pagebreak-before",
+                                                 "less-space"]})
+    # bold in code passthrough
+    assert soup.find("pre",
+                     attrs={"data-type":
+                            "programlisting"}).find("strong")
 
 
 def test_chapter_cleans():
@@ -88,7 +118,11 @@ def test_sidebar_processing():
     assert chapter_text.find("aside")["data-type"] == "sidebar"
     assert chapter_text.find("h1").string == "Here Is a Sidebar Title"
 
+
 def test_hidden_input_is_removed():
+    """
+    Ensure that our hidden content is removed when the "hide" class is present
+    """
     chapter_text = BeautifulSoup("""
 <div class="cell tag_hide-input docutils container">
 <details class="hide above-input">
@@ -97,13 +131,20 @@ def test_hidden_input_is_removed():
 <span class="expanded">Hide code cell source</span>
 </summary>
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The source for this his hidden!&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate">
+<div class="highlight">
+<pre><span></span><span class="nb">print</span>""" +
+                                 """<span class="p">(</span><span """ +
+                                 """class="s2">&quot;The source """ +
+                                 """for this his hidden!&quot;</span>""" +
+                                 """<span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </details>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The source for this his hidden!
+<div class="output stream highlight-myst-ansi notranslate">
+<div class="highlight"><pre><span></span>The source for this his hidden!
 </pre></div>
 </div>
 </div>
@@ -114,10 +155,14 @@ def test_hidden_input_is_removed():
 
 
 def test_hidden_output_is_removed():
-    chapter_text = BeautifulSoup("""
+    chapter_text = BeautifulSoup(
+        """
 <div class="cell tag_hide-output docutils container">
 <div class="cell_input above-output-prompt docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Don&#39;t see me!&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="nb">print</span>""" +
+        """<span class="p">(</span><span class="s2">&quot;""" +
+        """Don&#39;t see me!&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -127,7 +172,8 @@ def test_hidden_output_is_removed():
 <span class="expanded">Hide code cell output</span>
 </summary>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Don&#39;t see me!
+<div class="output stream highlight-myst-ansi notranslate">
+<div class="highlight"><pre><span></span>Don&#39;t see me!
 </pre></div>
 </div>
 </div>
