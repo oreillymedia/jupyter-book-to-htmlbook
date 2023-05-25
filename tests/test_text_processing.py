@@ -17,12 +17,7 @@ def test_chapter_cleans():
 <h2><span class="section-number">19.1.1.
 </span>Issues with Linear Regression<a class="headerlink"
 href="#issues-with-linear-regression" title="Permalink to this headline">¶</a>
-/h2>
-<div class="cell tag_hide-input docutils container">
-div class="cell_input docutils container">
-<pre> some thing </pre>
-</div>
-</div>"""
+</h2>"""
     chapter = BeautifulSoup(chapter_text, 'html.parser')
     result = clean_chapter(chapter)
     assert str(result) == """
@@ -32,11 +27,6 @@ div class="cell_input docutils container">
 </table>
 <p>Lorem ipsum</p>
 <h2>Issues with Linear Regression
-/h2&gt;
-<div class="cell tag_hide-input docutils container">
-div class="cell_input docutils container"&gt;
-<pre> some thing </pre>
-</div>
 </h2>"""
 
 
@@ -97,3 +87,52 @@ def test_sidebar_processing():
     process_sidebars(chapter_text)
     assert chapter_text.find("aside")["data-type"] == "sidebar"
     assert chapter_text.find("h1").string == "Here Is a Sidebar Title"
+
+def test_hidden_input_is_removed():
+    chapter_text = BeautifulSoup("""
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The source for this his hidden!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The source for this his hidden!
+</pre></div>
+</div>
+</div>
+</div>""", "html.parser")
+    clean_chapter(chapter_text, False)
+    assert not chapter_text.find("details")
+    assert not chapter_text.find("div", class_="highlight-ipython3")
+
+
+def test_hidden_output_is_removed():
+    chapter_text = BeautifulSoup("""
+<div class="cell tag_hide-output docutils container">
+<div class="cell_input above-output-prompt docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Don&#39;t see me!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<details class="hide below-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell output</span>
+<span class="expanded">Hide code cell output</span>
+</summary>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Don&#39;t see me!
+</pre></div>
+</div>
+</div>
+</details>
+</div>""", "html.parser")
+    clean_chapter(chapter_text, False)
+    assert not chapter_text.find("details")
+    assert not chapter_text.find("div", class_="output")

@@ -583,4 +583,3 @@ class TestInlineCode:
         expected = str(code_example_data_type)
         result = process_inline_code(code_example_data_type)
         assert str(result) == expected
-

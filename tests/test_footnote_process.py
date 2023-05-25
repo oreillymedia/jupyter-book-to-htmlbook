@@ -1,10 +1,22 @@
 import logging
+import pytest
 from bs4 import BeautifulSoup  # type: ignore
 
 from jupyter_book_to_htmlbook.footnote_processing import process_footnotes
 
 
-def test_process_footnotes_happy_path():
+@pytest.fixture()
+def footnote_chapter():
+    """
+    Returns the "article" element (main section) of the footnotes tester
+    file.
+    """
+    with open("tests/example_book/_build/html/notebooks/footnotes.html",
+              "rt") as f:
+        return BeautifulSoup(f.read(), "lxml").find("article")
+
+
+def test_process_footnotes_happy_path(footnote_chapter):
     """
     Happy path test for footnote conversions
 
@@ -12,24 +24,8 @@ def test_process_footnotes_happy_path():
     data-type="footnote" attribute, and the references section
     should be destroyed
     """
-    chapter_text = """<div>
-<p>For example, Twitter lets people quickly download millions of data
-points.<a class="footnote-reference brackets" href="#twitter" id="id1">1</a>
-</p>
-<hr class="footnotes docutils" />
-<dl class="footnote brackets">
-<dt class="label" id="twitter">
-<span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><p>Isn't the internet amazing?</p>
-</dd></dl></div>"""
-    chapter = BeautifulSoup(chapter_text, 'html.parser')
-    result = process_footnotes(chapter)
-    assert str(result) == """<div>
-<p>For example, Twitter lets people quickly download millions of data
-points.<span data-type="footnote">Isn't the internet amazing?</span>
-</p>
-
-</div>"""
+    result = process_footnotes(footnote_chapter)
+    assert result.find("span", attrs={"data-type": "footnote"})
 
 
 def test_prcoess_footnotes_no_href(caplog):

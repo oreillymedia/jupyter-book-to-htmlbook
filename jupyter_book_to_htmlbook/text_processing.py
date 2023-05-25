@@ -27,8 +27,8 @@ def clean_chapter(chapter, rm_numbering=True):
         # remove hidden cells. in the web version, these cells are hidden by
         # default and users can toggle them on/off. but they take up too much
         # space if rendered into the pdf.
-        ".tag_hide-input > .cell_input",
-        ".tag_hide-output > .cell_output",
+        ".tag_hide-input > .hide",
+        ".tag_hide-output > .hide",
         ".tag_hide-cell",
         ".toggle-details",
 

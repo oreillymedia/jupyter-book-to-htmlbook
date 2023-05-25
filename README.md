@@ -72,6 +72,11 @@ Options:
 
 ## Release Notes
 
+### 1.1.0
+
+Features:
+- Upgrade to Jupyter Book v.0.15.1
+
 ### 1.0.9
 
 Bug fixes:
