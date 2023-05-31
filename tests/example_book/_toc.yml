@@ -20,6 +20,7 @@ parts:
       - file: notebooks/code_r
   - caption: References
     chapters:
+      - file: notebooks/markup
       - file: notebooks/footnotes
       - file: notebooks/glossary
       - file: bibliography
