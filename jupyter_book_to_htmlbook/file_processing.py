@@ -1,7 +1,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
 from bs4 import BeautifulSoup  # type: ignore
 from .admonition_processing import process_admonitions
 from .figure_processing import process_figures, process_informal_figs
@@ -222,7 +222,8 @@ def process_chapter(toc_element,
                     source_dir,
                     build_dir=Path('.'),
                     book_ids: list = [],
-                    skip_cell_numbering: bool = False):
+                    skip_cell_numbering: Optional[bool] = False,
+                    keep_highlighting: Optional[bool] = False):
     """
     Takes a list of chapter files and chapter lists and then writes the chapter
     to the root directory in which the script is run. Note that this assumes
@@ -251,7 +252,8 @@ def process_chapter(toc_element,
     chapter = process_math(chapter)
     # note: best to run examples before code processing
     chapter = process_code_examples(chapter)
-    chapter = process_code(chapter, skip_cell_numbering)
+    if not keep_highlighting:
+        chapter = process_code(chapter, skip_cell_numbering)
     chapter = process_inline_code(chapter)
     chapter = move_span_ids_to_sections(chapter)
     chapter = process_sidebars(chapter)

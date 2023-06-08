@@ -11,20 +11,15 @@ from jupyter_book_to_htmlbook.file_processing import (
 class TestChapterProcess:
     """ chapter tests """
 
-    def test_compile_chapter_parts_happy_path(self, tmp_path):
+    def test_compile_chapter_parts_happy_path(self, tmp_book_path):
         """
         happy path for taking an ordered list of chapter paths
         and then returning a <section> delimited chapter
         """
-        test_env = tmp_path / 'tmp'
-        test_env.mkdir()
-        shutil.copytree('tests/example_book/_build/html/notebooks',
-                        test_env, dirs_exist_ok=True)
-
         result = process_chapter_soup([
-            test_env / 'ch02.00.html',
-            test_env / 'ch02.01.html',
-            test_env / 'ch02.02.html',
+            tmp_book_path / 'notebooks/ch02.00.html',
+            tmp_book_path / 'notebooks/ch02.01.html',
+            tmp_book_path / 'notebooks/ch02.02.html',
             ])[0]
         # the resulting section should have a data-type of "chapter"
         assert result["data-type"] == "chapter"
@@ -34,18 +29,16 @@ class TestChapterProcess:
         number_of_sections_expected = 2  # the first html file doesn't get one
         assert number_of_sections == number_of_sections_expected
 
-    def test_process_chapter_single_chapter_file(self, tmp_path, capsys):
+    def test_process_chapter_single_chapter_file(self, tmp_book_path, capsys):
         """
         happy path for chapter processing a single chapter file
 
         also ensures that our function is returning what we expect it to
         """
-        test_env = tmp_path / 'tmp'
+        test_env = tmp_book_path / 'notebooks'
         test_out = test_env / 'output'
-        test_env.mkdir()
         test_out.mkdir()
-        shutil.copy('tests/example_book/_build/html/notebooks/ch01.html',
-                    test_env / 'ch01.html')
+
         result = process_chapter((test_env / 'ch01.html'), test_env, test_out)
         # first item is the intro file, so let's check on the first "chapter"
         assert os.path.exists(test_out / 'ch01.html')
@@ -128,17 +121,15 @@ id="this-is-another-subheading">
 </h1>
 <p>Finally, a summary.</p></section></section>"""
 
-    def test_process_chapter_filepaths(self, tmp_path):
+    def test_process_chapter_filepaths(self, tmp_book_path):
         """
         ensure the returned/written filepath is correct
         also includes testing nested directories
         """
-        test_env = tmp_path / 'tmp'
+        test_env = tmp_book_path
         test_out = test_env / 'output'
-        test_env.mkdir()
         test_out.mkdir()
-        shutil.copytree('tests/example_book/_build/html',
-                        test_env, dirs_exist_ok=True)
+
         shutil.copytree(test_env / 'notebooks',
                         test_env / 'chapters/notebooks')
         result = process_chapter((test_env / 'notebooks/ch01.html'),
@@ -152,16 +143,13 @@ id="this-is-another-subheading">
         assert "notebooks/ch01.html" in result
         assert "chapters/" in result
 
-    def test_process_chapter_with_subfiles(self, tmp_path):
+    def test_process_chapter_with_subfiles(self, tmp_book_path):
         """
         happy path for chapter processing a chapter with subfiles
         """
-        test_env = tmp_path / 'tmp'
+        test_env = tmp_book_path / "notebooks"
         test_out = test_env / 'output'
-        test_env.mkdir()
         test_out.mkdir()
-        shutil.copytree('tests/example_book/_build/html/notebooks',
-                        test_env, dirs_exist_ok=True)
 
         result = process_chapter([
             test_env / 'ch02.00.html',
@@ -173,16 +161,14 @@ id="this-is-another-subheading">
         assert "ch02" in result
         assert os.path.exists(test_out / 'ch02.00.html')
 
-    def test_process_chapter_with_subsections(self, tmp_path, capsys):
+    def test_process_chapter_with_subsections(self, tmp_book_path, capsys):
         """
         ensure subsections are getting data-typed appropriately
         """
-        test_env = tmp_path / 'tmp'
+        test_env = tmp_book_path / 'notebooks'
         test_out = test_env / 'output'
-        test_env.mkdir()
         test_out.mkdir()
-        shutil.copytree('tests/example_book/_build/html/notebooks',
-                        test_env, dirs_exist_ok=True)
+
         process_chapter([
             test_env / 'ch02.00.html',
             test_env / 'ch02.01.html',
@@ -216,7 +202,6 @@ id="this-is-another-subheading">
             text = f.read()
             assert text.find('xmlns="http://www.w3.org/1999/xhtml"') > -1
 
-    @pytest.mark.in_dev
     def test_process_chapter_totally_invalid_file(self, tmp_path, caplog):
         """
         if we ever try to process something that's super malformed, don't,
@@ -361,3 +346,21 @@ id="this-is-another-subheading">
             assert 'data-type="sect4"' in text
             assert 'data-type="sect5"' in text
             assert text.find('data-type="appendix"') > -1
+
+    def test_keep_highlighting(self, tmp_book_path):
+        """
+        We want to be able to optionally pass Jupyter's highlighting through,
+        e.g., in cases where we're not explicitly providing language support
+        """
+        test_out = tmp_book_path / "output"
+        test_out.mkdir()
+
+        process_chapter(tmp_book_path / "notebooks/code_py.html",
+                        tmp_book_path, test_out, keep_highlighting=True)
+
+        with open(test_out / "notebooks/code_py.html", "rt") as f:
+            text = f.read()
+
+        assert text.find('data-type="programlisting"') == -1
+        assert text.find('data-code-language="') == -1
+        assert text.find('<span class="nb"') > 0

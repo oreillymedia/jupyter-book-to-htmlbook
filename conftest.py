@@ -19,3 +19,16 @@ def fresh_book_html(tmp_path_factory):
         return Path("tests/example_book/_build/html")
     else:
         return test_env / "_build/html"
+
+
+@pytest.fixture()
+def tmp_book_path(tmp_path):
+    """
+    Provides a copy of the example_book html jupyter book build
+    for use in tests.
+    """
+    test_env = tmp_path / 'tmp'
+    test_env.mkdir()
+    shutil.copytree('tests/example_book/_build/html',
+                    test_env, dirs_exist_ok=True)
+    return test_env
