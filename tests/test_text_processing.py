@@ -1,7 +1,4 @@
 import pytest
-import shutil
-import subprocess
-from pathlib import Path
 from bs4 import BeautifulSoup  # type: ignore
 from jupyter_book_to_htmlbook.text_processing import (
     clean_chapter,
@@ -25,7 +22,9 @@ def test_passthroughs(fresh_book_html):
     assert soup.find("span", class_="keep-together")
     # note inside complex list
     assert soup.find("div",
-                     attrs={"data-type": "note"}).parent.name == "li"
+                     attrs={
+                            "data-type": "note"
+                            }).parent.name == "li"  # type: ignore
     # section with pagebreak-before
     assert soup.find("section", attrs={"data-type": "sect2",
                                        "class": ["pagebreak-before",
@@ -33,7 +32,7 @@ def test_passthroughs(fresh_book_html):
     # bold in code passthrough
     assert soup.find("pre",
                      attrs={"data-type":
-                            "programlisting"}).find("strong")
+                            "programlisting"}).find("strong")  # type: ignore
 
 
 def test_chapter_cleans():
@@ -77,9 +76,33 @@ def test_chapter_cleans_table_specific():
     halign_tr = result.find("tr")
     valign_th = result.find("th")
     width_td = result.find("td")  # it'll find the first
-    assert not halign_tr.get("valign")
-    assert not valign_th.get("valign")
-    assert not width_td.get("width")
+    assert not halign_tr.get("valign")  # type: ignore
+    assert not valign_th.get("valign")  # type: ignore
+    assert not width_td.get("width")  # type: ignore
+
+
+def test_chapter_clean_table_caption():
+    """
+    Ensure that we are preserving the captions, but removing the caption
+    numbering provided by Jupyter Book
+    """
+    chapter = BeautifulSoup("""
+<table class="table" id="example-table">
+<caption><span class="caption-number">Table 1 </span>
+<span class="caption-text">Table title</span>
+<a class="headerlink" href="#example-table" title="Permalink">#</a></caption>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup><thead>
+<tr class="row-odd"><th class="head"><p>Col1</p></th>
+<th class="head"><p>Col2</p></th>
+</tr></thead><tbody>
+<tr class="row-odd"><td><p>Row2 under Col1</p></td>
+<td><p>Row2 under Col2</p></td>
+</tr></tbody></table>""", "html.parser")
+    result = clean_chapter(chapter)
+    assert not result.find("span", class_="caption-number")
 
 
 def test_move_span_ids_to_sections():
@@ -115,8 +138,9 @@ def test_sidebar_processing():
 </div>
 </aside>""", "html.parser")
     process_sidebars(chapter_text)
-    assert chapter_text.find("aside")["data-type"] == "sidebar"
-    assert chapter_text.find("h1").string == "Here Is a Sidebar Title"
+    assert chapter_text.find("aside")["data-type"] == "sidebar"  # type: ignore
+    assert chapter_text.find(
+            "h1").string == "Here Is a Sidebar Title"  # type: ignore
 
 
 def test_hidden_input_is_removed():

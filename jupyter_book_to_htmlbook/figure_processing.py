@@ -1,8 +1,7 @@
-from pathlib import Path
 from bs4 import NavigableString  # type: ignore
 
 
-def process_figures(chapter, build_dir: Path):
+def process_figures(chapter):
     """
     Takes a chapter soup and handles changing the references to figures
     to the /images directory per usual htmlbook repo
@@ -42,13 +41,13 @@ def process_figures(chapter, build_dir: Path):
     return chapter
 
 
-def process_informal_figs(chapter, build_dir=''):
+def process_informal_figs(chapter):
     """
     This should be run *AFTER* process figs, but basically just repoints the
     img tags.
     """
     for img in chapter.find_all('img'):
-        # Since, weirdly, a myst-marked image will be in a floating anchor,
+        # Since, weirdly, a myst-marked image will be in a floating anchor
         if img.parent.name == 'a':
             img.parent.name = "figure"
             img.parent['class'] = "informal"
