@@ -1,10 +1,11 @@
 import re
 import logging
+from typing import Union
 from bs4 import NavigableString  # type: ignore
 from .helpers import base_soup
 
 
-def process_code(chapter, skip_numbering=False):
+def process_code(chapter, skip_numbering: Union[bool, None] = False):
     """
     Turn rendered <pre> blocks into appropriately marked-up HTMLBook
     """
