@@ -29,7 +29,7 @@ class TestChapterProcess:
         number_of_sections_expected = 2  # the first html file doesn't get one
         assert number_of_sections == number_of_sections_expected
 
-    def test_process_chapter_single_chapter_file(self, tmp_book_path, capsys):
+    def test_process_chapter_single_chapter_file(self, tmp_book_path):
         """
         happy path for chapter processing a single chapter file
 
@@ -161,7 +161,7 @@ id="this-is-another-subheading">
         assert "ch02" in result
         assert os.path.exists(test_out / 'ch02.00.html')
 
-    def test_process_chapter_with_subsections(self, tmp_book_path, capsys):
+    def test_process_chapter_with_subsections(self, tmp_book_path):
         """
         ensure subsections are getting data-typed appropriately
         """
@@ -315,7 +315,7 @@ id="this-is-another-subheading">
             text = f.read()
             assert text.find('data-type="appendix"') > -1
 
-    def test_process_appendix_with_subsections(self, tmp_path, capsys):
+    def test_process_appendix_with_subsections(self, tmp_path):
         """
         ensure subsections are getting data-typed appropriately when
         they're a part of an appendix

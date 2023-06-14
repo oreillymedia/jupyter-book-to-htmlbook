@@ -37,10 +37,12 @@ def process_part(part_path: Path, output_dir: Path):
         part_number = info.group(1)
         # undo earlier space replacement and do a simple title case
         part_name = info.group(2).replace('-', ' ')
+        # just to make the string fit better
+        ns = "http://www.w3.org/1999/xhtml"
 
         with open(output_dir / f'part-{part_number}.html', 'wt') as f:
             f.write(f"""
-<div xmlns="http://www.w3.org/1999/xhtml" data-type="part" id="part-1">
+<div xmlns="{ns}" data-type="part" id="part-{part_number}">
 <h1>{part_name}</h1>
 </div>""".lstrip())
         return f'part-{part_number}.html'
