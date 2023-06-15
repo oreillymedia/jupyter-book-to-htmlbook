@@ -8,6 +8,10 @@ def process_figures(chapter):
     """
     figures = chapter.find_all("figure")
     for figure in figures:
+
+        if figure.parent.name == "p":
+            figure.parent.unwrap()
+
         # clean anything extraneous, if extant
         if figure.find_all('a', class_="headerlink") != []:
             for anchor in figure.find_all('a', class_="headerlink"):

@@ -202,6 +202,36 @@ Here is my figure caption!</span>
         assert result.find("img").get("style") is None
         assert not result.find("span", class_="caption-number")
 
+    def test_fig_wrapped_in_p_is_unwrapped(self):
+        """
+        Edge case where sometimes figures end up wrapped inside <p> tags,
+        causing issues with rendering in Atlas. We should ensure that all
+        figures -- formal or informal -- do not end up wrapped inside
+        paragraphs
+        """
+        fig = """<p><figure class="align-default" id="example-fig">
+<a class="reference internal image-reference" href="images/flower.png">
+<img alt="images/flower.png" src="../_images/flower.png"
+style="height: 150px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">
+Here is my figure caption!</span>
+<a class="headerlink" href="#example-fig" title="Permalink to this image">#</a>
+</p></figcaption></p>"""
+        informal_fig = '<p><img alt="Flower" src="flower.png" /></p>'
+        text = f"<section>{fig}{informal_fig}</section>"
+        chapter = Soup(text, "html.parser")
+        process_figures(chapter)
+        process_informal_figs(chapter)
+
+        figs = chapter.find_all("figure")
+        assert len(figs) == 2
+
+        for fig in figs:
+            assert not fig.parent.name == "p"
+
+        assert not chapter.find('p')
+
 
 class TestGeneratedFigureProcessing:
     """
