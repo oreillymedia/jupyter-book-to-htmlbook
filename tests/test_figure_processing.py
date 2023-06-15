@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 from bs4 import BeautifulSoup as Soup  # type: ignore
 from jupyter_book_to_htmlbook.figure_processing import (
         process_figures,
@@ -47,7 +46,7 @@ Here is my figure caption!</span>
 <a class="headerlink" href="#example-fig" title="Permalink to this image">#</a>
 </p></figcaption>"""
         chapter = Soup(text, 'html.parser')
-        result = process_figures(chapter, Path('example'))
+        result = process_figures(chapter)
         assert not result.find("figcaption").find("a", class_="headerlink")
         assert result.find("img").get("style") is None
         assert not result.find("span", class_="caption-number")
@@ -66,7 +65,7 @@ style="width: 200px; height: 200px;" /></a>
 <a class="headerlink" href="#markdown-fig" title="Permalink to this image">
 #</a></p></figcaption></figure>"""
         chapter = Soup(text, 'html.parser')
-        result = process_figures(chapter, Path('example'))
+        result = process_figures(chapter)
         assert not result.find("figcaption").find("a", class_="headerlink")
         assert result.find("img").get("style") is None
         assert not result.find("span", class_="caption-number")
@@ -76,7 +75,7 @@ style="width: 200px; height: 200px;" /></a>
         """ support bare markdown images, i.e., informal figs """
         text = '<p><img alt="Flower" src="../_images/flower.png" /></p>'
         chapter = Soup(text, 'html.parser')
-        result = process_informal_figs(chapter, Path('example'))
+        result = process_informal_figs(chapter)
         assert str(result) == (
             '<figure class="informal"><img alt="Flower" ' +
             'src="../_images/flower.png"/></figure>')
@@ -88,7 +87,7 @@ style="width: 200px; height: 200px;" /></a>
                'e-class align-center" src="_images/flower.png" style="' + \
                'width: 249px; height: 150px;" /></a>'
         chapter = Soup(text, 'html.parser')
-        result = process_informal_figs(chapter, Path('example'))
+        result = process_informal_figs(chapter)
         assert str(result) == (
             '<figure class="informal"><img alt="flower" ' +
             'src="_images/flower.png"/></figure>')
@@ -109,7 +108,7 @@ Here is my figure caption!</span>
 <a class="headerlink" href="#example-fig" title="Permalink to this image">#</a>
 </p></figcaption>"""
         chapter = Soup(text, 'html.parser')
-        result = process_figures(chapter, Path('example'))
+        result = process_figures(chapter)
         caption = result.find("figcaption")
         assert not caption.p
         assert "\n" not in caption.string
@@ -130,7 +129,7 @@ Here is my <code>figure</code> caption!</span>
 <a class="headerlink" href="#example-fig" title="Permalink to this image">#</a>
 </p></figcaption>"""
         chapter = Soup(text, 'html.parser')
-        result = process_figures(chapter, Path('example'))
+        result = process_figures(chapter)
         caption = result.find("figcaption")
         assert not caption.p
         assert caption.find("code")
@@ -152,7 +151,7 @@ style="height: 150px;" /></a>
 <a class="headerlink" href="#example-fig" title="Permalink to this image">#</a>
 </p></figcaption>"""
         chapter = Soup(text, 'html.parser')
-        result = process_figures(chapter, Path('example'))
+        result = process_figures(chapter)
         caption = result.find("figcaption")
         assert caption.find("strong")
         assert caption.find("em")
@@ -175,7 +174,7 @@ style="width: 200px; height: 200px;" />
 <a class="headerlink" href="#markdown-fig" title="Permalink to this image">
 #</a></p></figcaption></figure>"""
         chapter = Soup(text, 'html.parser')
-        result = process_figures(chapter, Path('example'))
+        result = process_figures(chapter)
         assert result.find("figcaption")
         assert not result.find("figcaption").find("a", class_="headerlink")
         assert result.find("img").get("style") is None
@@ -197,11 +196,41 @@ Here is my figure caption!</span>
 <a class="headerlink" href="#example-fig" title="Permalink to this image">#</a>
 </p></figcaption>"""
         chapter = Soup(text, 'html.parser')
-        result = process_figures(chapter, Path('example'))
+        result = process_figures(chapter)
         assert result.find("figcaption")
         assert not result.find("figcaption").find("a", class_="headerlink")
         assert result.find("img").get("style") is None
         assert not result.find("span", class_="caption-number")
+
+    def test_fig_wrapped_in_p_is_unwrapped(self):
+        """
+        Edge case where sometimes figures end up wrapped inside <p> tags,
+        causing issues with rendering in Atlas. We should ensure that all
+        figures -- formal or informal -- do not end up wrapped inside
+        paragraphs
+        """
+        fig = """<p><figure class="align-default" id="example-fig">
+<a class="reference internal image-reference" href="images/flower.png">
+<img alt="images/flower.png" src="../_images/flower.png"
+style="height: 150px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">
+Here is my figure caption!</span>
+<a class="headerlink" href="#example-fig" title="Permalink to this image">#</a>
+</p></figcaption></p>"""
+        informal_fig = '<p><img alt="Flower" src="flower.png" /></p>'
+        text = f"<section>{fig}{informal_fig}</section>"
+        chapter = Soup(text, "html.parser")
+        process_figures(chapter)
+        process_informal_figs(chapter)
+
+        figs = chapter.find_all("figure")
+        assert len(figs) == 2
+
+        for fig in figs:
+            assert not fig.parent.name == "p"
+
+        assert not chapter.find('p')
 
 
 class TestGeneratedFigureProcessing:
@@ -217,7 +246,7 @@ class TestGeneratedFigureProcessing:
         """
         Minimal generated figure test
         """
-        result = process_figures(code_generated_figure, "")
+        result = process_figures(code_generated_figure)
         assert result.find("figure").get("id") == "code-output-fig"
         assert result.find("figcaption")
         assert not result.find("figcaption").find("a", class_="headerlink")

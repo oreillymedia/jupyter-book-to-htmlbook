@@ -27,6 +27,7 @@ Usage:`jb2htmlbook [OPTIONS] SOURCE TARGET`
 Help text: 
 
 ```
+$ jb2htmlbook --help
 Usage: jb2htmlbook [OPTIONS] SOURCE TARGET
 
   Converts a Jupyter Book project into HTMLBook.
@@ -53,9 +54,11 @@ Options:
   --atlas-json TEXT               Path to the book's atlas.json file
   --skip-jb-build                 Skip running `jupyter-book` as a part of
                                   this conversion
-  --skip-numbering      Skip the numbering of In[]/Out[] code cells
+  --skip-numbering                Skip the numbering of In[]/Out[] code cells
   --include-root                  Include the 'root' file of the jupyter-book
                                   project
+  --keep-highlighting             Preserve any code highlighting provided by
+                                  Jupyter Book
   --version
   --install-completion [bash|zsh|fish|powershell|pwsh]
                                   Install completion for the specified shell.
@@ -63,19 +66,35 @@ Options:
                                   Show completion for the specified shell, to
                                   copy it or customize the installation.
   --help                          Show this message and exit.
-
 ```
 
-## Current Known Limitations
+## Current (Known) Limitations
 
 * Jupyter Book can only process one metadata-named code-generated figure per file. The workaround for this is to save any resultant figures to disk and refer to them as any other figure.
 
 ## Release Notes
 
+### 1.1.0
+
+Features:
+- Upgrade to Jupyter Book v.0.15.1
+- `--keep-highlighting` flag to preserve syntax highlighting for code blocks provided by Jupyter Book
+
+Bug fixes:
+- Table caption numbering is now removed from output (was causing duplicates in Atlas builds)
+- Additional safeguards around figure markup
+- Generated part.html files now have correctly-numbered (and unique) IDs
+
+Quality of life improvements:
+- Explicit tests for common PE tasks
+- Additional examples in the `example_book`
+- Improved type hints
+
+
 ### 1.0.9
 
 Bug fixes:
-- Remove spans inside `<code>` tags that display incorrectly on the ORM learning platform.
+- Remove spans inside `<code>` tags that display incorrectly on the ORM learning platform
 
 ### 1.0.8
 

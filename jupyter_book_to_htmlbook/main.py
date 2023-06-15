@@ -43,6 +43,11 @@ def jupter_book_to_htmlbook(
             False,
             "--include-root",
             help="Include the 'root' file of the jupyter-book project"),
+        keep_highlighting: Optional[bool] = typer.Option(
+            False,
+            "--keep-highlighting",
+            help="Preserve any code highlighting provided by Jupyter Book",
+            ),
         version: Optional[bool] = typer.Option(
             None,
             "--version",
@@ -132,7 +137,8 @@ def jupter_book_to_htmlbook(
                                                 source_dir,
                                                 output_dir,
                                                 book_ids,
-                                                skip_cell_numbering)
+                                                skip_cell_numbering,
+                                                keep_highlighting)
             processed_files.append(f'{target}/{file}')
             book_ids.extend(chapter_ids)
 

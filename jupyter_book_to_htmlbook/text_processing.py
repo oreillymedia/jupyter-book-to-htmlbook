@@ -1,8 +1,8 @@
 def clean_chapter(chapter, rm_numbering=True):
     """
     "Cleans" the chapter from any script or style tags, removes table borders,
-    table valign/width attributes, removes any style attrs, and by default
-    removes any section numbering.
+    table valign/width attributes, caption numbering, removes any style attrs,
+    and by default removes any section numbering.
     """
     remove_tags = ['style', 'script']
     remove_attrs = ['style', 'valign', 'halign', 'width']
@@ -13,6 +13,8 @@ def clean_chapter(chapter, rm_numbering=True):
             tag.decompose()
         if tag.name == 'table':
             del tag['border']
+            if tag.find("span", class_="caption-number"):
+                tag.find("span", class_="caption-number").decompose()
 
     for attr in remove_attrs:
         for tag in chapter.find_all(attrs={attr: True}):
@@ -27,8 +29,8 @@ def clean_chapter(chapter, rm_numbering=True):
         # remove hidden cells. in the web version, these cells are hidden by
         # default and users can toggle them on/off. but they take up too much
         # space if rendered into the pdf.
-        ".tag_hide-input > .cell_input",
-        ".tag_hide-output > .cell_output",
+        ".tag_hide-input > .hide",
+        ".tag_hide-output > .hide",
         ".tag_hide-cell",
         ".toggle-details",
 

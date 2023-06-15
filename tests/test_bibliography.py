@@ -99,10 +99,32 @@ of the publisher, 7 1993, An optional note.</p>
         result = process_chapter([
             test_env / 'ch02.00.html',
             test_env / 'ch02.01.html',
+            test_env / 'ch02.02.html',
+            ], test_env, test_out)[0]
+        with open(test_out / result, "rt") as f:
+            soup = BeautifulSoup(f.read(), "lxml")
+        bib = soup.find("section", id="bibliography")
+        assert len(soup.find_all("section", id="bibliography")) == 1
+        assert len(bib.find("ul", class_="author-date").find_all("li")) == 4
+
+    def test_single_sub_bib_becomes_bib(self, tmp_path):
+        """
+        Coverage test to ensure that if we only have a bibliography in a
+        sub-file, it gets used as the primary bibliography for that chapter
+        """
+        test_env = tmp_path / 'tmp'
+        test_out = test_env / 'output'
+        test_env.mkdir()
+        test_out.mkdir()
+        shutil.copytree('tests/example_book/_build/html/notebooks/',
+                        test_env, dirs_exist_ok=True)
+        result = process_chapter([
+            test_env / 'ch01.html',
             test_env / 'ch02.01.html',
             test_env / 'ch02.02.html',
             ], test_env, test_out)[0]
         with open(test_out / result, "rt") as f:
             soup = BeautifulSoup(f.read(), "lxml")
+        bib = soup.find("section", id="bibliography")
         assert len(soup.find_all("section", id="bibliography")) == 1
-        assert len(soup.find("section", id="bibliography").find_all("li")) == 6
+        assert len(bib.find("ul", class_="author-date").find_all("li")) == 3

@@ -1,9 +1,38 @@
+import pytest
 from bs4 import BeautifulSoup  # type: ignore
 from jupyter_book_to_htmlbook.text_processing import (
     clean_chapter,
     move_span_ids_to_sections,
     process_sidebars
     )
+
+
+@pytest.mark.slow
+def test_passthroughs(fresh_book_html):
+    """
+    Test around various markup and passthroughs, also meant to serve
+    as a "smoke test" during future Jupyter Book version upgrades
+    """
+    with (fresh_book_html / "notebooks/markup.html").open("r") as f:
+        chapter = f.read()
+    soup = BeautifulSoup(chapter, "html.parser")
+    clean_chapter(soup, False)
+
+    # keep together
+    assert soup.find("span", class_="keep-together")
+    # note inside complex list
+    assert soup.find("div",
+                     attrs={
+                            "data-type": "note"
+                            }).parent.name == "li"  # type: ignore
+    # section with pagebreak-before
+    assert soup.find("section", attrs={"data-type": "sect2",
+                                       "class": ["pagebreak-before",
+                                                 "less-space"]})
+    # bold in code passthrough
+    assert soup.find("pre",
+                     attrs={"data-type":
+                            "programlisting"}).find("strong")  # type: ignore
 
 
 def test_chapter_cleans():
@@ -17,12 +46,7 @@ def test_chapter_cleans():
 <h2><span class="section-number">19.1.1.
 </span>Issues with Linear Regression<a class="headerlink"
 href="#issues-with-linear-regression" title="Permalink to this headline">¶</a>
-/h2>
-<div class="cell tag_hide-input docutils container">
-div class="cell_input docutils container">
-<pre> some thing </pre>
-</div>
-</div>"""
+</h2>"""
     chapter = BeautifulSoup(chapter_text, 'html.parser')
     result = clean_chapter(chapter)
     assert str(result) == """
@@ -32,11 +56,6 @@ div class="cell_input docutils container">
 </table>
 <p>Lorem ipsum</p>
 <h2>Issues with Linear Regression
-/h2&gt;
-<div class="cell tag_hide-input docutils container">
-div class="cell_input docutils container"&gt;
-<pre> some thing </pre>
-</div>
 </h2>"""
 
 
@@ -57,9 +76,33 @@ def test_chapter_cleans_table_specific():
     halign_tr = result.find("tr")
     valign_th = result.find("th")
     width_td = result.find("td")  # it'll find the first
-    assert not halign_tr.get("valign")
-    assert not valign_th.get("valign")
-    assert not width_td.get("width")
+    assert not halign_tr.get("valign")  # type: ignore
+    assert not valign_th.get("valign")  # type: ignore
+    assert not width_td.get("width")  # type: ignore
+
+
+def test_chapter_clean_table_caption():
+    """
+    Ensure that we are preserving the captions, but removing the caption
+    numbering provided by Jupyter Book
+    """
+    chapter = BeautifulSoup("""
+<table class="table" id="example-table">
+<caption><span class="caption-number">Table 1 </span>
+<span class="caption-text">Table title</span>
+<a class="headerlink" href="#example-table" title="Permalink">#</a></caption>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup><thead>
+<tr class="row-odd"><th class="head"><p>Col1</p></th>
+<th class="head"><p>Col2</p></th>
+</tr></thead><tbody>
+<tr class="row-odd"><td><p>Row2 under Col1</p></td>
+<td><p>Row2 under Col2</p></td>
+</tr></tbody></table>""", "html.parser")
+    result = clean_chapter(chapter)
+    assert not result.find("span", class_="caption-number")
 
 
 def test_move_span_ids_to_sections():
@@ -95,5 +138,71 @@ def test_sidebar_processing():
 </div>
 </aside>""", "html.parser")
     process_sidebars(chapter_text)
-    assert chapter_text.find("aside")["data-type"] == "sidebar"
-    assert chapter_text.find("h1").string == "Here Is a Sidebar Title"
+    assert chapter_text.find("aside")["data-type"] == "sidebar"  # type: ignore
+    assert chapter_text.find(
+            "h1").string == "Here Is a Sidebar Title"  # type: ignore
+
+
+def test_hidden_input_is_removed():
+    """
+    Ensure that our hidden content is removed when the "hide" class is present
+    """
+    chapter_text = BeautifulSoup("""
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate">
+<div class="highlight">
+<pre><span></span><span class="nb">print</span>""" +
+                                 """<span class="p">(</span><span """ +
+                                 """class="s2">&quot;The source """ +
+                                 """for this his hidden!&quot;</span>""" +
+                                 """<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate">
+<div class="highlight"><pre><span></span>The source for this his hidden!
+</pre></div>
+</div>
+</div>
+</div>""", "html.parser")
+    clean_chapter(chapter_text, False)
+    assert not chapter_text.find("details")
+    assert not chapter_text.find("div", class_="highlight-ipython3")
+
+
+def test_hidden_output_is_removed():
+    chapter_text = BeautifulSoup(
+        """
+<div class="cell tag_hide-output docutils container">
+<div class="cell_input above-output-prompt docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight">
+<pre><span></span><span class="nb">print</span>""" +
+        """<span class="p">(</span><span class="s2">&quot;""" +
+        """Don&#39;t see me!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<details class="hide below-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell output</span>
+<span class="expanded">Hide code cell output</span>
+</summary>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate">
+<div class="highlight"><pre><span></span>Don&#39;t see me!
+</pre></div>
+</div>
+</div>
+</details>
+</div>""", "html.parser")
+    clean_chapter(chapter_text, False)
+    assert not chapter_text.find("details")
+    assert not chapter_text.find("div", class_="output")

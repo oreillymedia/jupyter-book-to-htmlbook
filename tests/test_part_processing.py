@@ -26,3 +26,14 @@ class TestPartProcessing:
         result = process_part(part_path, tmp_path)
         assert result is None
         assert "unable to parse part information" in caplog.text.lower()
+
+    def test_process_part_id_is_correct(self, tmp_path):
+        """
+        Sanity check test to confirm that a prior bug isn't (re)introduced
+        """
+        part_path = Path(tmp_path / '_jb_part-20-Part.html')
+        result = process_part(part_path, tmp_path)
+        assert result == 'part-20.html'
+        with open(tmp_path / 'part-20.html') as f:
+            text = f.read()
+            assert text.find('id="part-20"') > 0

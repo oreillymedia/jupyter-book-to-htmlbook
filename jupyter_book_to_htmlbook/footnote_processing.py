@@ -12,9 +12,7 @@ def process_footnotes(chapter):
         try:
             ref_id = ref.get('href').split('#')[-1]
             # double next_sibling b/c next sibling is a space
-            ref_location = chapter.find(
-                                        "dt", {"id": ref_id}
-                                        ).next_sibling.next_sibling
+            ref_location = chapter.find(id=ref_id).next_sibling.next_sibling
             footnote_contents = ref_location.find('p').children
             ref.name = 'span'
             ref['data-type'] = 'footnote'

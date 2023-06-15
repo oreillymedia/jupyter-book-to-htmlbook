@@ -1,7 +1,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional, Tuple
 from bs4 import BeautifulSoup  # type: ignore
 from .admonition_processing import process_admonitions
 from .figure_processing import process_figures, process_informal_figs
@@ -37,10 +37,12 @@ def process_part(part_path: Path, output_dir: Path):
         part_number = info.group(1)
         # undo earlier space replacement and do a simple title case
         part_name = info.group(2).replace('-', ' ')
+        # just to make the string fit better
+        ns = "http://www.w3.org/1999/xhtml"
 
         with open(output_dir / f'part-{part_number}.html', 'wt') as f:
             f.write(f"""
-<div xmlns="http://www.w3.org/1999/xhtml" data-type="part" id="part-1">
+<div xmlns="{ns}" data-type="part" id="part-{part_number}">
 <h1>{part_name}</h1>
 </div>""".lstrip())
         return f'part-{part_number}.html'
@@ -151,7 +153,8 @@ def get_main_section(soup):
     return main, bibliography
 
 
-def process_chapter_soup(toc_element: Union[Path, list[Path]]):
+def process_chapter_soup(
+        toc_element: Union[Path, list[Path]]) -> Tuple[BeautifulSoup, str]:
     """ unified file chapter processing """
 
     if isinstance(toc_element, list):  # i.e., an ordered list of chapter parts
@@ -169,8 +172,12 @@ def process_chapter_soup(toc_element: Union[Path, list[Path]]):
     # perform initial swapping and namespace designation
     chapter, bib = get_main_section(base_soup)
 
-    if not chapter:
-        return None, None
+    if not chapter:  # guard against malformed files
+        logging.warning(f"Failed to process {toc_element}.")
+        raise RuntimeError(
+            f"Failed to process {toc_element}. Please check for error in " +
+            "your source file(s). Contact the Tools team for additional " +
+            "support.")
 
     else:
         chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
@@ -184,8 +191,8 @@ def process_chapter_soup(toc_element: Union[Path, list[Path]]):
                 subsection, sub_bib = process_chapter_subparts(subfile)
                 chapter.append(subsection)
                 if bib and sub_bib:
-                    entries = sub_bib.find_all("dd")
-                    bib.dl.extend(entries)
+                    entries = sub_bib.find_all("dd")  # type: ignore
+                    bib.dl.extend(entries)  # type: ignore
                 elif sub_bib:
                     bib = sub_bib
 
@@ -222,7 +229,8 @@ def process_chapter(toc_element,
                     source_dir,
                     build_dir=Path('.'),
                     book_ids: list = [],
-                    skip_cell_numbering: bool = False):
+                    skip_cell_numbering: Optional[bool] = False,
+                    keep_highlighting: Optional[bool] = False):
     """
     Takes a list of chapter files and chapter lists and then writes the chapter
     to the root directory in which the script is run. Note that this assumes
@@ -232,18 +240,11 @@ def process_chapter(toc_element,
     chapter, ch_name = process_chapter_soup(toc_element)
     logging.info(f"Processing {ch_name}...")
 
-    if not chapter:  # guard against malformed files
-        logging.warning(f"Failed to process {toc_element}.")
-        raise RuntimeError(
-            f"Failed to process {toc_element}. Please check for error in " +
-            "your source file(s). Contact the Tools team for additional " +
-            "support.")
-
     # perform cleans and processing
     chapter = clean_chapter(chapter)
     # note: must process figs before xrefs
-    chapter = process_figures(chapter, build_dir)
-    chapter = process_informal_figs(chapter, build_dir)
+    chapter = process_figures(chapter)
+    chapter = process_informal_figs(chapter)
     chapter = process_internal_refs(chapter)
     chapter = process_citations(chapter)
     chapter = process_footnotes(chapter)
@@ -251,7 +252,8 @@ def process_chapter(toc_element,
     chapter = process_math(chapter)
     # note: best to run examples before code processing
     chapter = process_code_examples(chapter)
-    chapter = process_code(chapter, skip_cell_numbering)
+    if not keep_highlighting:
+        chapter = process_code(chapter, skip_cell_numbering)
     chapter = process_inline_code(chapter)
     chapter = move_span_ids_to_sections(chapter)
     chapter = process_sidebars(chapter)
