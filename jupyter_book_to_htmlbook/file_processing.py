@@ -17,7 +17,8 @@ from .reference_processing import (
 from .code_processing import (
         process_code,
         process_code_examples,
-        process_inline_code
+        process_inline_code,
+        pre_spans_to_code_tags
     )
 from .text_processing import (
         clean_chapter,
@@ -254,6 +255,8 @@ def process_chapter(toc_element,
     chapter = process_code_examples(chapter)
     if not keep_highlighting:
         chapter = process_code(chapter, skip_cell_numbering)
+    else:
+        chapter = pre_spans_to_code_tags(chapter)
     chapter = process_inline_code(chapter)
     chapter = move_span_ids_to_sections(chapter)
     chapter = process_sidebars(chapter)

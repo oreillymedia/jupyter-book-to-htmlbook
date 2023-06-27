@@ -4,6 +4,7 @@ import re
 import shutil
 from bs4 import BeautifulSoup  # type: ignore
 from jupyter_book_to_htmlbook.code_processing import (
+        pre_spans_to_code_tags,
         process_code,
         process_inline_code,
         number_codeblock,
@@ -583,3 +584,21 @@ class TestInlineCode:
         expected = str(code_example_data_type)
         result = process_inline_code(code_example_data_type)
         assert str(result) == expected
+
+
+class TestKeepHighlighting:
+    """
+    Tests around preserving highlighting provided by Jupyter Book, but doing
+    enough to ensure they appear correctly inside Atlas
+    """
+
+    def test_pre_spans_to_code_tags(self):
+        """
+        Smoke test that we're correctly converting <span>s into <code>s inside
+        pre tags with highlighting
+        """
+        chapter = BeautifulSoup("""<div class="highlight"><pre>
+<span class="preserved">some code</span></pre></div>
+""", "html.parser")
+        result = pre_spans_to_code_tags(chapter)
+        assert result.find("pre").find("code")  # type: ignore

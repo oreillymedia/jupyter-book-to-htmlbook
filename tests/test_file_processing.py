@@ -351,6 +351,9 @@ id="this-is-another-subheading">
         """
         We want to be able to optionally pass Jupyter's highlighting through,
         e.g., in cases where we're not explicitly providing language support
+
+        In this case, the <span> tags inside the <pre> block need to be
+        converted into <code> tags so Atlas's css rules pick them up
         """
         test_out = tmp_book_path / "output"
         test_out.mkdir()
@@ -363,4 +366,5 @@ id="this-is-another-subheading">
 
         assert text.find('data-type="programlisting"') == -1
         assert text.find('data-code-language="') == -1
-        assert text.find('<span class="nb"') > 0
+        # spans should be converted to code tags for highlighting in Atlas
+        assert text.find('<code class="nb"') > 0

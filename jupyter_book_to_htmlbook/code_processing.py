@@ -228,3 +228,21 @@ def example_get_name_and_title_r(pre_block):
             "Missing first two line comments for uuid and title." +
             f"Unable to apply example formatting: {error}.")
         return None, None
+
+
+def pre_spans_to_code_tags(chapter):
+    """
+    If we are preserving highlighting provided by Jupyter Book but want those
+    styles to show up correctly in Atlas, we need to turn the <span> tags
+    inside the Jupyter <pre> tags into <code> tags
+    """
+    highlight_divs = chapter.find_all(class_="highlight")
+
+    for div in highlight_divs:
+        pre_tag = div.pre
+        if pre_tag:
+            spans = pre_tag.find_all("span")
+            for span in spans:
+                span.name = "code"
+
+    return chapter
