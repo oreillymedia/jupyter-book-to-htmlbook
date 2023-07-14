@@ -135,22 +135,66 @@ def apply_datatype(chapter, ch_name):
     return chapter
 
 
+def get_top_level_sections(soup):
+    """
+    Helper utility to grab top-level sections in main <article>. Returns
+    all but bibliography sections
+    """
+    section_wrappers = soup.find_all("article", attrs={"role": "main"})
+
+    # test case for partial files, not expected in production
+    if len(section_wrappers) == 0:
+        sections = soup.find_all('section')
+    elif len(section_wrappers) != 1:
+        article = soup.find('article', attrs={"role": "main"})
+        try:
+            main_title = article.find('h1').get_text()
+        except AttributeError:
+            main_title = soup.find("h1")
+        print("Warning: " +
+              f"The chapter with title '{main_title}' is malformed.")
+        return None, None
+    else:
+        main = section_wrappers[0]
+        sections = []
+
+        for element in main.children:
+            if (
+                    element.name == "section" and
+                    element.get('id') != "bibliography"
+               ):
+                sections.append(element)
+
+    return sections
+
+
 def get_main_section(soup):
     """
     Gets the main "section," or the main chapter text, and additionally
     checks to see if there is a separate bibliography section, returning
     that if it exists to be dealt with later.
     """
-    sections = soup.find_all('section')
+    sections = get_top_level_sections(soup)
+
     try:
         main = sections[0]
-    except IndexError:  # does not have a section class for top-level
-        logging.warning("Looks like {toc_element.name} is malformed.")
-        return None, None
+    except IndexError:
+        main = None
+
     if len(sections) > 1:
-        bibliography = soup.find('section', id="bibliography")
-    else:
-        bibliography = None
+        article = soup.find('article', attrs={"role": "main"})
+        try:
+            main_title = article.find('h1').get_text()
+        except AttributeError:
+            main_title = soup.find("h1")
+        err_msg = f"The chapter with title '{main_title}' " + \
+                  "has extra <section>s " + \
+                  "that will not be processed. Please check the " + \
+                  "notebook source files."
+        logging.warning(err_msg)
+        print(err_msg)
+    bibliography = soup.find('section', id="bibliography")
+
     return main, bibliography
 
 
@@ -172,11 +216,14 @@ def process_chapter_soup(
 
     # perform initial swapping and namespace designation
     chapter, bib = get_main_section(base_soup)
+    if bib and not chapter:  # bibs can be their own chapters
+        chapter = bib
+        bib = None
 
     if not chapter:  # guard against malformed files
         logging.warning(f"Failed to process {toc_element}.")
         raise RuntimeError(
-            f"Failed to process {toc_element}. Please check for error in " +
+            f"Failed to process {toc_element}. Please check for errors in " +
             "your source file(s). Contact the Tools team for additional " +
             "support.")
 
@@ -189,8 +236,10 @@ def process_chapter_soup(
 
         if chapter_parts:
             for subfile in chapter_parts:
-                subsection, sub_bib = process_chapter_subparts(subfile)
-                chapter.append(subsection)
+                subsections, sub_bib = process_chapter_subparts(subfile)
+                if subsections:
+                    for subsection in subsections:
+                        chapter.append(subsection)
                 if bib and sub_bib:
                     entries = sub_bib.find_all("dd")  # type: ignore
                     bib.dl.extend(entries)  # type: ignore
@@ -211,19 +260,24 @@ def process_chapter_subparts(subfile):
     """ processing for chapters with "sections" """
     with open(subfile, 'r') as f:
         soup = BeautifulSoup(f, 'lxml')
-        section, bib = get_main_section(soup)
-        section['data-type'] = 'sect1'  # type: ignore
-        del section['class']  # type: ignore
-        # move id from empty span to section
-        try:
-            section['id'] = section.select_one('span')['id']  # type: ignore
-        except TypeError:
-            # fun fact, this happens when there's not numbering on the toc
-            pass  # like before, if it's not there that's OK.
-        except KeyError:
-            # fun fact, this happens when there is numbering on the toc
-            pass  # like before, if it's not there that's OK.
-    return section, bib
+        top_level_sections = get_top_level_sections(soup)
+
+        for section in top_level_sections:
+            section['data-type'] = 'sect1'  # type: ignore
+            del section['class']  # type: ignore
+            # move id from empty span to section
+            try:
+                section['id'] = section.select_one(  # type: ignore
+                                    'span')['id']
+            except TypeError:
+                # this happens when there's not numbering on the toc
+                pass  # like before, if it's not there that's OK.
+            except KeyError:
+                # fun fact, this happens when there is numbering on the toc
+                pass  # like before, if it's not there that's OK.
+        bibliography = soup.find('section', id="bibliography")
+
+    return top_level_sections, bibliography
 
 
 def process_chapter(toc_element,
