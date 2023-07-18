@@ -74,6 +74,11 @@ Options:
 
 ## Release Notes
 
+### 1.1.1
+
+Bug fix:
+- Don't drop additional top-level headings in subchapter files
+
 ### 1.1.0
 
 Features:

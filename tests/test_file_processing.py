@@ -29,6 +29,25 @@ class TestChapterProcess:
         number_of_sections_expected = 2  # the first html file doesn't get one
         assert number_of_sections == number_of_sections_expected
 
+    def test_compile_chapter_parts_parts_with_many_h1s(self, tmp_book_path):
+        """
+        We should ensure that subsequent A-level headings inside subchapter
+        files aren't getting dropped from the book
+        """
+        result = process_chapter_soup([
+            tmp_book_path / 'notebooks/ch02.00.html',
+            tmp_book_path / 'notebooks/ch02.01.html',
+            tmp_book_path / 'notebooks/ch02.02.html',
+            tmp_book_path / 'notebooks/many_a_levels.html',
+            ])[0]
+        # the resulting section should have a data-type of "chapter"
+        assert result["data-type"] == "chapter"
+        # number of level-1 subsections should be one less than the group
+        number_of_sections = len(
+                result.find_all(attrs={"data-type": "sect1"}))
+        number_of_sections_expected = 4  # the first html file doesn't get one
+        assert number_of_sections == number_of_sections_expected
+
     def test_process_chapter_single_chapter_file(self, tmp_book_path):
         """
         happy path for chapter processing a single chapter file
@@ -44,6 +63,39 @@ class TestChapterProcess:
         assert os.path.exists(test_out / 'ch01.html')
         # check on return
         assert "ch01.html" in result
+
+    def test_process_chapter_single_file_with_multiple_h1s(self,
+                                                           tmp_book_path,
+                                                           caplog,
+                                                           capsys):
+        """
+        Edge case in which a single chapter has multiple top-level sections,
+        (but the subsequent one is not a bibliography); we want to ensure that
+        the error is logged as well as printed
+        """
+        test_env = tmp_book_path / 'notebooks'
+        test_out = test_env / 'output'
+        test_out.mkdir()
+        caplog.set_level(logging.DEBUG)
+
+        process_chapter((test_env / 'many_a_levels.html'),
+                        test_env, test_out)
+        log = caplog.text
+        assert "will not be processed" in capsys.readouterr().out
+        assert "will not be processed" in log
+
+    def test_process_chapter_single_file_bibliogrpahy(self,
+                                                      tmp_book_path):
+        """
+        Bibliography files should act like normal chapters
+        """
+        test_env = tmp_book_path
+        test_out = test_env / 'output'
+        test_out.mkdir()
+
+        result = process_chapter((test_env / 'bibliography.html'),
+                                 test_env, test_out)
+        assert "bibliography.html" in result
 
     def test_chapter_promote_headings(self, tmp_path):
         """
