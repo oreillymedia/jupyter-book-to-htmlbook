@@ -206,3 +206,25 @@ def test_hidden_output_is_removed():
     clean_chapter(chapter_text, False)
     assert not chapter_text.find("details")
     assert not chapter_text.find("div", class_="output")
+
+
+def test_svg_retains_attrs():
+    """
+    This is to get around styles applied to SVGs, which seems like
+    standard practice, for better or worse.
+    """
+    svg_ch = BeautifulSoup("""
+<div class="cell_output docutils container">
+<div class="output text_html">
+<svg width="250" height="150" style="color:blue">
+<rect width="100%" height="100%" fill="white"/>
+<line x1="125" y1="75" x2="225.0" y2="75.0" stroke-linecap="round" style="stroke:#663399;stroke-width:2"/>
+<g visibility="visible" transform="rotate(-90,225.0,75.0) translate(225.0, 75.0)">
+<circle stroke="gray" stroke-width="2" fill="transparent" r="5.5" cx="0" cy="0"/>
+<polygon points="0,12 2,9 -2,9" style="fill:gray;stroke:gray;stroke-width:2"/>
+</g>
+</svg>
+</div></div>""", "html.parser")
+    clean_chapter(svg_ch, False)
+    assert "stroke" in svg_ch.find("line").get('style')  # type:ignore
+    assert "blue" in svg_ch.find("svg").get('style')  # type:ignore

@@ -74,6 +74,11 @@ Options:
 
 ## Release Notes
 
+### 1.1.2
+
+Bug fix:
+- Allow "style" attributes to remain inside SVGs
+
 ### 1.1.1
 
 Bug fix:
