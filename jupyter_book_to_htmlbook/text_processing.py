@@ -18,7 +18,18 @@ def clean_chapter(chapter, rm_numbering=True):
 
     for attr in remove_attrs:
         for tag in chapter.find_all(attrs={attr: True}):
-            del tag[attr]
+            # we need to allow styles on svg elements
+            in_svg = False
+            if attr == "style":
+
+                if tag.name == "svg":
+                    in_svg = True
+
+                for parent in tag.parents:
+                    if parent.name == "svg":
+                        in_svg = True
+            if not in_svg:
+                del tag[attr]
 
     # (optionally) remove numbering
     if rm_numbering:
