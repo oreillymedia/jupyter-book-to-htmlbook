@@ -186,13 +186,12 @@ def get_main_section(soup):
         try:
             main_title = article.find('h1').get_text()
         except AttributeError:
-            main_title = soup.find("h1")
+            main_title = soup.find("h1").get_text()
         err_msg = f"The chapter with title '{main_title}' " + \
-                  "has extra <section>s " + \
+                  "has extra sections " + \
                   "that will not be processed. Please check the " + \
                   "notebook source files."
         logging.warning(err_msg)
-        print(err_msg)
     bibliography = soup.find('section', id="bibliography")
 
     return main, bibliography

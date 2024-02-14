@@ -81,7 +81,6 @@ class TestChapterProcess:
         process_chapter((test_env / 'many_a_levels.html'),
                         test_env, test_out)
         log = caplog.text
-        assert "will not be processed" in capsys.readouterr().out
         assert "will not be processed" in log
 
     def test_process_chapter_single_file_bibliogrpahy(self,
