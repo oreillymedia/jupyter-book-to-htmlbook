@@ -150,7 +150,7 @@ parts:
         monkeypatch.chdir(tmp_path)  # patch for our build target
         result = runner.invoke(app, [str(test_env), 'build'])
         assert result.exit_code != 0
-        assert type(result.exception) == FileNotFoundError
+        assert type(result.exception) is FileNotFoundError
 
     @pytest.mark.jb
     @pytest.mark.slow

@@ -215,7 +215,7 @@ def process_chapter_soup(
 
     # perform initial swapping and namespace designation
     chapter, bib = get_main_section(base_soup)
-    if bib and not chapter:  # bibs can be their own chapters
+    if bib and not chapter or bib == chapter:  # bibs can be their own chapters
         chapter = bib
         bib = None
 
