@@ -141,10 +141,15 @@ def get_top_level_sections(soup):
     all but bibliography sections
     """
     section_wrappers = soup.find_all("article", attrs={"role": "main"})
+    top_level_sections = []
 
     # test case for partial files, not expected in production
     if len(section_wrappers) == 0:
         sections = soup.find_all('section')
+
+        for section in sections:
+            if section.find_parent('section') is None:
+                top_level_sections.append(section)
     elif len(section_wrappers) != 1:
         article = soup.find('article', attrs={"role": "main"})
         try:
@@ -156,16 +161,15 @@ def get_top_level_sections(soup):
         return None, None
     else:
         main = section_wrappers[0]
-        sections = []
 
         for element in main.children:
             if (
                     element.name == "section" and
                     element.get('id') != "bibliography"
                ):
-                sections.append(element)
+                top_level_sections.append(element)
 
-    return sections
+    return top_level_sections
 
 
 def get_main_section(soup):
