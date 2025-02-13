@@ -64,6 +64,28 @@ class TestChapterProcess:
         # check on return
         assert "ch01.html" in result
 
+    def test_process_chapter_with_no_main_wrapper(self, tmp_book_path):
+        """
+        ensure a chapter with no main wrapper but with a single
+        top-level section can be processed
+
+        observed edge cases:
+        article wrapper present but has no role attr with value of main
+        wrapper element is of type main rather than article
+        """
+        test_env = tmp_book_path
+        test_out = test_env / 'output'
+        test_out.mkdir()
+
+        process_chapter((test_env / 'no_wrapper.html'), test_env, test_out)
+
+        with open(test_out / 'no_wrapper.html') as f:
+            text = f.read()
+            assert 'section data-type="chapter" id="chapter-1"' in text
+            assert 'data-type="sect1" id="section-1"' in text
+            assert 'data-type="sect1" id="section-2"' in text
+            assert 'data-type="sect1" id="section-3"' in text
+
     def test_process_chapter_single_file_with_multiple_h1s(self,
                                                            tmp_book_path,
                                                            caplog,
