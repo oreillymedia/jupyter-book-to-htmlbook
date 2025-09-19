@@ -1,26 +1,34 @@
-[tool.poetry]
+[project]
 name = "jupyter-book-to-htmlbook"
 version = "1.1.2"
 description = "A script to convert jupyter book html files to htmlbook for consumption in Atlas"
-authors = ["delfanbaum"]
+authors = [
+    {name = "O'Reilly Media"}
+]
+requires-python = ">=3.9"
+dependencies = [
+    "beautifulsoup4>=4.11.1",
+    "typer>=0.7.0",
+    "PyYAML>=6.0",
+    "lxml>=6.0.1",
+    "jupyter-book>=1.0.4.post1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-beautifulsoup4 = "^4.11.1"
-typer = "^0.7.0"
-PyYAML = "^6.0"
-jupyter-book = "^0.15.1"
-docutils = "0.17.1"
-lxml = "^6.0.1"
-
-[tool.poetry.scripts]
+[project.scripts]
 jb2htmlbook = "jupyter_book_to_htmlbook.main:main"
 jb2atlas = "jupyter_book_to_htmlbook.main:main"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.4.2"
-pytest-cov = "^7.0.0"
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.workspace]
+members = [
+    "sphinx-htmlbook-theme",
+]
