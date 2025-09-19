@@ -7,14 +7,14 @@ requires-python = ">=3.9"
 dependencies = [
     "sphinx>=6.1",
 ]
-license = "MIT"
+license = { file = "LICENSE" }
 
 [project.entry-points]
 "sphinx.html_themes" = { sphinx_htmlbook_theme = "sphinx_htmlbook_theme" }
 
 [tool.sphinx-theme-builder]
 node-version = "20.9.0"
-theme-name = "sphinx_htmlbook_theme"
+theme-name = "sphinx-htmlbook-theme"
 additional-compiled-static-assets = []
 
 [build-system]
