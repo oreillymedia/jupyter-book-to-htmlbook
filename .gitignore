@@ -144,3 +144,7 @@ tests/example_book/_build/html/_static
 tests/example_book/_build/html/reports
 tests/example_book/_build/html/.*
 tests/example_book/_build/html/objects.inv
+
+**/*/.nodeenv
+**/*/node_modules
+sphinx-htmlbook-theme/src/sphinx_htmlbook_theme/theme/static/*

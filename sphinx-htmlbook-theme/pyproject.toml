@@ -1,0 +1,22 @@
+[project]
+name = "sphinx-htmlbook-theme"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "sphinx>=6.1",
+]
+license = "MIT"
+
+[project.entry-points]
+"sphinx.html_themes" = { sphinx_htmlbook_theme = "sphinx_htmlbook_theme" }
+
+[tool.sphinx-theme-builder]
+node-version = "20.9.0"
+theme-name = "sphinx_htmlbook_theme"
+additional-compiled-static-assets = []
+
+[build-system]
+requires = ["sphinx-theme-builder >= 0.2.0a14"]
+build-backend = "sphinx_theme_builder"
