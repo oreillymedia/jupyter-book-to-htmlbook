@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{%- block body %}
+  {%- if pagename == 'index' %}
+    <section data-type="titlepage">
+      <h1>{{ theme_book_title or title }}</h1>
+      {%- if theme_book_author %}
+      <p data-type="author">{{ theme_book_author }}</p>
+      {%- endif %}
+      {%- if theme_publisher %}
+      <p data-type="publisher">{{ theme_publisher }}</p>
+      {%- endif %}
+    </section>
+  {%- elif pagename == 'genindex' %}
+    <section data-type="index">
+      <h1>{{ title }}</h1>
+      {{ body }}
+    </section>
+  {%- elif 'bibliography' in pagename %}
+    <section data-type="bibliography">
+      <h1>{{ title }}</h1>
+      {{ body }}
+    </section>
+  {%- elif 'glossary' in pagename %}
+    <section data-type="glossary">
+      <h1>{{ title }}</h1>
+      {{ body }}
+    </section>
+  {%- elif 'preface' in pagename %}
+    <section data-type="preface">
+      <h1>{{ title }}</h1>
+      {{ body }}
+    </section>
+  {%- elif 'appendix' in pagename or 'appx' in pagename %}
+    <section data-type="appendix">
+      <h1>{{ title }}</h1>
+      {{ body }}
+    </section>
+  {%- else %}
+    <section data-type="chapter">
+      <h1>{{ title }}</h1>
+      {{ body }}
+    </section>
+  {%- endif %}
+  
+  {%- if next or prev %}
+  <nav data-type="page-list">
+    {%- if prev %}
+    <a href="{{ prev.link|e }}" data-type="prev">{{ prev.title }}</a>
+    {%- endif %}
+    {%- if next %}
+    <a href="{{ next.link|e }}" data-type="next">{{ next.title }}</a>
+    {%- endif %}
+  </nav>
+  {%- endif %}
+{%- endblock %}

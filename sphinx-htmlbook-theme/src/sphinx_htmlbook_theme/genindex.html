@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{%- set title = _('Index') %}
+
+{%- block body %}
+<section data-type="index">
+  <h1>{{ title }}</h1>
+  
+  {%- if genindexentries %}
+  <div class="genindex-jumpbox">
+    {%- for key, dummy in genindexentries %}
+    <a href="#{{ key }}"><strong>{{ key }}</strong></a>
+    {%- if not loop.last %} | {% endif %}
+    {%- endfor %}
+  </div>
+  
+  {%- for key, entries in genindexentries %}
+  <h2 id="{{ key }}">{{ key }}</h2>
+  <dl class="index-entries">
+    {%- for entry in entries %}
+    <dt>
+      {%- if entry[2] %}
+      <strong>{{ entry[0] }}</strong>
+      {%- else %}
+      {{ entry[0] }}
+      {%- endif %}
+    </dt>
+    <dd>
+      {%- for subentry in entry[1] %}
+      <a href="{{ subentry[1] }}">{{ subentry[0] }}</a>
+      {%- if not loop.last %}, {% endif %}
+      {%- endfor %}
+    </dd>
+    {%- endfor %}
+  </dl>
+  {%- endfor %}
+  {%- endif %}
+</section>
+{%- endblock %}

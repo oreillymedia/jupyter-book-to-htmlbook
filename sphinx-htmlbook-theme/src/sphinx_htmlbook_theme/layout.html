@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="{{ language }}" xml:lang="{{ language }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}{{ title|striptags|e }}{% if title %} &mdash; {% endif %}{{ docstitle|e }}{% endblock %}</title>
+  
+  {%- for css in css_files %}
+    {%- if css|attr("rel") %}
+  <link rel="{{ css.rel }}" href="{{ pathto(css.filename, 1) }}"{% if css.title is not none %} title="{{ css.title }}"{% endif %}{% if css.media %} media="{{ css.media }}"{% endif %} />
+    {%- else %}
+  <link rel="stylesheet" type="text/css" href="{{ pathto(css.filename, 1) }}" />
+    {%- endif %}
+  {%- endfor %}
+  
+  {%- for js in script_files %}
+  <script src="{{ pathto(js.filename, 1) }}"></script>
+  {%- endfor %}
+  
+  {%- if favicon %}
+  <link rel="shortcut icon" href="{{ pathto('_static/' + favicon, 1) }}" />
+  {%- endif %}
+  
+  {%- block extrahead %} {% endblock %}
+</head>
+
+<body data-type="book"{% if theme_book_title %} data-title="{{ theme_book_title }}"{% endif %}{% if theme_book_author %} data-author="{{ theme_book_author }}"{% endif %}>
+  
+  {%- block header %}{% endblock %}
+  
+  <div class="htmlbook-container">
+    {%- block content %}
+      {%- block document %}
+        <div class="documentwrapper">
+          <div class="bodywrapper">
+            <div class="body" role="main">
+              {% block body %} {% endblock %}
+            </div>
+          </div>
+        </div>
+      {%- endblock %}
+    {%- endblock %}
+  </div>
+  
+  {%- block footer %}{% endblock %}
+  
+  {%- for js in script_files %}
+    {%- if js.priority != 'normal' %}
+  <script src="{{ pathto(js.filename, 1) }}"></script>
+    {%- endif %}
+  {%- endfor %}
+  
+</body>
+</html>

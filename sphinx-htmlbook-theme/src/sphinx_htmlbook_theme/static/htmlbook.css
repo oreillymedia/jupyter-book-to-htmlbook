@@ -1,0 +1,210 @@
+/* HTMLBook Theme CSS */
+
+/* Base styles */
+body[data-type="book"] {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: bold;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+h1 { font-size: 2.5em; }
+h2 { font-size: 2em; }
+h3 { font-size: 1.5em; }
+h4 { font-size: 1.25em; }
+h5 { font-size: 1.1em; }
+h6 { font-size: 1em; }
+
+/* HTMLBook sections */
+section[data-type="titlepage"] {
+  text-align: center;
+  margin-bottom: 3em;
+}
+
+section[data-type="titlepage"] h1 {
+  font-size: 3em;
+  margin-bottom: 0.5em;
+}
+
+section[data-type="titlepage"] p[data-type="author"] {
+  font-size: 1.5em;
+  font-style: italic;
+  margin-bottom: 0.5em;
+}
+
+section[data-type="titlepage"] p[data-type="publisher"] {
+  font-size: 1.2em;
+  color: #666;
+}
+
+section[data-type="chapter"],
+section[data-type="preface"],
+section[data-type="appendix"] {
+  margin-bottom: 2em;
+}
+
+section[data-type="chapter"] > h1::before {
+  content: "Chapter " counter(chapter) ": ";
+  counter-increment: chapter;
+}
+
+/* Code blocks */
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1em;
+  overflow-x: auto;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.9em;
+}
+
+code {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  background-color: #f8f8f8;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* Examples */
+div[data-type="example"] {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 1.5em 0;
+  padding: 1em;
+  background-color: #fafafa;
+}
+
+div[data-type="example"] h5 {
+  margin-top: 0;
+  color: #666;
+  font-size: 1em;
+}
+
+/* Figures */
+figure {
+  margin: 1.5em 0;
+  text-align: center;
+}
+
+figure img {
+  max-width: 100%;
+  height: auto;
+}
+
+figcaption {
+  font-style: italic;
+  margin-top: 0.5em;
+  color: #666;
+}
+
+/* Admonitions */
+div[data-type="note"],
+div[data-type="warning"],
+div[data-type="tip"],
+div[data-type="caution"],
+div[data-type="important"] {
+  border-left: 4px solid;
+  padding: 1em;
+  margin: 1.5em 0;
+  background-color: #f9f9f9;
+}
+
+div[data-type="note"] { border-left-color: #3498db; }
+div[data-type="warning"] { border-left-color: #e74c3c; }
+div[data-type="tip"] { border-left-color: #2ecc71; }
+div[data-type="caution"] { border-left-color: #f39c12; }
+div[data-type="important"] { border-left-color: #9b59b6; }
+
+/* Sidebars */
+aside[data-type="sidebar"] {
+  border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  padding: 1em;
+  margin: 1.5em 0;
+  border-radius: 4px;
+}
+
+aside[data-type="sidebar"] h5 {
+  margin-top: 0;
+  color: #333;
+}
+
+/* Navigation */
+nav[data-type="page-list"] {
+  margin-top: 3em;
+  padding-top: 1em;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+}
+
+nav[data-type="page-list"] a {
+  text-decoration: none;
+  color: #3498db;
+  padding: 0.5em 1em;
+  border: 1px solid #3498db;
+  border-radius: 4px;
+}
+
+nav[data-type="page-list"] a:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+/* Index styles */
+section[data-type="index"] .genindex-jumpbox {
+  text-align: center;
+  margin-bottom: 2em;
+  padding: 1em;
+  background-color: #f8f8f8;
+  border-radius: 4px;
+}
+
+section[data-type="index"] .genindex-jumpbox a {
+  text-decoration: none;
+  color: #3498db;
+  font-weight: bold;
+}
+
+section[data-type="index"] dl.index-entries {
+  margin-left: 0;
+}
+
+section[data-type="index"] dt {
+  font-weight: bold;
+  margin-top: 1em;
+}
+
+section[data-type="index"] dd {
+  margin-left: 2em;
+  margin-bottom: 0.5em;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  body[data-type="book"] {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  h1 { font-size: 2em; }
+  h2 { font-size: 1.5em; }
+  
+  nav[data-type="page-list"] {
+    flex-direction: column;
+    gap: 1em;
+  }
+}
