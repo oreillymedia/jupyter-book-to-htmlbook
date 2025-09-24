@@ -1,9 +1,9 @@
 import shutil
 from bs4 import BeautifulSoup  # type: ignore
 from jupyter_book_to_htmlbook.file_processing import (
-        apply_datatype,
-        process_chapter
-    )
+    apply_datatype,
+    process_chapter,
+)
 from jupyter_book_to_htmlbook.reference_processing import process_citations
 
 
@@ -22,15 +22,16 @@ class TestBibliography:
         Given a "bibliography.*" filename, we want the main/chapter section to
         have an "appendix" data-type
         """
-        test_env = tmp_path / 'tmp'
+        test_env = tmp_path / "tmp"
         test_env.mkdir()
-        shutil.copytree('tests/example_book/_build/html/',
-                        test_env, dirs_exist_ok=True)
-        with open(test_env / 'bibliography.html') as f:
+        shutil.copytree(
+            "tests/example_book/_build/html/", test_env, dirs_exist_ok=True
+        )
+        with open(test_env / "bibliography.html") as f:
             text = f.read()
-        chapter = BeautifulSoup(text, "lxml").find_all('section')[0]
+        chapter = BeautifulSoup(text, "lxml").find_all("section")[0]
         apply_datatype(chapter, "bibliography")
-        assert chapter["data-type"] == "appendix"
+        assert chapter["data-type"] == "appendix"  # type: ignore
 
     def test_bib_appx_to_author_date(self):
         """
@@ -38,7 +39,8 @@ class TestBibliography:
         file) from Jupyter Book, bibliographical citations should be in an
         unordered list with an "author-date" style applied to the list.
         """
-        chapter = BeautifulSoup("""
+        chapter = BeautifulSoup(
+            """
 <dl class="citation">
 <dt class="label" id="id2"><span class="brackets">Aad93</span></dt>
 <dd><p>Terry Aadams. The title of the work. <em>The name of the journal</em>,
@@ -54,10 +56,12 @@ note.</p>
 of the publisher, 7 1993, An optional note.</p>
 </dd>
 </dl>
-""", "html.parser")
+""",
+            "html.parser",
+        )
         result = process_citations(chapter)
         assert not result.find("dl")
-        assert "author-date" in result.find("ul")["class"]
+        assert "author-date" in result.find("ul")["class"]  # type: ignore
         assert len(result.find_all("li")) == 3
 
     def test_bib_gets_moved_to_end(self, tmp_path):
@@ -65,22 +69,29 @@ of the publisher, 7 1993, An optional note.</p>
         An in-chapter bibliography should be moved to the end of the main
         chapter section.
         """
-        test_env = tmp_path / 'tmp'
-        test_out = test_env / 'output'
+        test_env = tmp_path / "tmp"
+        test_out = test_env / "output"
         test_env.mkdir()
         test_out.mkdir()
-        shutil.copytree('tests/example_book/_build/html/notebooks/',
-                        test_env, dirs_exist_ok=True)
-        result = process_chapter([
-            test_env / 'ch02.00.html',
-            test_env / 'ch02.01.html',
-            test_env / 'ch02.02.html',
-            ], test_env, test_out)[0]
+        shutil.copytree(
+            "tests/example_book/_build/html/notebooks/",
+            test_env,
+            dirs_exist_ok=True,
+        )
+        result = process_chapter(
+            [
+                test_env / "ch02.00.html",
+                test_env / "ch02.01.html",
+                test_env / "ch02.02.html",
+            ],
+            test_env,
+            test_out,
+        )[0]
         with open(test_out / result, "rt") as f:
             soup = BeautifulSoup(f.read(), "lxml")
 
-        assert soup.find_all("section")[-1]["id"] == "bibliography"
-        assert soup.find_all("section")[-1].find("ul", class_="author-date")
+        assert soup.find_all("section")[-1]["id"] == "bibliography"  # type: ignore
+        assert soup.find_all("section")[-1].find("ul", class_="author-date")  # type: ignore
 
     def test_sub_bibs_get_combined_appropriately(self, tmp_path):
         """
@@ -90,41 +101,56 @@ of the publisher, 7 1993, An optional note.</p>
         NOTE: This is not the ideal solution, but a "works enough for now"
         compromise.
         """
-        test_env = tmp_path / 'tmp'
-        test_out = test_env / 'output'
+        test_env = tmp_path / "tmp"
+        test_out = test_env / "output"
         test_env.mkdir()
         test_out.mkdir()
-        shutil.copytree('tests/example_book/_build/html/notebooks/',
-                        test_env, dirs_exist_ok=True)
-        result = process_chapter([
-            test_env / 'ch02.00.html',
-            test_env / 'ch02.01.html',
-            test_env / 'ch02.02.html',
-            ], test_env, test_out)[0]
+        shutil.copytree(
+            "tests/example_book/_build/html/notebooks/",
+            test_env,
+            dirs_exist_ok=True,
+        )
+        result = process_chapter(
+            [
+                test_env / "ch02.00.html",
+                test_env / "ch02.01.html",
+                test_env / "ch02.02.html",
+            ],
+            test_env,
+            test_out,
+        )[0]
+
         with open(test_out / result, "rt") as f:
             soup = BeautifulSoup(f.read(), "lxml")
         bib = soup.find("section", id="bibliography")
         assert len(soup.find_all("section", id="bibliography")) == 1
-        assert len(bib.find("ul", class_="author-date").find_all("li")) == 4
+        assert len(bib.find("ul", class_="author-date").find_all("li")) == 4  # type: ignore
 
     def test_single_sub_bib_becomes_bib(self, tmp_path):
         """
         Coverage test to ensure that if we only have a bibliography in a
         sub-file, it gets used as the primary bibliography for that chapter
         """
-        test_env = tmp_path / 'tmp'
-        test_out = test_env / 'output'
+        test_env = tmp_path / "tmp"
+        test_out = test_env / "output"
         test_env.mkdir()
         test_out.mkdir()
-        shutil.copytree('tests/example_book/_build/html/notebooks/',
-                        test_env, dirs_exist_ok=True)
-        result = process_chapter([
-            test_env / 'ch01.html',
-            test_env / 'ch02.01.html',
-            test_env / 'ch02.02.html',
-            ], test_env, test_out)[0]
+        shutil.copytree(
+            "tests/example_book/_build/html/notebooks/",
+            test_env,
+            dirs_exist_ok=True,
+        )
+        result = process_chapter(
+            [
+                test_env / "ch01.html",
+                test_env / "ch02.01.html",
+                test_env / "ch02.02.html",
+            ],
+            test_env,
+            test_out,
+        )[0]
         with open(test_out / result, "rt") as f:
             soup = BeautifulSoup(f.read(), "lxml")
         bib = soup.find("section", id="bibliography")
         assert len(soup.find_all("section", id="bibliography")) == 1
-        assert len(bib.find("ul", class_="author-date").find_all("li")) == 3
+        assert len(bib.find("ul", class_="author-date").find_all("li")) == 3  # type: ignore

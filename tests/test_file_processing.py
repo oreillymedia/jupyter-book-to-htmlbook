@@ -21,6 +21,8 @@ class TestChapterProcess:
             tmp_book_path / 'notebooks/ch02.01.html',
             tmp_book_path / 'notebooks/ch02.02.html',
             ])[0]
+        with open("check.html", "wt") as f:
+            f.write(str(result))
         # the resulting section should have a data-type of "chapter"
         assert result["data-type"] == "chapter"
         # number of level-1 subsections should be one less than the group
