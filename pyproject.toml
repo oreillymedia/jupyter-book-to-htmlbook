@@ -12,6 +12,7 @@ PyYAML = "^6.0"
 jupyter-book = "^0.15.1"
 docutils = "0.17.1"
 lxml = "^6.0.1"
+standard-imghdr = "^3.13.0"
 
 [tool.poetry.scripts]
 jb2htmlbook = "jupyter_book_to_htmlbook.main:main"
@@ -20,6 +21,7 @@ jb2atlas = "jupyter_book_to_htmlbook.main:main"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"
 pytest-cov = "^7.0.0"
+types-beautifulsoup4 = "^4.12.0.20250516"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
