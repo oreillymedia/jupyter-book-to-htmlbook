@@ -232,7 +232,7 @@ def process_chapter_soup(
 
     else:
         chapter['xmlns'] = 'http://www.w3.org/1999/xhtml'  # type: ignore
-        del chapter['class']
+        del chapter['class']  # type: ignore
 
         # promote subheadings within "base" chapter
         chapter = promote_headings(chapter)
@@ -242,10 +242,12 @@ def process_chapter_soup(
                 subsections, sub_bib = process_chapter_subparts(subfile)
                 if subsections:
                     for subsection in subsections:
-                        chapter.append(subsection)
+                        chapter.append(subsection)  # type: ignore
                 if bib and sub_bib:
                     entries = sub_bib.find_all("dd")  # type: ignore
                     bib.dl.extend(entries)  # type: ignore
+                    # throw away the sub-bib section
+                    _ = sub_bib.extract()
                 elif sub_bib:
                     bib = sub_bib
 
@@ -328,7 +330,7 @@ def process_chapter(toc_element,
     chapter, ids = process_ids(chapter, book_ids)
 
     # write the file, preserving any directory structure(s) from source
-    if type(toc_element) == list:
+    if type(toc_element) is list:
         dir_structure = [p for p in toc_element[0].parts
                          if p not in source_dir.parts]
     else:
