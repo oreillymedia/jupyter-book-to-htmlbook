@@ -60,7 +60,7 @@ def move_span_ids_to_sections(chapter):
     and moves the id to the parent section tag so Atlas can find the cross
     reference.
     """
-    empty_id_spans = chapter.find_all("span", id=True, string="")
+    empty_id_spans = chapter.find_all("span", id=True, string=None)
     for span in empty_id_spans:
         if (
                 span.parent.name == "section" and
