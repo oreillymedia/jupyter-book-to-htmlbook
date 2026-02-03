@@ -24,6 +24,7 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
           installer-parallel: true
+          version: 2.1.3
 
       # - run: poetry config installer.modern-installation false
 
